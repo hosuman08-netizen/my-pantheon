@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Pantheon • p2</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+  <div class="app">
+    <!-- Top Meditation Bar - Om for high-vibe Indian meditation (not bottom nav) -->
+    <div class="meditation-top">
+      <div class="om-container">
+        <div class="om-symbol" id="om-symbol">ॐ</div>
+        <div class="om-info">
+          <strong>Meditate with Om</strong>
+          <span id="om-freq-info">ॐ Om • High vibration for inner peace &amp; dharma</span>
+        </div>
+      </div>
+      <button id="om-btn" class="om-btn">▶ Play Om</button>
+      <span id="om-timer" class="om-timer" style="display:none;">0:00</span>
+      <div class="breath-guide" id="breath-guide" style="display:none;">
+        <span id="breath-text">Breathe with the Om...</span>
+      </div>
+    </div>
+
+    <!-- Frequency List - Elegant, Soft Selector for Various High-Vibe Tones -->
+    <div class="freq-list" id="freq-list">
+      <div class="freq-item active" data-mode="om">ॐ Om<br><small>Mantra</small></div>
+      <div class="freq-item" data-mode="432">432 Hz<br><small>Nature</small></div>
+      <div class="freq-item" data-mode="528">528 Hz<br><small>Love</small></div>
+      <div class="freq-item" data-mode="963">963 Hz<br><small>Oneness</small></div>
+      <div class="freq-item" data-mode="417">417 Hz<br><small>Release</small></div>
+      <div class="freq-item" data-mode="639">639 Hz<br><small>Harmony</small></div>
+    </div>
+
+    <!-- Permanent Framing (Raji style) -->
+    <div class="framing" data-i18n="framing">
+      <strong>Fictional stories inspired by ancient epics of dharma and karma.</strong><br>
+      <span>Creative narrative for 20-30s Indians.</span>
+    </div>
+
+    <!-- Elegant Header -->
+    <header>
+      <div class="header-row">
+        <div>
+          <h1>My Pantheon</h1>
+          <p class="subtitle">Your clan of echoes, born from the epics</p>
+        </div>
+        <div class="stats">
+          <div>Karma <b id="header-karma">0</b></div>
+          <div class="prestige-stat">
+            Prestige <b id="header-prestige">1</b>
+            <span id="prestige-title" class="prestige-title">Ashborn</span>
+            <div class="prestige-bar"><div id="prestige-fill" class="prestige-fill" style="width:0%"></div></div>
+            <div class="prestige-text" id="prestige-text">0/10 to next</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Premium Bottom Navigation -->
+    <nav class="bottom-nav">
+      <button data-tab="create" class="active">
+        <div class="icon">✧</div>
+        <div>Create</div>
+      </button>
+      <button data-tab="my">
+        <div class="icon">◈</div>
+        <div>My Pantheon</div>
+      </button>
+      <button data-tab="explore">
+        <div class="icon">◇</div>
+        <div>Explore</div>
+      </button>
+      <button data-tab="events">
+        <div class="icon">✦</div>
+        <div>Festivals</div>
+      </button>
+      <button data-tab="settings">
+        <div class="icon">⚙</div>
+        <div>Settings</div>
+      </button>
+    </nav>
+
+    <!-- CREATE TAB - Premium Flow -->
+    <div id="tab-create" class="tab-content active">
+      <div class="section-header">
+        <h2>새로운 판테온을 여세요</h2>
+        <p class="section-sub">서사시의 미덕에서 영감을 받아, 당신만의 독창적인 에코를 만드세요.</p>
+      </div>
+      
+      <form id="pantheon-form">
+        <div class="form-group">
+          <label>판테온 이름</label>
+          <input type="text" id="clan-name" placeholder="예: 쿠루크셰트라의 빛" required>
+        </div>
+        
+        <div class="form-group">
+          <label>당신의 모토</label>
+          <textarea id="clan-desc" placeholder="가문의 가치나 서사시에서 영감을 받은 한 줄" rows="2"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>에코 선택 (3~5개)</label>
+          <p class="guide-small">서사시적 미덕(다르마: 맥락 속 의무와 순수 의도)에서 영감을 받은, 당신만의 가상 영웅들입니다. 신 그 자체가 아닙니다. <span style="color:#c9a227; opacity:.7;">(Premium Raji miniature icons)</span></p>
+          <div id="echo-summary" class="echo-summary">0 echoes selected • Begin your clan</div>
+          <div class="echo-grid">
+            <label class="echo-card">
+              <input type="checkbox" value="Krishna-echo">
+              <div class="echo-content">
+                <div class="echo-icon">
+                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Bowl base with subtle pattern -->
+                  <path d="M15 41 Q15 53 32 53 Q49 53 49 41" fill="#5C4033" stroke="#C9A227" stroke-width="1.8"/>
+                  <!-- Inner bowl shade -->
+                  <path d="M18 42 Q18 50 32 50 Q46 50 46 42" fill="#3D2A1F"/>
+                  <!-- Ornate rim with dots and line pattern -->
+                  <ellipse cx="32" cy="39" rx="18" ry="5.5" fill="#704B2E" stroke="#D4B37F" stroke-width="2.2"/>
+                  <circle cx="20" cy="39" r="1.2" fill="#D4B37F" opacity="0.6"/>
+                  <circle cx="44" cy="39" r="1.2" fill="#D4B37F" opacity="0.6"/>
+                  <path d="M16 37 Q32 35 48 37" fill="none" stroke="#C9A227" stroke-width="0.6" opacity="0.4"/>
+                  <!-- Flame outer layer with soft edges -->
+                  <path d="M32 14 Q23 29 27 42 Q32 33 37 42 Q41 29 32 14" fill="#E86A00"/>
+                  <!-- Flame mid with highlight -->
+                  <path d="M32 19 Q25 30 29 39 Q32 32 35 39 Q39 30 32 19" fill="#FFB347"/>
+                  <!-- Inner core glow with extra layer -->
+                  <path d="M32 25 Q28 32 31 37 Q32 32 34 37 Q37 32 32 25" fill="#FFE082"/>
+                  <!-- Delicate flame tips and sparkles -->
+                  <path d="M29 22 Q32 27 35 22" fill="none" stroke="#FFF8E1" stroke-width="1.2" opacity="0.65"/>
+                  <circle cx="30" cy="17" r="0.8" fill="#FFFDE7" opacity="0.7"/>
+                  <!-- Small lotus detail on bowl -->
+                  <circle cx="32" cy="46" r="2" fill="none" stroke="#C9A227" stroke-width="0.8" opacity="0.5"/>
+                </svg>
+              </div>
+                <div>
+                  <div class="echo-name">크리슈나의 메아리</div>
+                  <div class="echo-trait">전략가 · 지혜</div>
+                </div>
+              </div>
+            </label>
+            <label class="echo-card">
+              <input type="checkbox" value="Rama-echo">
+              <div class="echo-content">
+                <div class="echo-icon">
+                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Graceful bow with carved details and inlays -->
+                  <path d="M19 49 Q32 9 45 49" fill="none" stroke="#5C4033" stroke-width="5.5" stroke-linecap="round"/>
+                  <!-- Gold inlay edge with subtle pattern -->
+                  <path d="M21 47 Q32 12 43 47" fill="none" stroke="#C9A227" stroke-width="2.2" stroke-linecap="round"/>
+                  <line x1="28" y1="30" x2="36" y2="30" stroke="#D4B37F" stroke-width="0.5" opacity="0.5"/>
+                  <!-- Decorative bands -->
+                  <line x1="25" y1="35" x2="39" y2="35" stroke="#D4B37F" stroke-width="1" opacity="0.7"/>
+                  <line x1="27" y1="25" x2="37" y2="25" stroke="#D4B37F" stroke-width="1" opacity="0.7"/>
+                  <!-- Delicate string with tension detail -->
+                  <line x1="19" y1="49" x2="45" y2="49" stroke="#D4B37F" stroke-width="1.8"/>
+                  <!-- Fine arrow shaft with fletch lines -->
+                  <line x1="22" y1="49" x2="42" y2="30" stroke="#C9A227" stroke-width="1.8"/>
+                  <!-- Ornate arrowhead with detail -->
+                  <polygon points="42,30 37.5,26.5 37.5,32.5" fill="#D4B37F"/>
+                  <!-- Soft fletching with detail -->
+                  <path d="M22 49 L17 45" fill="none" stroke="#8B5A2B" stroke-width="2.5" stroke-linecap="round"/>
+                  <path d="M25 49 L20 45" fill="none" stroke="#8B5A2B" stroke-width="2.5" stroke-linecap="round"/>
+                  <circle cx="21" cy="47" r="1" fill="#D4B37F" opacity="0.5"/>
+                </svg>
+              </div>
+                <div>
+                  <div class="echo-name">라마의 메아리</div>
+                  <div class="echo-trait">의무 · 용기</div>
+                </div>
+              </div>
+            </label>
+            <label class="echo-card">
+              <input type="checkbox" value="Draupadi-echo">
+              <div class="echo-content">
+                <div class="echo-icon">
+                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Ornate lotus base with petals and veins -->
+                  <ellipse cx="32" cy="47" rx="9" ry="3.5" fill="#704B2E" stroke="#C9A227" stroke-width="1.6"/>
+                  <path d="M23 46 Q32 42 41 46" fill="none" stroke="#D4B37F" stroke-width="1" opacity="0.6"/>
+                  <path d="M25 48 Q32 44 39 48" fill="none" stroke="#D4B37F" stroke-width="0.8" opacity="0.5"/>
+                  <path d="M26 45 Q32 43 38 45" fill="none" stroke="#C9A227" stroke-width="0.5" opacity="0.4"/>
+                  <!-- Outer flame flowing with layered edges -->
+                  <path d="M32 13 Q22 27 26 43 Q32 35 38 43 Q42 27 32 13" fill="#E86A00"/>
+                  <!-- Mid flame with inner waves and highlights -->
+                  <path d="M32 18 Q25 28 28 38 Q32 32 36 38 Q39 28 32 18" fill="#FFB347"/>
+                  <!-- Glowing heart with multiple layers -->
+                  <path d="M32 24 Q29 31 31 36 Q32 32 34 36 Q36 31 32 24" fill="#FFE082"/>
+                  <!-- Very soft core light and spark -->
+                  <path d="M32 28 Q30.5 32 32 34" fill="none" stroke="#FFFDE7" stroke-width="1.5" opacity="0.8"/>
+                  <circle cx="32" cy="16" r="1.5" fill="#FFF8E1" opacity="0.4"/>
+                  <circle cx="33" cy="20" r="0.6" fill="#FFFDE7" opacity="0.6"/>
+                </svg>
+              </div>
+                <div>
+                  <div class="echo-name">드라우파디의 메아리</div>
+                  <div class="echo-trait">회복력 · 정의</div>
+                </div>
+              </div>
+            </label>
+            <label class="echo-card">
+              <input type="checkbox" value="Hanuman-echo">
+              <div class="echo-content">
+                <div class="echo-icon">
+                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Noble head with subtle texture and fur lines -->
+                  <circle cx="32" cy="29" r="13" fill="#704B2E" stroke="#C9A227" stroke-width="2.2"/>
+                  <!-- Delicate fur texture lines -->
+                  <path d="M25 24 Q27 27 25 30" fill="none" stroke="#5C4033" stroke-width="0.6" opacity="0.4"/>
+                  <path d="M39 24 Q37 27 39 30" fill="none" stroke="#5C4033" stroke-width="0.6" opacity="0.4"/>
+                  <path d="M28 26 Q30 29 28 32" fill="none" stroke="#5C4033" stroke-width="0.5" opacity="0.3"/>
+                  <!-- Soft ears with inner detail and highlights -->
+                  <ellipse cx="20" cy="19" rx="6" ry="5" fill="#5C4033" stroke="#C9A227" stroke-width="1.6"/>
+                  <ellipse cx="44" cy="19" rx="6" ry="5" fill="#5C4033" stroke="#C9A227" stroke-width="1.6"/>
+                  <ellipse cx="21" cy="20" rx="2.8" ry="2" fill="#D4B37F"/>
+                  <ellipse cx="43" cy="20" rx="2.8" ry="2" fill="#D4B37F"/>
+                  <!-- Serene face with gentle expression lines -->
+                  <ellipse cx="32" cy="31" rx="7" ry="7.5" fill="#5C4033"/>
+                  <!-- Gentle eyes with shine -->
+                  <circle cx="26.5" cy="28" r="1.6" fill="#D4B37F"/>
+                  <circle cx="37.5" cy="28" r="1.6" fill="#D4B37F"/>
+                  <circle cx="27" cy="27.5" r="0.5" fill="#FFF" opacity="0.3"/>
+                  <!-- Divine crown with detailed ornament -->
+                  <path d="M25 19 L32 10 L39 19" fill="none" stroke="#D4B37F" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M28 15 L32 11 L36 15" fill="none" stroke="#C9A227" stroke-width="0.8"/>
+                  <!-- Elegant mace with detailed ornament and glow -->
+                  <circle cx="47" cy="36" r="3.5" fill="#C9A227" stroke="#704B2E" stroke-width="1.2"/>
+                  <rect x="45.5" y="38" width="3" height="10" rx="1" fill="#C9A227"/>
+                  <circle cx="47" cy="34" r="1.2" fill="#D4B37F"/>
+                  <circle cx="47" cy="33" r="0.5" fill="#FFF" opacity="0.4"/>
+                </svg>
+              </div>
+                <div>
+                  <div class="echo-name">하누만의 메아리</div>
+                  <div class="echo-trait">충성 · 헌신</div>
+                </div>
+              </div>
+            </label>
+            <label class="echo-card">
+              <input type="checkbox" value="Durga-echo">
+              <div class="echo-content">
+                <div class="echo-icon">
+                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Elegant shield with border details and pattern -->
+                  <path d="M17 11 Q17 25 32 52 Q47 25 47 11 Q32 15 17 11" fill="#5C4033" stroke="#C9A227" stroke-width="2.2"/>
+                  <!-- Inner ornate frame with subtle pattern lines -->
+                  <path d="M22 16 Q22 26 32 44 Q42 26 42 16" fill="none" stroke="#D4B37F" stroke-width="1.6"/>
+                  <path d="M25 19 Q32 18 39 19" fill="none" stroke="#C9A227" stroke-width="0.5" opacity="0.4"/>
+                  <!-- Delicate central lotus + trident hint with extra detail -->
+                  <ellipse cx="32" cy="26" rx="6" ry="4" fill="#704B2E" stroke="#D4B37F" stroke-width="1.2"/>
+                  <path d="M32 22 L32 16 M29 24 L27 19 M35 24 L37 19" fill="none" stroke="#C9A227" stroke-width="1" opacity="0.7"/>
+                  <circle cx="32" cy="20" r="0.8" fill="#D4B37F" opacity="0.5"/>
+                  <!-- Subtle power rays with dots and swirls -->
+                  <path d="M32 19 L32 13 M27 22 L23 16 M37 22 L41 16" fill="none" stroke="#D4B37F" stroke-width="1.4" stroke-linecap="round" opacity="0.85"/>
+                  <!-- Intricate accent dots, swirls and border flourishes -->
+                  <circle cx="32" cy="26" r="1.8" fill="#D4B37F"/>
+                  <circle cx="26" cy="30" r="0.8" fill="#C9A227" opacity="0.5"/>
+                  <circle cx="38" cy="30" r="0.8" fill="#C9A227" opacity="0.5"/>
+                  <path d="M20 14 Q22 13 24 14" fill="none" stroke="#C9A227" stroke-width="0.6" opacity="0.4"/>
+                  <path d="M40 14 Q42 13 44 14" fill="none" stroke="#C9A227" stroke-width="0.6" opacity="0.4"/>
+                </svg>
+              </div>
+                <div>
+                  <div class="echo-name">두르가의 메아리</div>
+                  <div class="echo-trait">수호 · 힘</div>
+                </div>
+              </div>
+            </label>
+
+            <!-- New: Arjuna Echo - Focus / Courage -->
+            <label class="echo-card">
+              <input type="checkbox" value="Arjuna-echo">
+              <div class="echo-content">
+                <div class="echo-icon">
+                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Focused arrow shaft -->
+                  <line x1="12" y1="32" x2="48" y2="32" stroke="#5C4033" stroke-width="4" stroke-linecap="round"/>
+                  <!-- Gold inlay -->
+                  <line x1="14" y1="32" x2="46" y2="32" stroke="#C9A227" stroke-width="1.5" stroke-linecap="round"/>
+                  <!-- Arrow head with power -->
+                  <polygon points="48,32 38,26 38,38" fill="#D4B37F"/>
+                  <!-- Focus aura rings -->
+                  <circle cx="32" cy="32" r="10" fill="none" stroke="#C9A227" stroke-width="1" opacity="0.3"/>
+                  <circle cx="32" cy="32" r="14" fill="none" stroke="#C9A227" stroke-width="0.7" opacity="0.2"/>
+                  <!-- Subtle target lines for concentration -->
+                  <line x1="20" y1="20" x2="28" y2="28" stroke="#D4B37F" stroke-width="0.8" opacity="0.5"/>
+                  <line x1="36" y1="36" x2="44" y2="44" stroke="#D4B37F" stroke-width="0.8" opacity="0.5"/>
+                </svg>
+                </div>
+                <div>
+                  <div class="echo-name">아르주나의 메아리</div>
+                  <div class="echo-trait">집중 · 용기</div>
+                </div>
+              </div>
+            </label>
+
+            <!-- New: Sita Echo - Endurance / Purity -->
+            <label class="echo-card">
+              <input type="checkbox" value="Sita-echo">
+              <div class="echo-content">
+                <div class="echo-icon">
+                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Pure lotus petals -->
+                  <ellipse cx="32" cy="32" rx="8" ry="12" fill="#704B2E" stroke="#D4B37F" stroke-width="1.2" transform="rotate(-20 32 32)"/>
+                  <ellipse cx="32" cy="32" rx="8" ry="12" fill="#704B2E" stroke="#D4B37F" stroke-width="1.2" transform="rotate(20 32 32)"/>
+                  <ellipse cx="32" cy="32" rx="7" ry="11" fill="#8B5A2B" stroke="#C9A227" stroke-width="1"/>
+                  <!-- Center purity -->
+                  <circle cx="32" cy="32" r="4" fill="#D4B37F"/>
+                  <!-- Protective endurance ring -->
+                  <circle cx="32" cy="32" r="16" fill="none" stroke="#C9A227" stroke-width="1.5" opacity="0.6"/>
+                  <circle cx="32" cy="32" r="18" fill="none" stroke="#D4B37F" stroke-width="0.8" opacity="0.4"/>
+                  <!-- Small flame of resilience at base -->
+                  <path d="M28 42 Q32 46 36 42" fill="none" stroke="#E86A00" stroke-width="1.2" opacity="0.7"/>
+                </svg>
+                </div>
+                <div>
+                  <div class="echo-name">시타의 메아리</div>
+                  <div class="echo-trait">인내 · 순수</div>
+                </div>
+              </div>
+            </label>
+
+          </div>
+        </div>
+
+        <!-- Live Aura Preview - huge visual magic -->
+        <div class="preview-section">
+          <p class="guide-small">Your Clan Aura (live preview)</p>
+          <div id="aura-preview" class="aura-preview">
+            <span class="hint">Select 3+ Echoes to see your Pantheon come alive...</span>
+          </div>
+        </div>
+
+        <button type="submit" class="primary">판테온 창조하기</button>
+      </form>
+    </div>
+
+    <!-- MY PANTHEON TAB -->
+    <div id="tab-my" class="tab-content">
+      <div id="my-content">
+        <h2>Your Pantheon</h2>
+        <div id="pantheon-display"></div>
+
+        <!-- Soft premium Clan Status -->
+        <div id="clan-status" class="clan-status">
+          <div class="status-header">Clan Status</div>
+          <div class="status-grid">
+            <div class="status-item">
+              <div class="status-label">Echoes</div>
+              <div class="status-value" id="status-echoes">0</div>
+            </div>
+            <div class="status-item">
+              <div class="status-label">Stories</div>
+              <div class="status-value" id="status-stories">0</div>
+            </div>
+            <div class="status-item">
+              <div class="status-label">Shares</div>
+              <div class="status-value" id="status-shares">0</div>
+            </div>
+            <div class="status-item">
+              <div class="status-label">From Sharing</div>
+              <div class="status-value" id="status-share-karma">+0</div>
+            </div>
+            <div class="status-item">
+              <div class="status-label">Prestige</div>
+              <div class="status-value" id="status-prestige">1</div>
+            </div>
+          </div>
+          <div style="margin-top:6px; font-size:9.5px; color:#c9a227; text-align:center; opacity:0.75;">Prestige grows with karma from stories, shares &amp; events</div>
+          <div class="status-note">Every share spreads the light and grows your karma.</div>
+        </div>
+
+        <!-- Premium (TG Stars — optional, fictional) -->
+        <div class="section" style="margin-top:12px">
+          <h3 style="font-size:13px">Premium (optional)</h3>
+          <p style="font-size:11px;opacity:0.8">Featured clan slot, extra story slots, custom frames. Purely cosmetic — core UGC + karma always free. <strong>Prominent disclosure: fictional stories only.</strong></p>
+          <button onclick="showPremiumModal()" class="secondary" style="font-size:12px">Unlock Premium (Stars)</button>
+          <div style="font-size:9px;opacity:0.6;margin-top:4px">Reversible. No dark patterns.</div>
+        </div>
+
+        <!-- 🪖 Founding Member + Daily Streak + Invite Ladder (MVP①②) -->
+        <div class="section legion-block">
+          <div id="founder-badge" class="founder-badge"></div>
+
+          <div class="streak-box">
+            <div class="streak-head">
+              <span>📅 Daily Devotion</span>
+              <span class="streak-meta">Streak <b id="streak-count">0</b> · Best <b id="streak-best">0</b></span>
+            </div>
+            <button id="streak-btn" class="primary" onclick="claimDaily()">☀ Claim Daily Karma</button>
+            <div class="streak-note">Miss a day and the flame resets. Keep the devotion alive.</div>
+          </div>
+
+          <div class="ref-box">
+            <div class="ref-head"><span>🔥 Invite Your Clan</span><span class="ref-meta"><b id="ref-count">0</b> joined</span></div>
+            <div id="ref-ladder" class="ref-ladder"></div>
+            <button class="secondary" onclick="inviteFriends()">🔗 Share Invite Link</button>
+            <div class="ref-note">Friends who join via your link light your path. Founding clans are honored forever.</div>
+            <button onclick="playClanAnthem()" class="secondary" style="font-size:11px;margin-top:6px">🎵 Sing Clan Anthem</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Add Story / Retell</h3>
+          <p class="guide">Raji-style: 당신만의 허구 이야기를 써주세요. Pantheon Director (Kurosawa·Ray·Rajamouli·Tagore·에픽 융합)가 마스터를 지킵니다.</p>
+          <p class="guide-small">가치 = 당신이 직접 만드는 것. 우리는 미리 채워넣지 않습니다.</p>
+          <p class="example">예시 (Pantheon Director 업그레이드, dharma/karma accurate): "가난 속 매일 '가족과 이웃에 대한 작은 의무(다르마)를 다하자' 다짐하며 순수한 마음(의도)으로 할머니 약을 사주고 아이들 도시락 나눴다. '카르마는 선한 행동의 선순환' 믿었다. 15년 뒤, 도와준 손자가 돌아와 '할머니가 당신 이야기를 매일...' 하며 가게와 사업 기회 줌. 가난 속 뿌린 친절이, 마침내 거대한 풍요로 피어났다. — 크리슈나와 드라우파디의 메아리처럼."</p>
+
+          <!-- 선택적 의도 태그 (순수 UGC 유지, 가볍게 제안) -->
+          <div class="intention-hint">
+            <span class="hint-label">선택: 의도를 가볍게 더해보세요</span>
+            <div class="intention-chips">
+              <button type="button" class="intention-chip" data-phrase="가족을 위해">가족</button>
+              <button type="button" class="intention-chip" data-phrase="작은 친절로">친절</button>
+              <button type="button" class="intention-chip" data-phrase="의무를 다하며">의무</button>
+              <button type="button" class="intention-chip" data-phrase="선한 연쇄를 믿으며">연쇄</button>
+            </div>
+          </div>
+
+          <form id="story-form">
+            <textarea id="story-text" placeholder="120-160자 · positive dharma story (daily kindness → legacy) · end — Echo의 메아리처럼. (fictional, India 20-30s empathy)" rows="5" required></textarea>
+            <div id="story-progress" class="story-progress">
+              <div class="story-progress-bar"><div id="story-progress-fill"></div></div>
+              <span id="story-progress-text">0 / 160</span>
+            </div>
+            <button type="submit" class="primary">Add to Pantheon</button>
+            <button type="button" onclick="askDirector()" class="secondary" style="margin-top:8px;">Pantheon Director에게 영감 받기 (dharma/karma accurate, 5h upgrade)</button>
+          </form>
+        </div>
+
+        <div class="section">
+          <h3>Stories</h3>
+          <div id="stories-list"></div>
+        </div>
+
+        <div class="actions">
+          <button onclick="shareToTG()" class="primary">Share to Telegram</button>
+          <button onclick="inviteFriends()" class="secondary">Invite Clan</button>
+        </div>
+
+
+      </div>
+      <div id="no-pantheon" style="display:none">
+        <p>아직 판테온이 없어요.<br>당신의 이야기를 직접 써서 판테온을 채워보세요.</p>
+        <button onclick="switchTab('create')" class="primary">판테온 만들기</button>
+      </div>
+    </div>
+
+    <!-- EXPLORE TAB -->
+    <div id="tab-explore" class="tab-content">
+      <h2>Explore Pantheons</h2>
+      <p class="hint">See what others built — all fictional stories inspired by the epics (Raji style). Share to grow your K-factor.</p>
+      <div id="explore-list" class="card-list">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- FESTIVALS / EVENTS TAB -->
+    <div id="tab-events" class="tab-content">
+      <h2>Festivals 2026</h2>
+      <div class="event-card">
+        <div class="event-header">
+          <strong>✧ Ganesh Chaturthi</strong>
+          <span class="date">Sep 14</span>
+        </div>
+        <p>New beginnings — Create a fresh echo story for your clan. Together we rise.</p>
+        <button onclick="joinEvent('ganesh')" class="primary small">Join Clan Challenge</button>
+      </div>
+      <div class="event-card">
+        <div class="event-header">
+          <strong>✧ Navratri / Dussehra</strong>
+          <span class="date">Oct 11–20</span>
+        </div>
+        <p>Power &amp; victory — 9-day clan contribution streak. Strength in unity.</p>
+        <button onclick="joinEvent('navratri')" class="primary small">Join Clan Challenge</button>
+      </div>
+      <div class="event-card">
+        <div class="event-header">
+          <strong>✧ Diwali</strong>
+          <span class="date">Nov 8</span>
+        </div>
+        <p>Light &amp; prosperity — Collaborative light-themed retells. Share the glow.</p>
+        <button onclick="joinEvent('diwali')" class="primary small">Join Clan Challenge</button>
+      </div>
+      <p class="note">Clan goals unlock shared prestige. Limited echoes during events. Your story matters.</p>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div id="tab-settings" class="tab-content">
+      <h2>Settings</h2>
+      
+      <div class="section">
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Notifications</div>
+            <div class="setting-desc">Celebration toasts after shares &amp; events</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="notif-toggle" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Language</div>
+            <div class="setting-desc">English + Indian languages (North &amp; South)</div>
+          </div>
+          <select id="lang-select" style="background: var(--card); color: var(--text); border:1px solid var(--border); border-radius:8px; padding:4px 8px;">
+            <option value="en">English</option>
+            <option value="hi">हिन्दी (Hindi - North)</option>
+            <option value="bn">বাংলা (Bengali - East/North)</option>
+            <option value="mr">मराठी (Marathi)</option>
+            <option value="gu">ગુજરાતી (Gujarati)</option>
+            <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
+            <option value="ta">தமிழ் (Tamil - South)</option>
+            <option value="te">తెలుగు (Telugu - South)</option>
+            <option value="kn">ಕನ್ನಡ (Kannada - South)</option>
+            <option value="ml">മലയാളം (Malayalam - South)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">About this app</div>
+            <div class="setting-desc" style="font-size:12px; line-height:1.4; margin-top:4px;">
+              Fictional stories inspired by ancient epics of dharma &amp; karma.<br>
+              (Not real gods or religion. Positive fiction only.)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <button onclick="resetAllData()" class="secondary" style="width:100%;">Reset All Progress</button>
+        <p class="setting-desc" style="text-align:center; margin-top:8px;">This is a reversible demo. All data is local.</p>
+        <p style="font-size:10px;opacity:0.6;text-align:center;margin-top:12px;">Privacy: local only • Terms: fictional use only • Full disclosure in-app</p>
+        <div style="margin-top:8px; text-align:center; font-size:11px;">
+          <a href="#" onclick="showLegal('privacy');return false;" style="color:#c9a227;text-decoration:underline;">Privacy</a> ·
+          <a href="#" onclick="showLegal('terms');return false;" style="color:#c9a227;text-decoration:underline;">Terms</a>
+          <span style="font-size:9px;opacity:0.5;"> (modal)</span>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <small>Fictional stories inspired by ancient epics of dharma &amp; karma. Positive only. All core free.
+      <a href="#" onclick="showLegal('privacy');return false;" style="color:#c9a227;">Privacy</a> / 
+      <a href="#" onclick="showLegal('terms');return false;" style="color:#c9a227;">Terms</a></small>
+    </footer>
+
+    <!-- Premium Toast -->
+    <div id="toast" class="toast" style="display:none;">
+      <span class="toast-icon">✧</span>
+      <span id="toast-text"></span>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

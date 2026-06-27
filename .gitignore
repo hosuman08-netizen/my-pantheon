@@ -1,0 +1,12 @@
+# 내부 전략·치트·원작업 문서 — 공개 금지 (deniability)
+DIRECTOR.md
+LEGION_*.md
+LEGION_*.txt
+LEGION_DELIVERED_*.txt
+PANTHEON-STORY-DIRECTOR-SYNTHESIS.md
+MASTER_STORIES_VAULT.txt
+pantheon-director-jobs.txt
+legion-raw-outputs/
+.claude/
+*.log
+.DS_Store
