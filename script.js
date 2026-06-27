@@ -1273,29 +1273,30 @@ function renderExplore() {
   const list = document.getElementById('explore-list');
   if (!list) return;
   
-  const dummies = [
-    { 
-      name: "Winds of Duty", 
-      echoes: "Echo of Rama, Echo of Hanuman", 
-      stories: 7, 
-      karma: 42,
-      example: "몬순 폭우 속 아버지 병환에 도시 꿈 접고 가족 의무(다르마) 다하며 매일 돌봤다. 순수한 마음으로 작은 친절 이어감. 8년 뒤 작은 찻집이 마을 중심. '네가 돌아온 그 바람이 우리 가문을 살렸다' — 라마와 하누만의 메아리처럼."
-    },
-    { 
-      name: "Bloom of Small Kindness", 
-      echoes: "Echo of Krishna, Echo of Draupadi", 
-      stories: 12, 
-      karma: 89,
-      example: "가난 속 매일 '가족과 이웃에 대한 작은 의무(다르마)를 다하자' 다짐하며 순수한 마음(의도)으로 할머니 약을 사주고 아이들 도시락 나눴다. '카르마는 선한 행동의 선순환' 믿었다. 15년 뒤, 도와준 손자가 돌아와 '할머니가 당신 이야기를 매일...' 하며 가게와 사업 기회 줌. 가난 속 뿌린 친절이, 마침내 거대한 풍요로 피어났다. — 크리슈나와 드라우파디의 메아리처럼."
-    },
-    { 
-      name: "Shield of Warmth", 
-      echoes: "Echo of Durga, Echo of Hanuman", 
-      stories: 5, 
-      karma: 31,
-      example: "남편 잃은 후 매일 고난 속 '이웃에 대한 의무(다르마)와 순수한 친절(의도)'로 나눔. 오래전 도와준 아이 성공 후 후원. '어머니처럼...' 하며 학교 세움. 슬픔 속 베푼 마음이 모두의 빛 — 두르가와 하누만의 메아리처럼."
-    }
+  const SEED_PANTHEONS = [
+    { name: "Winds of Duty", echoes: "Echo of Rama, Echo of Hanuman", stories: 7, karma: 42, example: "A son set aside his city dreams to care for his ailing father through the monsoon. Years later the small tea-stall he kept alive became the heart of the village. — like the echoes of Rama and Hanuman." },
+    { name: "Bloom of Small Kindness", echoes: "Echo of Krishna, Echo of Draupadi", stories: 12, karma: 89, example: "In poverty she still shared a child's lunch and an elder's medicine every day, trusting kindness returns. Fifteen years on, a grandchild she once fed came back with a chance that lifted her whole family. — like the echoes of Krishna and Draupadi." },
+    { name: "Shield of Warmth", echoes: "Echo of Durga, Echo of Hanuman", stories: 5, karma: 31, example: "Widowed and struggling, she gave what little she had to her neighbours. A boy she once helped returned to build a school in her name. — like the echoes of Durga and Hanuman." },
+    { name: "The Patient River", echoes: "Echo of Rama, Echo of Krishna", stories: 9, karma: 54, example: "He forgave the brother who wronged him and kept the family land whole. Their children now farm it together. — like the echoes of Rama and Krishna." },
+    { name: "Lamp in the Storm", echoes: "Echo of Durga, Echo of Draupadi", stories: 6, karma: 38, example: "She stood between a frightened crowd and a falling wall, guiding everyone out first. They light a lamp for her each year. — like the echoes of Durga and Draupadi." },
+    { name: "Threads of Trust", echoes: "Echo of Krishna, Echo of Hanuman", stories: 11, karma: 77, example: "A weaver taught his craft freely to orphans instead of guarding his secrets. The town's cloth became famous, and none of them went hungry. — like the echoes of Krishna and Hanuman." },
+    { name: "The Honest Scale", echoes: "Echo of Rama, Echo of Draupadi", stories: 4, karma: 26, example: "A grain-seller always gave full measure even when he could cheat. In a hard year, the whole market vouched for him and saved his shop. — like the echoes of Rama and Draupadi." },
+    { name: "Courage of the Quiet", echoes: "Echo of Durga, Echo of Hanuman", stories: 8, karma: 49, example: "The smallest student spoke up against a cruel rule, alone. By the next season the rule was gone and others had found their voice. — like the echoes of Durga and Hanuman." },
+    { name: "Garden of the Forgotten", echoes: "Echo of Krishna, Echo of Rama", stories: 10, karma: 63, example: "He planted shade trees on a road he'd never walk old enough to enjoy. Travellers now rest beneath them and bless a name they never knew. — like the echoes of Krishna and Rama." },
+    { name: "The Returned Coin", echoes: "Echo of Draupadi, Echo of Hanuman", stories: 3, karma: 22, example: "A boy returned a lost purse though his family went without dinner. The owner, a teacher, gave him years of free learning. — like the echoes of Draupadi and Hanuman." },
+    { name: "Roots That Hold", echoes: "Echo of Durga, Echo of Krishna", stories: 13, karma: 95, example: "She raised her sister's children as her own after a flood took everything. Today they care for the elders of three families. — like the echoes of Durga and Krishna." },
+    { name: "The Unbroken Promise", echoes: "Echo of Rama, Echo of Hanuman", stories: 7, karma: 44, example: "He kept a vow to a dying friend to protect his fields, asking nothing. The friend's daughter now leads the village council. — like the echoes of Rama and Hanuman." },
+    { name: "Song of the Last Bowl", echoes: "Echo of Krishna, Echo of Draupadi", stories: 6, karma: 35, example: "In famine she shared her last bowl of rice with a stranger. The stranger, a merchant, returned with seed for the whole village. — like the echoes of Krishna and Draupadi." },
+    { name: "Hands for the Tired", echoes: "Echo of Durga, Echo of Rama", stories: 9, karma: 58, example: "A young nurse stayed past every shift for those with no family near. The hospital now bears a small ward built by the people she healed. — like the echoes of Durga and Rama." },
+    { name: "The Mended Boat", echoes: "Echo of Hanuman, Echo of Krishna", stories: 5, karma: 29, example: "A fisherman repaired the boats of rivals ruined by a storm, for free. The next season they all sailed out together. — like the echoes of Hanuman and Krishna." },
+    { name: "Light Carried Forward", echoes: "Echo of Draupadi, Echo of Durga", stories: 12, karma: 84, example: "A teacher walked miles to bring lessons to children no school would take. Many now teach the next forgotten village. — like the echoes of Draupadi and Durga." },
+    { name: "The Quiet Debt", echoes: "Echo of Rama, Echo of Krishna", stories: 4, karma: 27, example: "He paid off a poor neighbour's loan in secret and never spoke of it. Years later the neighbour did the same for another, the kindness still moving. — like the echoes of Rama and Krishna." },
+    { name: "Wings Over the Field", echoes: "Echo of Hanuman, Echo of Durga", stories: 8, karma: 52, example: "She carried medicine across a flooded river to a fevered child at midnight. The child grew to build the village's first clinic. — like the echoes of Hanuman and Durga." },
+    { name: "The Shared Harvest", echoes: "Echo of Krishna, Echo of Rama", stories: 11, karma: 71, example: "Three farmers pooled their failing fields instead of fighting over water. Together they fed families that drought would have broken. — like the echoes of Krishna and Rama." },
+    { name: "Embers of Welcome", echoes: "Echo of Draupadi, Echo of Hanuman", stories: 6, karma: 40, example: "Her door and pot were open to every traveller, however poor. When fire took her home, a hundred strangers rebuilt it in a week. — like the echoes of Draupadi and Hanuman." }
   ];
+  // Show user's saved/explored + seeds (FTUE: never empty). 모두 허구 — 서사시에서 영감받은 가상 이야기.
+  const dummies = SEED_PANTHEONS;
   
   list.innerHTML = '';
   dummies.forEach(d => {
