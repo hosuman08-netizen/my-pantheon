@@ -94,4 +94,4 @@ p2. Legion one. Sovereign directive 2026-06-20. **FINISH + LAUNCH 2026-06-27**
 
 **확장 전략**: TG 미니앱으로 인도 유저 대량 모은 후 앱스토어/플레이스토어 네이티브 출시 검토. 인도 전용 스토어는 없지만 Google Play/App Store 인도 타겟팅 + 규제 준수(중독 가드, "허구 영감" 프레이밍)로 가능. TG Stars로 traction + 결제 검증 먼저 → 네이티브로 푸시/리텐션 확대. p1 완료 후 p2 TG 우선.
 
-Next: Morpheus (final test + deploy), Niobe seeding. Sovereign approve publish. p3+ fork this template.
+Next: Morpheus (final test + deploy), Niobe seeding. Sovereign approve publish. p3+ fork this template.미꾸라지: fictional + disclosure + no real deities + reversible
