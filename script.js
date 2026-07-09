@@ -11,21 +11,26 @@ if (tg) {
 }
 
 // TG native: MainButton for primary action (share / create)
-if (tg.MainButton) {
+// ⚠️ null 가드 필수 — SDK 로드 실패(망 차단·CDN 다운) 시 여기서 throw하면 앱 전체 사망(폴백 무력화). QA P1.
+if (tg && tg.MainButton) {
   tg.MainButton.setParams({ text: 'Share Story', is_visible: false, color: '#c9a227' });
 }
 
+// MainButton onClick은 한 번만 등록(중복 누적 방지 — QA P2). 핸들러는 현재 상태를 클로저 밖에서 참조.
+let _mainBtnWired = false;
+function _mainBtnShare() {
+  if (!currentPantheon) return;
+  const shareText = `🔱 ${currentPantheon.name} — ${currentPantheon.desc || ''} (fictional, epics inspired)`;
+  if (tg && tg.openTelegramLink) {
+    tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(shareText)}`);
+  }
+  addKarma(2);
+}
 function updateMainButton() {
   if (!tg || !tg.MainButton) return;
+  if (!_mainBtnWired) { tg.MainButton.onClick(_mainBtnShare); _mainBtnWired = true; }
   if (currentPantheon) {
     tg.MainButton.setText('Share My Pantheon');
-    tg.MainButton.onClick(() => {
-      const shareText = `🔱 ${currentPantheon.name} — ${currentPantheon.desc || ''} (fictional, epics inspired)`;
-      if (tg.openTelegramLink) {
-        tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(shareText)}`);
-      }
-      addKarma(2);
-    });
     tg.MainButton.show();
   } else {
     tg.MainButton.hide();
@@ -822,6 +827,25 @@ const P2_BOT = '';        // p2 봇 핸들(예: 'my_pantheon_bot'). 있으면 st
 const P2_BASE = (typeof location !== 'undefined' ? location.origin + location.pathname : '');
 const P2_BACKEND = '';    // optional backend for invite credit; empty = ignored
 
+// === Minimal p2 Stars invoice stub (PARHWA-UHWEE ready) ===
+// Mirrors p1 pay-worker createInvoiceLink pattern exactly.
+// currency: "XTR" (Telegram Stars). Payload stealth + disclosure shield.
+// When P2_PAY_BACKEND set: fetch /invoice → tg.openInvoice. Fictional cosmetic only.
+// Prominent: "Core always free. Optional featured/frames. Pure fiction."
+const P2_PAY_BACKEND = ""; // Sovereign: point to p2-stars worker (copy p1 legion-pay pattern)
+function getP2Uid() { return p2uid || localStorage.getItem('p2_uid') || ('p2' + Date.now().toString(36)); }
+function purchaseP2WithStars(item = 'p2_featured') {
+  if (!tg || !tg.openInvoice) { showToast('TG WebApp only — Stars via Bot invoice'); return; }
+  const uid = getP2Uid();
+  // Exact p1 createInvoiceLink fields: title/desc from server, payload, currency:"XTR", prices[]
+  const url = (P2_PAY_BACKEND || 'https://legion-pay.hoyashi95.workers.dev') +
+    `/invoice?item=${encodeURIComponent(item)}&uid=${encodeURIComponent(uid)}&type=stars&lang=en`;
+  fetch(url).then(r=>r.json()).then(d=>{
+    if(d && d.link){ tg.openInvoice(d.link, (st)=>{ if(st==='paid'){addKarma(25); showToast('✧ Premium cosmetic unlocked — MY story featured.');} else showToast('Stars:'+st); }); }
+    else showToast('Stars link: set P2_PAY_BACKEND + worker createInvoiceLink(XTR)');
+  }).catch(()=> showToast('Demo Stars (cosmetic). Core free.'));
+}
+
 let p2uid = '';
 let founderNo = 0;
 let invitedBy = '';
@@ -1200,18 +1224,7 @@ function inviteFriends() {
   if (document.getElementById('tab-my').classList.contains('active')) renderMyPantheon();
 }
 
-// === Festivals ===
-function joinEvent(name) {
-  if (!currentPantheon) { showToast('먼저 판테온을 만드세요!'); switchTab('create'); return; }
-  const rewards = { ganesh: [8,12], navratri: [12,18], diwali: [15,25] };
-  const base = rewards[name] || [5,10];
-  const bonus = Math.floor(Math.random() * (base[1]-base[0]+1)) + base[0];
-  const scarcity = name==='diwali' ? 'Limited window — this cycle only!' : 'Scarcity active. Claim now.';
-  currentPantheon.festivalBoost = (currentPantheon.festivalBoost||0) + bonus;
-  addKarma(bonus);
-  showToast(`✧ Festival +${bonus} Karma. ${scarcity} — MY Pantheon power grows.`, 3200);
-  renderMyPantheon();
-}
+// === Festivals === (실제 정의는 아래 line ~1379 joinEvent 단일본 — 중복 死본 제거됨, QA P2)
 
 function playClanAnthem() {
   const txt = "Clan Anthem (arts synthesis):\nIn the harmony of many voices, we rise as one...\nWu wei • Karma carries.\n(Fictional, positive only)";
@@ -1229,8 +1242,8 @@ function showPremiumModal() {
       <strong>Premium (TG Stars)</strong><br><br>
       <span style="font-size:12px;opacity:0.8">Featured slot, extra stories, custom frames — cosmetic only.<br>
       Core (create, stories, karma, share, festivals) is always free.<br><br>
-      <strong>Fictional stories inspired by epics. Optional purchase.</strong></span><br><br>
-      <button onclick="this.closest('div[style*=\"position:fixed\"]').remove(); showToast('Stars 결제는 Bot에서 처리됩니다. (데모)');" style="margin:4px;padding:8px 16px;background:#c9a227;color:#111;border:none;border-radius:8px;">Purchase with Stars (demo)</button>
+      <strong>Fictional stories inspired by epics. Optional purchase. XTR via Bot.</strong></span><br><br>
+      <button onclick="this.closest('div[style*=\'position:fixed\']').remove(); purchaseP2WithStars('p2_featured');" style="margin:4px;padding:8px 16px;background:#c9a227;color:#111;border:none;border-radius:8px;">Purchase with Stars</button>
       <button onclick="this.closest('div[style*=\"position:fixed\"]').remove()" style="margin:4px;padding:8px 16px;background:transparent;color:#c9a227;border:1px solid #c9a227;border-radius:8px;">Cancel</button>
     </div>`;
   document.body.appendChild(modal);
@@ -1353,6 +1366,7 @@ function likePantheon(name) {
 
 // Festivals with stronger, more celebratory micro (still elegant)
 function joinEvent(ev) {
+  if (!currentPantheon) { showToast('먼저 판테온을 만드세요!'); switchTab('create'); return; }  // QA P2: 가드 복원(死 중복본에만 있던 것)
   const messages = {
     ganesh: "Joined Ganesh challenge! +8 karma for clan story.",
     navratri: "9-day power streak started. Daily contribution +3.",
