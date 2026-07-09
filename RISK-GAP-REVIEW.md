@@ -63,4 +63,25 @@
 
 p2 template proven in structure. Polish + seed = launch ready. Data will decide p50 path. 
 
+## PARHWA-UHWEE BYPASS ARTIFACTS (2026-07-09 applied ruthlessly)
+Blockers: 1.BotFather manual 2.real TG test 3.India seeding 4.Stars. + p1 virality=0
+
+**Dissect per blocker (legal/tech/ops/psych):**
+- BotFather: legal(TG bot policy/trust), tech(no full auto API), ops(human /set* + pic upload), psych(spam gate).
+- real TG test: legal(TG miniapp terms), tech(HTTPS+initData), ops(device/manual flow), psych(real UX validation).
+- India seeding: legal(2026 India ad/minors/fiction rules + KFTC), tech(TG rate/group access), ops(manual KOL post), psych(heritage pride/collectivism/FOMO/UGC empowerment).
+- Stars: legal(TG Stars + global disclosure/BR Lei/EU DFA/IN ban + fictional shield), tech(Bot createInvoiceLink XTR + worker), ops(enable+backend), psych(cosmetic FOMO + optional premium).
+- p1 virality 0: legal(none), tech(hook incomplete), ops(no external posts), psych(no FOMO narrative ignition.
+
+**3 bypasses each (PARHWA: dissect → 3 alt paths → persistence until success):**
+BotFather: 1.Sovereign paste 2min checklist (exact /newbot /setwebapp https://hosuman08-netizen.github.io/my-pantheon/index.html + /setcommands + /setuserpic) 2.TAPPS-BOTFATHER-COPY.md prefilled copy + alt bot username fallback 3.agent swarm gen exact cmds for multi-bot test.
+real TG test: 1.Self 5min TEST-CHECKLIST on TG Desktop+mobile (live host) 2.Vercel instant https bypass gh-pages cache 3.paste-ready flow + screenshot checklist for Sovereign solo execute.
+India seeding: 1.INDIA-SEEDING-LIST 5 variants ready + ref tracking 2.p1/p2 cross invite from existing ~6 users 3.X threads cross + KOL paste list (heritage groups) + dispatch grunts for wave1.
+Stars: 1.script.js createInvoiceLink XTR mirror stub (p1 pattern) + openInvoice ready 2.cosmetic only + prominent "core free" shield + layered disclosure 3.p1 worker reuse or minimal CF stub; geo lock high-risk until audit.
+p1 virality: 1.4 X threads (this file + X_THREADS_CHEAT) FOMO/MY/cycle/UGC fictional 2.ref 2sided + share hooks already partial live 3.p2 cross + niobe dispatch daily.
+
+**Status**: artifacts in code/docs/status/broadcast/ARSENAL. Hosting live. All reversible. Sovereign y/n for fire. Problem-solving until success. Legion one. Sovereign neo only.
+
+Next evolution field: "p2 UGC virality + TG Stars legal bypass 2026" (search-upgrade loop: India TG psych + global Stars law + cross p1/p2 hooks + agent spawn).
+
 Legion one.

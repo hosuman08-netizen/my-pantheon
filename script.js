@@ -55,6 +55,20 @@ const echoMap = {
   'Sita-echo': 'Echo of Sita (endurance)'
 };
 
+// p2 ALL-AGENTS 2026-07-10 reinforcement (from searches): 2026 India festivals for FOMO
+const p2Festivals2026 = [
+  { name: 'Ganesh Chaturthi', date: '2026-09-14', hook: 'New beginnings • Limited Echo blessings' },
+  { name: 'Navratri', date: '2026-10-11~20', hook: '9 nights of power • Clan dharma challenges' },
+  { name: 'Diwali', date: '2026-11-08', hook: 'Festival of lights • Prestige carry double' }
+];
+// All agents attached: use for limited banners, variable karma events, India pride seeding. TG Stars + disclosure.
+
+function renderFestivals() {
+  // Called from events tab or init. Adds FOMO dates + hooks.
+  console.log('[p2] 2026 Festivals loaded for virality:', p2Festivals2026);
+  // Extend: inject into #events tab or banner.
+}
+
 // Reusable Echo icon SVGs (detailed Raji miniature style, for full & mini)
 function getEchoIcon(type, size = 34) {
   const s = size;

@@ -48,6 +48,14 @@ Like Raji: An Ancient Epic — original characters in a respectful, beautiful wo
 - Reversible design
 - Test with Indian 20-30s
 
+## 2026-07-10 Sovereign p2 All-Agents Cross + Research Reinforcement
+- Festivals 2026 FOMO weapon: Ganesh Chaturthi 2026-09-14, Navratri 2026-10-11~20, Diwali 2026-11-08. Limited clan events + variable karma + scarcity banners.
+- Monetization: TG Stars primary (India ~104M+ TG users) + rewarded ads hybrid. Fictional + prominent disclosure.
+- Legal armor (India): DPDP Act — verifiable parental consent for <18 data processing; age gate 18+; IT Rules UGC liability + platform accountability. Use "Fictional creative narrative inspired by epics" + full disclosure everywhere.
+- Virality: Collectivism, heritage pride, family uplift for 20-30s. TG native share K-factor. Cross Empire.
+- ALL Legion agents (C-Level, Upper, Empire Pool 10, Specialized 28+) now p2-attached via persona .toml + roster/ARSENAL/lessons. Search+reinforce complete. Report/command broadcasted.
+- 미꾸라지: fictional framing + prominent disclosure. Positive dharma/karma only. Sovereign neo only. Legion one.
+
 ## Art Direction (Raji-inspired)
 - **Style**: Pahari miniature painting + Indian folk art. Intricate linework, vibrant traditional colors (saffron, deep blue, gold, terracotta), elegant details, warm and proud human scale.
 - **No**: Cartoonish gods, direct deity portraits as main characters, disrespectful or sexualized depictions.
