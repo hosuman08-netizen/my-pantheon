@@ -38,3 +38,15 @@
 5. Sovereign approval → public
 
 p2 finish → launch. Legion one. Absolute obedience to neo.
+---
+## 🚦 LAUNCH STATUS UPDATE (2026-07-10, Trinity)
+- **호스팅 🟢 GREEN**: 라이브 https://hosuman08-netizen.github.io/my-pantheon/ (200)
+- **코드 🟢 GREEN**: P0 전항목 ✅ + **한국어 누수 → 영어 수정 배포됨**(create·에코명·스토리, commit 266a10e). playwright 테스트: 크래시0·4040·프레이밍 prominent.
+- **BotFather 🟡 YELLOW = neo 몫**: TAPPS-BOTFATHER-COPY.md 참조.
+  1. @BotFather → /mybots → 봇 선택 (또는 /newbot)
+  2. /setwebapp → https://hosuman08-netizen.github.io/my-pantheon/index.html
+  3. Menu Button → Web App (같은 URL)
+  4. /setdescription + /setabouttext (TAPPS-BOTFATHER-COPY.md 복붙)
+  5. /setcommands: start, create, share, festival
+- **다음(neo)**: BotFather 설정 → 모바일 TG 실기기 테스트 → 시딩 y/n.
+- **판정**: 호스팅+코드 GO. BotFather+실기기+시딩만 neo 손. **소프트런칭 준비 완료.**
