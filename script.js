@@ -500,7 +500,7 @@ function applyLanguage(lang) {
   labels.forEach(l => {
     if (l.textContent.includes('Pantheon Name') || l.textContent.includes('పాంథియన్ పేరు')) l.textContent = t.clanNameLabel;
     if (l.textContent.includes('Your Motto') || l.textContent.includes('మీ నినాదం')) l.textContent = t.mottoLabel;
-    if (l.textContent.includes('Echo Selection')) l.textContent = t.echoSelect;
+    if (l.textContent.includes('Echo Selection') || l.textContent.includes('Choose Echoes')) l.textContent = t.echoSelect;
   });
   const clanPh = document.getElementById('clan-name');
   if (clanPh) clanPh.placeholder = t.clanNamePh;
@@ -747,7 +747,7 @@ function initSettings() {
 }
 
 function resetAllData() {
-  if (!confirm('모든 진행 상황을 초기화할까요? (되돌릴 수 없음)')) return;
+  if (!confirm('Reset all progress? (This cannot be undone)')) return;
   localStorage.clear();
   location.reload();
 }
@@ -985,7 +985,7 @@ if (form) {
     });
     
     if (echoes.length < 3) {
-      showToast('에코를 3개 이상 선택하세요 (서사시 영감 허구 캐릭터).');
+      showToast('Choose at least 3 Echoes (fictional characters inspired by the epics).');
       return;
     }
     
@@ -1192,13 +1192,13 @@ document.querySelectorAll('.intention-chip').forEach(chip => {
 function shareToTG() {
   if (!currentPantheon) return;
   
-  const framing = "\n\n고대 서사시에서 영감을 받은 허구의 이야기. 다르마(맥락 속 의무와 미덕)와 카르마(긍정적 행동의 선순환 성장)를 모티브로 한 창작 서사 • 20~30대 인도인 대상 테스트";
+  const framing = "\n\nA fictional story inspired by ancient epics. A creative narrative themed on dharma (duty and virtue within context) and karma (the virtuous cycle of positive action) • a test for Indians in their 20s-30s";
   const text = `My Pantheon: ${currentPantheon.name}\n${currentPantheon.desc || ''}\n\n${currentPantheon.stories.slice(-1)[0] || ''}${framing}`;
   
   if (tg && tg.openTelegramLink) {
     tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(text)}`);
   } else {
-    navigator.clipboard?.writeText(text).then(() => showToast('프레이밍 포함 복사됨! TG 그룹에 공유하세요. (허구 서사)'));
+    navigator.clipboard?.writeText(text).then(() => showToast('Copied with framing! Share it to your TG group. (fictional narrative)'));
   }
   sharesCount++;
   const reach = Math.floor(Math.random() * 180) + 70;
@@ -1356,11 +1356,11 @@ function renderExplore() {
 function useAsInspiration(text) {
   const ta = document.getElementById('story-text');
   if (ta) {
-    ta.value = text + ' — (내 버전으로 다듬음, fictional)';
+    ta.value = text + ' — (refined into my own version, fictional)';
     switchTab('my');
-    showToast('영감 복사됨. 수정해서 추가하세요. (허구 프레임 유지)');
+    showToast('Inspiration copied. Edit it and add your own. (keep the fictional frame)');
   } else {
-    showToast('My Pantheon 탭에서 스토리를 추가하세요.');
+    showToast('Add your story in the My Pantheon tab.');
     switchTab('my');
   }
 }
@@ -1380,7 +1380,7 @@ function likePantheon(name) {
 
 // Festivals with stronger, more celebratory micro (still elegant)
 function joinEvent(ev) {
-  if (!currentPantheon) { showToast('먼저 판테온을 만드세요!'); switchTab('create'); return; }  // QA P2: 가드 복원(死 중복본에만 있던 것)
+  if (!currentPantheon) { showToast('Create your pantheon first!'); switchTab('create'); return; }  // QA P2: 가드 복원(死 중복본에만 있던 것)
   const messages = {
     ganesh: "Joined Ganesh challenge! +8 karma for clan story.",
     navratri: "9-day power streak started. Daily contribution +3.",
@@ -1642,7 +1642,7 @@ function initOmMeditation() {
         const durSec = (Date.now() - omStartTime) / 1000;
         if (durSec > 25) {
           addKarma(1);
-          showToast('명상이 마음을 가라앉혔습니다 • +1 Karma', 1400);
+          showToast('Meditation has calmed your mind • +1 Karma', 1400);
         }
       }
       if (omTimerInterval) {
@@ -1927,7 +1927,7 @@ function updateEchoSummary() {
       const label = document.querySelector(`label.echo-card input[value="${cb.value}"]`)?.closest('label');
       return label?.querySelector('.echo-name')?.textContent || '';
     });
-    if (names.some(n => n.includes('크리슈나') || n.includes('Krishna')) && names.some(n => n.includes('라마') || n.includes('Rama'))) {
+    if (names.some(n => n.includes('Krishna')) && names.some(n => n.includes('Rama'))) {
       vibe = 'Wisdom + Duty';
     } else if (count >= 4) {
       vibe = 'Strong clan aura';
@@ -1942,38 +1942,38 @@ function updateEchoSummary() {
 
 // Pantheon Director Mode
 const DIRECTOR_VAULT = [
-  "몬순 폭우가 쏟아지던 밤, 아버지가 쓰러지자 나는 도시로 가려던 발걸음을 돌렸다. 매일 아버지 곁에서 '가족이 내 다르마'라 다짐하며 약을 달이고 손을 잡았다. 바람이 잦아들고 별이 뜬 8년 뒤, 우리가 함께 세운 작은 찻집은 마을의 심장이 되었다. 아버지는 '네가 돌아온 그 바람이 우리 가문을 살렸다'고 말씀하신다. — 라마와 하누만의 메아리처럼.",
-  "가난한 골목 끝에서 나는 매일 '오늘도 누군가를 따뜻하게 하자' 다짐했다. 할머니가 아프면 약을 사다 드리고, 배고픈 아이들에게 도시락을 나누어주었다. '바보'라는 말에도 미소로 '카르마는 먼 길을 돌아온다' 믿었다. 몬순이 지나간 마을 길, 15년 뒤 도와준 할머니의 손자가 성공해 돌아왔다. 그는 눈물 흘리며 '할머니가 당신 이야기를 매일 들려주셨어요. 이제 제 차례입니다'라며 가게를 열어주고 마을 사업을 함께 하자고 했다. 가난 속 뿌린 작은 친절이, 마침내 거대한 풍요의 연꽃으로 피어났다. — 크리슈나와 드라우파디의 메아리처럼.",
-  "남편을 잃고 혼자 아이를 키우며 매일이 전쟁이었다. '이 고난이 나를 더 따뜻한 사람으로 빚을 거야'라 되뇌며 가진 것을 이웃과 아낌없이 나누었다. 동네 사람들이 힘겨울 때 내 문을 두드리곤 했다. 어느 비 오는 날, 오래전 도와준 소년이 큰 회사를 일으켜 돌아왔다. '어머니처럼 따뜻한 사람이 있다는 걸 세상에 보여주고 싶었습니다'라며 마을 학교를 세워주었다. 슬픔이 만든 방패가, 이제 모두의 빛이 되었다. — 두르가와 하누만의 메아리처럼.",
-  "가난한 마을 소년은 매일 새벽 우물을 파고 돌을 날랐다. '내 손이 마을의 생명'이라 믿으며 땀을 흘렸다. 12년 뒤 마을에 처음으로 맑은 물이 솟아오르자, 아이들이 웃고 농사가 살아났다. 손자 손녀가 '할아버지가 판 우물이 우리를 살렸다'고 말할 때, 그는 '작은 약속이 이렇게 큰 강이 되는구나' 생각했다. — 하누만과 두르가의 메아리처럼.",
-  "축제 디왈리 전날, 마을 여인은 혼자 등불을 만들며 이웃의 아픈 손을 잡아주고, 가난한 아이들에게 간식을 나눴다. '빛은 나누는 것'이라 속삭였다. 10년 뒤, 그녀가 도와준 아이들이 성공해 돌아와 마을 전체를 환하게 밝히는 대형 등불 행사를 열었다. '어머니가 준 작은 빛이 우리 모두의 축제가 되었습니다.' 이제 그녀의 집 앞은 매년 가장 밝은 별이 된다. — 드라우파디와 크리슈나의 메아리처럼."
+  "On a night of pounding monsoon rain, when my father collapsed I turned back from the road to the city. Each day at his side I vowed 'family is my dharma,' brewing his medicine and holding his hand. Eight years later, when the winds had stilled and the stars had risen, the little tea house we built together became the heart of the village. My father says, 'The wind that carried you home saved our house.' — like the Echoes of Rama and Hanuman.",
+  "At the end of a poor alley, each day I vowed, 'today too, let me warm someone.' When a grandmother fell ill I bought her medicine; to hungry children I shared my lunch. Even when called a fool, I smiled and believed 'karma travels a long road home.' Along the village path after the monsoon, fifteen years later, the grandson of the grandmother I had helped returned in success. In tears he said, 'She told your story every day. Now it is my turn,' and opened a shop for me and asked me to build the village's business together. The small kindness sown in poverty at last bloomed into a vast lotus of abundance. — like the Echoes of Krishna and Draupadi.",
+  "Having lost my husband and raising my child alone, every day was a battle. Repeating 'this hardship will shape me into a warmer soul,' I shared all I had with my neighbors without reserve. When the townsfolk struggled, they would knock at my door. On a rainy day, a boy I had helped long ago returned, having built a great company. 'I wanted to show the world that warm-hearted people like a mother exist,' he said, and built a school for the village. The shield forged from sorrow has now become a light for all. — like the Echoes of Durga and Hanuman.",
+  "A poor village boy dug a well and carried stones each dawn. Believing 'my hands are the life of the village,' he poured out his sweat. Twelve years later, when clear water first rose in the village, the children laughed and the fields came alive. When his grandchildren said, 'the well grandfather dug saved us,' he thought, 'so a small promise becomes a great river.' — like the Echoes of Hanuman and Durga.",
+  "On the eve of the Diwali festival, a village woman shaped lamps alone, held the aching hands of her neighbors, and shared sweets with poor children. 'Light is meant to be shared,' she whispered. Ten years later, the children she had helped returned in success and held a grand lamp festival that lit the whole village bright. 'The small light our mother gave us became a festival for us all.' Now, each year, the front of her house becomes the brightest star. — like the Echoes of Draupadi and Krishna."
 ];
 
 function askDirector() {
-  const theme = prompt('Pantheon Director (Kurosawa·Ray·Rajamouli·Tagore·에픽 융합): 주제를 말해주세요 (예: 마을 우물, 축제 도움, 친구 일으켜 세움, 할머니 선행)');
+  const theme = prompt('Pantheon Director (Kurosawa · Ray · Rajamouli · Tagore · epic fusion): tell me a theme (e.g. village well, festival help, lifting up a friend, a grandmother\'s good deed)');
   const ta = document.getElementById('story-text');
   if (!ta) return;
 
   let chosen = DIRECTOR_VAULT[1]; // default core touching karma story
   const t = (theme || '').toLowerCase();
 
-  if (t.includes('우물') || t.includes('water') || t.includes('마을')) chosen = DIRECTOR_VAULT[3];
-  else if (t.includes('축제') || t.includes('diwali') || t.includes('빛') || t.includes('festival')) chosen = DIRECTOR_VAULT[4];
-  else if (t.includes('아버지') || t.includes('가족') || t.includes('duty') || t.includes('의무')) chosen = DIRECTOR_VAULT[0];
-  else if (t.includes('친구') || t.includes('friend') || t.includes('일으켜')) chosen = DIRECTOR_VAULT[2];
-  else if (t.includes('할머니') || t.includes('선행') || t.includes('kind') || t.includes('가난')) chosen = DIRECTOR_VAULT[1];
+  if (t.includes('well') || t.includes('water') || t.includes('village')) chosen = DIRECTOR_VAULT[3];
+  else if (t.includes('festival') || t.includes('diwali') || t.includes('light') || t.includes('lamp')) chosen = DIRECTOR_VAULT[4];
+  else if (t.includes('father') || t.includes('family') || t.includes('duty')) chosen = DIRECTOR_VAULT[0];
+  else if (t.includes('friend') || t.includes('lift') || t.includes('raise')) chosen = DIRECTOR_VAULT[2];
+  else if (t.includes('grandmother') || t.includes('kind') || t.includes('poverty') || t.includes('poor')) chosen = DIRECTOR_VAULT[1];
   else {
     chosen = DIRECTOR_VAULT[Math.floor(Math.random() * DIRECTOR_VAULT.length)];
   }
 
-  const prefix = '고대 서사시에서 영감을 받은 허구의 이야기. ';
+  const prefix = 'A fictional story inspired by ancient epics. ';
   ta.value = prefix + chosen;
   ta.focus();
 
   setTimeout(() => {
     const hint = document.createElement('div');
     hint.style.cssText = 'font-size:11px;color:#c9a227;margin-top:4px;';
-    hint.textContent = 'Director 영감 주입. 당신만의 말로 다듬어 주세요.';
+    hint.textContent = 'Director inspiration added. Refine it into your own words.';
     if (ta.parentNode) ta.parentNode.appendChild(hint);
     setTimeout(() => hint && hint.remove(), 2400);
   }, 90);

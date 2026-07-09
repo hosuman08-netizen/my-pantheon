@@ -46,7 +46,7 @@
     <header>
       <div class="header-row">
         <div style="display:flex; align-items:center; gap:12px;">
-          <img src="art/icon-512.png" alt="My Pantheon" style="width:56px; height:56px; border-radius:50%; border:3px solid var(--accent); box-shadow:0 6px 20px rgba(201,162,39,.5);">
+          <img src="art/icon-512.png" alt="My Pantheon" style="width:58px; height:58px; border-radius:50%; border:3px solid var(--accent); box-shadow:0 8px 26px rgba(201,162,39,.55), 0 0 0 6px rgba(201,162,39,.08); background:#111;">
           <div>
             <h1>My Pantheon</h1>
             <p class="subtitle">Your clan of echoes, born from the epics</p>
@@ -91,24 +91,24 @@
     <!-- CREATE TAB - Premium Flow -->
     <div id="tab-create" class="tab-content active">
       <div class="section-header">
-        <h2>새로운 판테온을 여세요</h2>
-        <p class="section-sub">서사시의 미덕에서 영감을 받아, 당신만의 독창적인 에코를 만드세요.</p>
+        <h2>Open a New Pantheon</h2>
+        <p class="section-sub">Inspired by the virtues of the epics, create your unique Echoes.</p>
       </div>
       
       <form id="pantheon-form">
         <div class="form-group">
-          <label>판테온 이름</label>
-          <input type="text" id="clan-name" placeholder="예: 쿠루크셰트라의 빛" required>
+          <label>Pantheon Name</label>
+          <input type="text" id="clan-name" placeholder="e.g. Light of Kurukshetra" required>
         </div>
         
         <div class="form-group">
-          <label>당신의 모토</label>
-          <textarea id="clan-desc" placeholder="가문의 가치나 서사시에서 영감을 받은 한 줄" rows="2"></textarea>
+          <label>Your Motto</label>
+          <textarea id="clan-desc" placeholder="A line inspired by epics or family values" rows="2"></textarea>
         </div>
 
         <div class="form-group">
-          <label>에코 선택 (3~5개)</label>
-          <p class="guide-small">서사시적 미덕(다르마: 맥락 속 의무와 순수 의도)에서 영감을 받은, 당신만의 가상 영웅들입니다. 신 그 자체가 아닙니다. <span style="color:#c9a227; opacity:.7;">(Premium Raji miniature icons)</span></p>
+          <label>Choose Echoes (3-5)</label>
+          <p class="guide-small">Your own fictional heroes, inspired by epic virtues (Dharma: duty and pure intention within context). Not the gods themselves. <span style="color:#c9a227; opacity:.7;">(Premium Raji miniature icons)</span></p>
           <div id="echo-summary" class="echo-summary">0 echoes selected • Begin your clan</div>
           <div class="echo-grid">
             <label class="echo-card">
@@ -139,8 +139,8 @@
                 </svg>
               </div>
                 <div>
-                  <div class="echo-name">크리슈나의 메아리</div>
-                  <div class="echo-trait">전략가 · 지혜</div>
+                  <div class="echo-name">Echo of Krishna</div>
+                  <div class="echo-trait">Strategist · Wisdom</div>
                 </div>
               </div>
             </label>
@@ -170,8 +170,8 @@
                 </svg>
               </div>
                 <div>
-                  <div class="echo-name">라마의 메아리</div>
-                  <div class="echo-trait">의무 · 용기</div>
+                  <div class="echo-name">Echo of Rama</div>
+                  <div class="echo-trait">Duty · Courage</div>
                 </div>
               </div>
             </label>
@@ -198,8 +198,8 @@
                 </svg>
               </div>
                 <div>
-                  <div class="echo-name">드라우파디의 메아리</div>
-                  <div class="echo-trait">회복력 · 정의</div>
+                  <div class="echo-name">Echo of Draupadi</div>
+                  <div class="echo-trait">Resilience · Justice</div>
                 </div>
               </div>
             </label>
@@ -236,8 +236,8 @@
                 </svg>
               </div>
                 <div>
-                  <div class="echo-name">하누만의 메아리</div>
-                  <div class="echo-trait">충성 · 헌신</div>
+                  <div class="echo-name">Echo of Hanuman</div>
+                  <div class="echo-trait">Loyalty · Devotion</div>
                 </div>
               </div>
             </label>
@@ -266,8 +266,8 @@
                 </svg>
               </div>
                 <div>
-                  <div class="echo-name">두르가의 메아리</div>
-                  <div class="echo-trait">수호 · 힘</div>
+                  <div class="echo-name">Echo of Durga</div>
+                  <div class="echo-trait">Protector · Strength</div>
                 </div>
               </div>
             </label>
@@ -293,8 +293,8 @@
                 </svg>
                 </div>
                 <div>
-                  <div class="echo-name">아르주나의 메아리</div>
-                  <div class="echo-trait">집중 · 용기</div>
+                  <div class="echo-name">Echo of Arjuna</div>
+                  <div class="echo-trait">Focus · Courage</div>
                 </div>
               </div>
             </label>
@@ -319,8 +319,8 @@
                 </svg>
                 </div>
                 <div>
-                  <div class="echo-name">시타의 메아리</div>
-                  <div class="echo-trait">인내 · 순수</div>
+                  <div class="echo-name">Echo of Sita</div>
+                  <div class="echo-trait">Endurance · Purity</div>
                 </div>
               </div>
             </label>
@@ -336,7 +336,7 @@
           </div>
         </div>
 
-        <button type="submit" class="primary">판테온 창조하기</button>
+        <button type="submit" class="primary">Create Pantheon</button>
       </form>
     </div>
 
@@ -407,29 +407,29 @@
 
         <div class="section">
           <h3>Add Story / Retell</h3>
-          <p class="guide">Raji-style: 당신만의 허구 이야기를 써주세요. Pantheon Director (Kurosawa·Ray·Rajamouli·Tagore·에픽 융합)가 마스터를 지킵니다.</p>
-          <p class="guide-small">가치 = 당신이 직접 만드는 것. 우리는 미리 채워넣지 않습니다.</p>
-          <p class="example">예시 (Pantheon Director 업그레이드, dharma/karma accurate): "가난 속 매일 '가족과 이웃에 대한 작은 의무(다르마)를 다하자' 다짐하며 순수한 마음(의도)으로 할머니 약을 사주고 아이들 도시락 나눴다. '카르마는 선한 행동의 선순환' 믿었다. 15년 뒤, 도와준 손자가 돌아와 '할머니가 당신 이야기를 매일...' 하며 가게와 사업 기회 줌. 가난 속 뿌린 친절이, 마침내 거대한 풍요로 피어났다. — 크리슈나와 드라우파디의 메아리처럼."</p>
+          <p class="guide">Raji-style: write your own fictional story. The Pantheon Director (Kurosawa · Ray · Rajamouli · Tagore · epic fusion) guards the master craft.</p>
+          <p class="guide-small">Value = what you create yourself. We do not prefill.</p>
+          <p class="example">Example (Pantheon Director upgrade, dharma/karma accurate): "In poverty, I vowed each day to fulfill small duties (dharma) to family and neighbors, and with pure intent bought medicine for a grandmother and shared lunches with children. I believed karma is the virtuous cycle of good deeds. Fifteen years later, a grandson I had helped returned, saying 'Grandmother told your story every day...' and offered me a shop and a business chance. The kindness sown in hardship finally bloomed into vast abundance. — like the Echoes of Krishna and Draupadi."</p>
 
           <!-- 선택적 의도 태그 (순수 UGC 유지, 가볍게 제안) -->
           <div class="intention-hint">
-            <span class="hint-label">선택: 의도를 가볍게 더해보세요</span>
+            <span class="hint-label">Optional: gently add your intention</span>
             <div class="intention-chips">
-              <button type="button" class="intention-chip" data-phrase="가족을 위해">가족</button>
-              <button type="button" class="intention-chip" data-phrase="작은 친절로">친절</button>
-              <button type="button" class="intention-chip" data-phrase="의무를 다하며">의무</button>
-              <button type="button" class="intention-chip" data-phrase="선한 연쇄를 믿으며">연쇄</button>
+              <button type="button" class="intention-chip" data-phrase="for my family">Family</button>
+              <button type="button" class="intention-chip" data-phrase="with small kindness">Kindness</button>
+              <button type="button" class="intention-chip" data-phrase="fulfilling my duty">Duty</button>
+              <button type="button" class="intention-chip" data-phrase="believing in the virtuous cycle">Cycle</button>
             </div>
           </div>
 
           <form id="story-form">
-            <textarea id="story-text" placeholder="120-160자 · positive dharma story (daily kindness → legacy) · end — Echo의 메아리처럼. (fictional, India 20-30s empathy)" rows="5" required></textarea>
+            <textarea id="story-text" placeholder="120-160 chars · positive dharma story (daily kindness → legacy) · end — like the Echo of ... (fictional, India 20-30s empathy)" rows="5" required></textarea>
             <div id="story-progress" class="story-progress">
               <div class="story-progress-bar"><div id="story-progress-fill"></div></div>
               <span id="story-progress-text">0 / 160</span>
             </div>
             <button type="submit" class="primary">Add to Pantheon</button>
-            <button type="button" onclick="askDirector()" class="secondary" style="margin-top:8px;">Pantheon Director에게 영감 받기 (dharma/karma accurate, 5h upgrade)</button>
+            <button type="button" onclick="askDirector()" class="secondary" style="margin-top:8px;">Get inspiration from the Pantheon Director (dharma/karma accurate, 5h upgrade)</button>
           </form>
         </div>
 
@@ -446,8 +446,8 @@
 
       </div>
       <div id="no-pantheon" style="display:none">
-        <p>아직 판테온이 없어요.<br>당신의 이야기를 직접 써서 판테온을 채워보세요.</p>
-        <button onclick="switchTab('create')" class="primary">판테온 만들기</button>
+        <p>No pantheon yet.<br>Write your own story to build your clan.</p>
+        <button onclick="switchTab('create')" class="primary">Create Pantheon</button>
       </div>
     </div>
 

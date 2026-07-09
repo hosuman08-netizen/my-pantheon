@@ -32,11 +32,20 @@ body {
   margin: 0 auto;
   padding: 0 16px 110px;
   background: linear-gradient(180deg, #0a0806 0%, var(--bg) 100%);
-  box-shadow: 0 0 0 1px var(--border), 0 12px 40px rgba(0,0,0,.5), inset 0 1px 0 rgba(212,179,127,.15);
-  border-radius: 20px;
+  box-shadow: 0 0 0 1px var(--border), 0 12px 40px rgba(0,0,0,.5), 0 0 0 4px rgba(201,162,39,.06), inset 0 1px 0 rgba(212,179,127,.15);
+  border-radius: 22px;
   overflow: hidden;
-  border: 2px solid rgba(201,162,39,.2);
+  border: 2px solid rgba(201,162,39,.28);
+  border-top-color: rgba(212,179,127,.35);
   position: relative;
+}
+.app::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(to right, transparent, var(--accent), transparent);
+  opacity: 0.6;
+  z-index: 10;
 }
 
 /* Elegant, decorative framing with cultural warmth */
@@ -47,9 +56,23 @@ body {
   font-size: 12.5px;
   margin: 16px 0 14px;
   border: 1px solid var(--border);
+  border-top: 1px solid rgba(212,179,127,.35);
   color: var(--text-muted);
   position: relative;
   box-shadow: var(--shadow);
+}
+.framing::before {
+  content: '𑁍  •  𑁍';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  color: var(--accent);
+  opacity: .45;
+  letter-spacing: 4px;
+  background: var(--bg);
+  padding: 0 6px;
 }
 
 /* High-Quality Top Meditation Bar - Premium Raji style */
@@ -269,6 +292,20 @@ body {
 header {
   padding: 26px 4px 18px;
   border-bottom: 1px solid var(--border);
+  position: relative;
+}
+header::after {
+  content: '𑁍';
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 15px;
+  color: var(--accent);
+  opacity: 0.55;
+  background: var(--bg);
+  padding: 0 10px;
+  letter-spacing: 6px;
 }
 h1 {
   margin: 0;
