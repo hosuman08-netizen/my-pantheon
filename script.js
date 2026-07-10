@@ -55,6 +55,18 @@ const echoMap = {
   'Sita-echo': 'Echo of Sita (endurance)'
 };
 
+// XSS shield (rank1 P1) — escape any user-authored text before it touches innerHTML.
+const escapeHtml = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+// TG native haptics (rank20) — safe no-op outside Telegram / on unsupported clients.
+function haptic(kind) {
+  try {
+    if (!tg || !tg.HapticFeedback) return;
+    if (kind === 'success' || kind === 'error' || kind === 'warning') tg.HapticFeedback.notificationOccurred(kind);
+    else tg.HapticFeedback.impactOccurred(kind || 'light');
+  } catch (e) {}
+}
+
 // p2 ALL-AGENTS 2026-07-10 reinforcement (from searches): 2026 India festivals for FOMO
 const p2Festivals2026 = [
   { name: 'Ganesh Chaturthi', date: '2026-09-14', hook: 'New beginnings • Limited Echo blessings' },
@@ -63,14 +75,42 @@ const p2Festivals2026 = [
 ];
 // All agents attached: use for limited banners, variable karma events, India pride seeding. TG Stars + disclosure.
 
+// Real 2026 festival dates keyed by ev (honest FOMO — 진짜 마감일 기반 카운트다운)
+const FEST_DATES = { ganesh: '2026-09-14', navratri: '2026-10-11', diwali: '2026-11-08' };
 function renderFestivals() {
-  // Called from events tab or init. Adds FOMO dates + hooks.
-  console.log('[p2] 2026 Festivals loaded for virality:', p2Festivals2026);
-  // Extend: inject into #events tab or banner.
+  const now = new Date();
+  document.querySelectorAll('#tab-events .event-card').forEach(card => {
+    const btn = card.querySelector('button[onclick*="joinEvent"]');
+    if (!btn) return;
+    const m = (btn.getAttribute('onclick') || '').match(/joinEvent\('(\w+)'\)/);
+    if (!m || !FEST_DATES[m[1]]) return;
+    const target = new Date(FEST_DATES[m[1]] + 'T23:59:59');
+    const days = Math.ceil((target - now) / 86400000);
+    const hdr = card.querySelector('.event-header');
+    if (!hdr) return;
+    let cd = hdr.querySelector('.fest-countdown');
+    if (!cd) { cd = document.createElement('span'); cd.className = 'fest-countdown'; hdr.appendChild(cd); }
+    let label, bg = 'rgba(201,162,39,.15)', fg = '#c9a227';
+    if (days < 0) { label = 'Ended'; bg = 'rgba(120,120,120,.15)'; fg = '#888'; }
+    else if (days === 0) { label = '⚡ LIVE TODAY'; bg = '#e8452e'; fg = '#fff'; }
+    else if (days <= 7) { label = '⚡ ' + days + 'd left'; bg = 'rgba(232,69,46,.16)'; fg = '#e8452e'; }
+    else { label = 'in ' + days + ' days'; }
+    cd.textContent = label;
+    cd.style.cssText = 'margin-left:auto;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;letter-spacing:.3px;background:' + bg + ';color:' + fg + ';';
+  });
 }
 
 // Reusable Echo icon SVGs (detailed Raji miniature style, for full & mini)
+// rank15: memoize by type+size — the 7 icons are pure functions of (type,size), so build once.
+const _echoIconCache = {};
 function getEchoIcon(type, size = 34) {
+  const key = type + ':' + size;
+  if (key in _echoIconCache) return _echoIconCache[key];
+  const svg = _buildEchoIcon(type, size);
+  _echoIconCache[key] = svg;
+  return svg;
+}
+function _buildEchoIcon(type, size = 34) {
   const s = size;
   const common = `width="${s}" height="${s}" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"`;
   if (type === 'Krishna-echo') {
@@ -186,8 +226,13 @@ const translations = {
     clanNamePh: "e.g. Light of Kurukshetra",
     mottoLabel: "Your Motto",
     mottoPh: "A line inspired by epics or family values",
-    echoSelect: "Echo Selection (3~5)",
+    echoSelect: "Choose Echoes (3-5)",
     guide: "Fictional heroes inspired by epic virtues. Not the gods themselves.",
+    navCreate: "Create",
+    navMy: "My Pantheon",
+    navExplore: "Explore",
+    navFestivals: "Festivals",
+    navSettings: "Settings",
     echoKrishna: "Echo of Krishna",
     traitKrishna: "Strategist · Wisdom",
     echoRama: "Echo of Rama",
@@ -261,8 +306,13 @@ const translations = {
     clanNamePh: "उदाहरण: कुरुक्षेत्र की रोशनी",
     mottoLabel: "आपका मंत्र",
     mottoPh: "महाकाव्यों या पारिवारिक मूल्यों से प्रेरित एक पंक्ति",
-    echoSelect: "इको चयन (3~5)",
+    echoSelect: "इको चुनें (3-5)",
     guide: "महाकाव्यों के सद्गुणों से प्रेरित काल्पनिक नायक। स्वयं देवता नहीं।",
+    navCreate: "बनाएं",
+    navMy: "मेरा पैंथियन",
+    navExplore: "खोजें",
+    navFestivals: "त्योहार",
+    navSettings: "सेटिंग्स",
     echoKrishna: "कृष्ण की इको",
     traitKrishna: "रणनीतिकार · ज्ञान",
     echoRama: "राम की इको",
@@ -336,8 +386,13 @@ const translations = {
     clanNamePh: "எ.கா: குருக்ஷேத்திரத்தின் ஒளி",
     mottoLabel: "உங்கள் குறிக்கோள்",
     mottoPh: "காவியங்கள் அல்லது குடும்ப மதிப்புகளால் ஊக்கமளிக்கும் ஒரு வரி",
-    echoSelect: "எதிரொலி தேர்வு (3~5)",
+    echoSelect: "எதிரொலிகளைத் தேர்ந்தெடு (3-5)",
     guide: "காவிய நற்பண்புகளால் ஊக்கமளிக்கப்பட்ட கற்பனை ஹீரோக்கள். கடவுள்களே அல்ல.",
+    navCreate: "உருவாக்கு",
+    navMy: "என் பாந்தியன்",
+    navExplore: "ஆராய",
+    navFestivals: "திருவிழாக்கள்",
+    navSettings: "அமைப்புகள்",
     echoKrishna: "கிருஷ்ணாவின் எதிரொலி",
     traitKrishna: "உத்தி வல்லுநர் · ஞானம்",
     echoRama: "ராமாவின் எதிரொலி",
@@ -411,8 +466,13 @@ const translations = {
     clanNamePh: "ఉదా: కురుక్షేత్రం యొక్క వెలుగు",
     mottoLabel: "మీ నినాదం",
     mottoPh: "మహాకావ్యాలు లేదా కుటుంబ విలువల నుండి ప్రేరణ పొందిన ఒక వాక్యం",
-    echoSelect: "ప్రతిధ్వని ఎంపిక (3~5)",
+    echoSelect: "ప్రతిధ్వనులను ఎంచుకో (3-5)",
     guide: "మహాకావ్య సద్గుణాల నుండి ప్రేరణ పొందిన కల్పిత హీరోలు. దేవతలు కాదు.",
+    navCreate: "సృష్టించు",
+    navMy: "నా పాంథియన్",
+    navExplore: "అన్వేషించు",
+    navFestivals: "పండుగలు",
+    navSettings: "సెట్టింగులు",
     echoKrishna: "కృష్ణుని ప్రతిధ్వని",
     traitKrishna: "వ్యూహకర్త · జ్ఞానం",
     echoRama: "రాముని ప్రతిధ్వని",
@@ -488,19 +548,27 @@ function applyLanguage(lang) {
   document.querySelector('h1').textContent = t.appTitle;
   const sub = document.querySelector('.subtitle');
   if (sub) sub.textContent = t.subtitle;
+  // rank5: for English keep the richer HTML original (it carries the live festival FOMO lines
+  // — Ganesh/Navratri/Diwali — that the translation strings don't). Only rebuild for other langs.
   const framing = document.querySelector('.framing');
-  if (framing) framing.innerHTML = `<strong>${t.framing.split('. ')[0]}.</strong><br><span>${t.framing.split('. ').slice(1).join('. ')}</span>`;
+  if (framing && lang !== 'en') framing.innerHTML = `<strong>${escapeHtml(t.framing.split('. ')[0])}.</strong><br><span>${escapeHtml(t.framing.split('. ').slice(1).join('. '))}</span>`;
 
   // Create tab
   const createH2 = document.querySelector('#tab-create h2');
   if (createH2) createH2.textContent = t.createTitle;
   const createSub = document.querySelector('#tab-create .section-sub');
   if (createSub) createSub.textContent = t.createSub;
-  const labels = document.querySelectorAll('#tab-create label');
-  labels.forEach(l => {
-    if (l.textContent.includes('Pantheon Name') || l.textContent.includes('పాంథియన్ పేరు')) l.textContent = t.clanNameLabel;
-    if (l.textContent.includes('Your Motto') || l.textContent.includes('మీ నినాదం')) l.textContent = t.mottoLabel;
-    if (l.textContent.includes('Echo Selection') || l.textContent.includes('Choose Echoes')) l.textContent = t.echoSelect;
+  // rank6: select the 3 form labels by stable structure (direct .form-group children), not by
+  // English/Telugu-only text matching (which stuck labels when switching between non-English langs).
+  const fgLabels = document.querySelectorAll('#tab-create .form-group > label');
+  if (fgLabels[0]) fgLabels[0].textContent = t.clanNameLabel;
+  if (fgLabels[1]) fgLabels[1].textContent = t.mottoLabel;
+  if (fgLabels[2]) fgLabels[2].textContent = t.echoSelect;
+  // rank6: bottom-nav labels translated by data-tab (stable), so every language covers navigation.
+  const navMap = { create: t.navCreate, my: t.navMy, explore: t.navExplore, events: t.navFestivals, settings: t.navSettings };
+  document.querySelectorAll('.bottom-nav button').forEach(b => {
+    const lbl = b.querySelector('div:last-child');
+    if (lbl && navMap[b.dataset.tab]) lbl.textContent = navMap[b.dataset.tab];
   });
   const clanPh = document.getElementById('clan-name');
   if (clanPh) clanPh.placeholder = t.clanNamePh;
@@ -542,8 +610,8 @@ function applyLanguage(lang) {
   if (storyGuide) storyGuide.textContent = t.storyGuide;
   const storyGuideSmall = document.querySelector('#tab-my .guide-small');
   if (storyGuideSmall) storyGuideSmall.textContent = 'Value = what you create yourself. We do not prefill.';
-  const storyEx = document.querySelector('#tab-my .example');
-  if (storyEx) storyEx.textContent = t.storyGuide; // simplified
+  // rank5: do NOT overwrite the crafted .example narrative with the short guide —
+  // the example and the guide are separate content. (Translated examples are a future add to `translations`.)
   const storyPh = document.getElementById('story-text');
   if (storyPh) storyPh.placeholder = t.storyPh;
   const addStoryBtn = document.querySelector('#story-form button.primary');
@@ -559,7 +627,7 @@ function applyLanguage(lang) {
       pFill.style.width = Math.min((l / 160) * 100, 100) + '%';
       pText.textContent = `${l} / 160`;
     };
-    storyTaEl.addEventListener('input', upd);
+    storyTaEl.oninput = upd;  // QA P2 fix: oninput=교체(중복등록 방지) — 언어 변경마다 리스너 누적하던 것
     setTimeout(upd, 50);
   }
   const directorBtn = document.querySelector('#story-form button.secondary');
@@ -611,29 +679,32 @@ function initLanguage() {
 
 // Tab switching
 function switchTab(tab) {
+  // rank9: no 180ms blank-wait. Toggle classes synchronously; fade only the newly-active tab.
   document.querySelectorAll('.bottom-nav button').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(c => {
-    c.style.transition = 'opacity .2s';
-    c.style.opacity = '0';
+    c.classList.remove('active');
+    c.style.opacity = '';
+    c.style.transition = '';
   });
-  
-  setTimeout(() => {
-    document.querySelectorAll('.tab-content').forEach(c => {
-      c.classList.remove('active');
-      c.style.opacity = '';
-    });
-    
-    const activeBtn = document.querySelector(`.bottom-nav button[data-tab="${tab}"]`);
-    if (activeBtn) activeBtn.classList.add('active');
-    
-    const activeContent = document.getElementById(`tab-${tab}`);
-    if (activeContent) {
-      activeContent.classList.add('active');
+
+  const activeBtn = document.querySelector(`.bottom-nav button[data-tab="${tab}"]`);
+  if (activeBtn) activeBtn.classList.add('active');
+
+  const activeContent = document.getElementById(`tab-${tab}`);
+  if (activeContent) {
+    activeContent.classList.add('active');
+    // render synchronously so the tab lands fully-formed (removes the double stall)
+    if (tab === 'explore') renderExplore();
+    if (tab === 'events') renderFestivals();
+    if (tab === 'my') updateMainButton();
+    // gentle in-sync fade on the new tab only
+    activeContent.style.opacity = '0';
+    requestAnimationFrame(() => {
+      activeContent.style.transition = 'opacity .15s ease';
       activeContent.style.opacity = '1';
-      if (tab === 'explore') renderExplore();
-      if (tab === 'my') updateMainButton();
-    }
-  }, 180);
+    });
+  }
+  haptic('light');
 }
 
 // Load state
@@ -659,19 +730,39 @@ function savePantheon() {
   localStorage.setItem('p2_notif', notifEnabled);
 }
 
+let _karmaShown = 0;      // last rendered karma value (for count-up tween, rank17)
+let _lastProg = 0;        // last prestige-progress % (for level-up flourish, rank16)
+let _karmaRaf = null;
+let _karmaPopTimer = null;
+
 function updateHeaderStats() {
   const k = document.getElementById('header-karma');
   const p = document.getElementById('header-prestige');
   if (k) {
-    const old = k.textContent;
-    k.textContent = karma;
-    if (old !== String(karma)) {
-      // Micro detail: karma number "pops" softly on change
+    const target = karma;
+    const from = _karmaShown;
+    if (from !== target) {
+      // rank17: count-up roll tween (ease-out), duration scales gently with delta
+      if (_karmaRaf) cancelAnimationFrame(_karmaRaf);
+      const delta = Math.abs(target - from);
+      const dur = Math.min(600, 320 + delta * 12);
+      const t0 = performance.now();
+      const ease = x => 1 - Math.pow(1 - x, 3);
+      const step = now => {
+        const prog = Math.min((now - t0) / dur, 1);
+        k.textContent = Math.round(from + (target - from) * ease(prog));
+        if (prog < 1) { _karmaRaf = requestAnimationFrame(step); }
+        else { k.textContent = target; _karmaShown = target; _karmaRaf = null; }
+      };
+      _karmaRaf = requestAnimationFrame(step);
+      // landing pop accent (kept from before)
       k.style.transition = 'transform .2s cubic-bezier(.23,1,.32,1)';
       k.style.transform = 'scale(1.12)';
-      setTimeout(() => {
-        k.style.transform = 'scale(1)';
-      }, 180);
+      if (_karmaPopTimer) clearTimeout(_karmaPopTimer);
+      _karmaPopTimer = setTimeout(() => { k.style.transform = 'scale(1)'; _karmaPopTimer = null; }, 180);
+    } else {
+      k.textContent = target;
+      _karmaShown = target;
     }
   }
   if (p) p.textContent = prestige;
@@ -682,12 +773,25 @@ function updateHeaderStats() {
   const prog = karma % 10;
   if (fill) {
     const progress = (prog / 10) * 100;
-    // Add a tiny "wave" on update for that "detail" feel
-    fill.style.transition = 'none';
-    fill.style.width = (progress - 3) + '%';
-    void fill.offsetWidth; // reflow
-    fill.style.transition = 'width .45s cubic-bezier(.23,1,.32,1)';
-    fill.style.width = progress + '%';
+    if (progress < _lastProg - 0.01) {
+      // rank16: level-up — fill to 100% + flash, then snap to 0 (no transition), then rise.
+      // Prevents the bar visibly draining backwards (90%→20%) at the celebration moment.
+      fill.style.transition = 'width .28s cubic-bezier(.23,1,.32,1)';
+      fill.style.width = '100%';
+      fill.style.boxShadow = '0 0 12px rgba(201,162,39,.85)';
+      setTimeout(() => {
+        fill.style.transition = 'none';
+        fill.style.width = '0%';
+        void fill.offsetWidth; // reflow before re-enabling transition
+        fill.style.transition = 'width .5s cubic-bezier(.23,1,.32,1)';
+        fill.style.boxShadow = '';
+        fill.style.width = progress + '%';
+      }, 320);
+    } else {
+      fill.style.transition = 'width .45s cubic-bezier(.23,1,.32,1)';
+      fill.style.width = progress + '%';
+    }
+    _lastProg = progress;
   }
   if (text) {
     text.textContent = `${prog}/10 to next`;
@@ -699,29 +803,43 @@ function updateHeaderStats() {
   if (titleEl) titleEl.textContent = titles[Math.min(prestige-1, titles.length-1)] || 'Legend';
 }
 
+// rank10: lightweight toast queue — each toast gets guaranteed screen time (min ~900ms) so the
+// highest-value moments (Prestige-Up, jackpot) are never overwritten ~1ms later by the next toast.
+let _toastQueue = [];
+let _toastActive = false;
 function showToast(message, duration = 2200) {
   if (!notifEnabled) return;
+  _toastQueue.push({ message, duration });
+  if (!_toastActive) _drainToast();
+}
+function _drainToast() {
   const toast = document.getElementById('toast');
   const text = document.getElementById('toast-text');
-  if (!toast || !text) return;
+  if (!toast || !text) { _toastQueue = []; _toastActive = false; return; }
+  const next = _toastQueue.shift();
+  if (!next) { _toastActive = false; return; }
+  _toastActive = true;
 
-  text.textContent = message;
+  text.textContent = next.message;
   toast.style.display = 'flex';
-  // force reflow
-  void toast.offsetWidth;
+  void toast.offsetWidth; // force reflow
   toast.classList.add('show');
 
+  const hold = Math.max(next.duration, 900);
   setTimeout(() => {
     toast.classList.remove('show');
     setTimeout(() => {
       toast.style.display = 'none';
+      _drainToast();
     }, 300);
-  }, duration);
+  }, hold);
 }
 
 function celebrateShare() {
   const k = document.getElementById('header-karma');
   if (!k) return;
+  // rank18: cancel the 180ms karma-pop reset so it can't collapse this 420ms glow to scale(1) mid-flight.
+  if (_karmaPopTimer) { clearTimeout(_karmaPopTimer); _karmaPopTimer = null; }
   const orig = k.style.transition;
   k.style.transition = 'transform .2s cubic-bezier(.23,1,.32,1), text-shadow .2s';
   k.style.transform = 'scale(1.35)';
@@ -743,6 +861,33 @@ function initSettings() {
       notifEnabled = toggle.checked;
       localStorage.setItem('p2_notif', notifEnabled);
     });
+  }
+
+  // rank21: Ambient music toggle (default off), persisted. Injected here since it's script-owned.
+  const settingsTab = document.getElementById('tab-settings');
+  if (settingsTab && !document.getElementById('bgm-toggle')) {
+    const sec = document.createElement('div');
+    sec.className = 'section';
+    sec.innerHTML = `
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Ambient music</div>
+          <div class="setting-desc">Soft luxurious background tones (off by default)</div>
+        </div>
+        <label class="switch"><input type="checkbox" id="bgm-toggle"><span class="slider"></span></label>
+      </div>`;
+    const firstSec = settingsTab.querySelector('.section');
+    if (firstSec && firstSec.nextSibling) settingsTab.insertBefore(sec, firstSec.nextSibling);
+    else settingsTab.appendChild(sec);
+    const bt = document.getElementById('bgm-toggle');
+    if (bt) {
+      bt.checked = bgmEnabled;
+      bt.addEventListener('change', () => {
+        bgmEnabled = bt.checked;
+        localStorage.setItem('p2_bgm', bgmEnabled);
+        if (bgmEnabled) ensureBgm(); else stopBGM();
+      });
+    }
   }
 }
 
@@ -802,21 +947,37 @@ function initAuraPreview() {
 }
 
 function addKarma(points) {
-  const oldPrestige = prestige;
   karma += points;
   const newPrest = Math.floor(karma / 10) + 1;
   if (newPrest > prestige) {
     prestige = newPrest;
     showToast(`Prestige Up! Now Level ${prestige} ✧`, 2800);
     celebratePrestige();
+    haptic('success');   // rank20: peak reward = success haptic
   }
   updateHeaderStats();
   savePantheon();
-  // Refresh status card if on My tab
+  // rank14: only refresh the changing status numbers — no full re-render of the SVG echoes /
+  // stories subtree on every single karma point (was layout-thrashing on each interaction).
   const myTab = document.getElementById('tab-my');
   if (myTab && myTab.classList.contains('active')) {
-    renderMyPantheon();
+    updateStatusCard();
   }
+}
+
+// rank14: lightweight status-number refresh (no SVG / story-list re-render)
+function updateStatusCard() {
+  if (!currentPantheon) return;
+  const echoesEl = document.getElementById('status-echoes');
+  const storiesCountEl = document.getElementById('status-stories');
+  const sharesEl = document.getElementById('status-shares');
+  const shareKarmaEl = document.getElementById('status-share-karma');
+  const prestigeStatus = document.getElementById('status-prestige');
+  if (echoesEl) echoesEl.textContent = currentPantheon.echoes ? currentPantheon.echoes.length : 0;
+  if (storiesCountEl) storiesCountEl.textContent = currentPantheon.stories ? currentPantheon.stories.length : 0;
+  if (sharesEl) sharesEl.textContent = sharesCount;
+  if (shareKarmaEl) shareKarmaEl.textContent = `+${sharesCount * 2}`;
+  if (prestigeStatus) prestigeStatus.textContent = prestige;
 }
 
 function celebratePrestige() {
@@ -851,13 +1012,29 @@ function getP2Uid() { return p2uid || localStorage.getItem('p2_uid') || ('p2' + 
 function purchaseP2WithStars(item = 'p2_featured') {
   if (!tg || !tg.openInvoice) { showToast('TG WebApp only — Stars via Bot invoice'); return; }
   const uid = getP2Uid();
-  // Exact p1 createInvoiceLink fields: title/desc from server, payload, currency:"XTR", prices[]
+  // rank3: send the SIGNED initData string. The worker must HMAC-verify it with the bot token and
+  //        derive the real payer uid server-side — never trust the query-string uid (client-forgeable).
+  //        The uid below stays only as a display/prefill hint for the worker's verified path.
+  const signed = (tg && tg.initData) ? tg.initData : '';
+  // rank25: invoice locale follows the app language (was hardcoded lang=en).
   const url = (P2_PAY_BACKEND || 'https://legion-pay.hoyashi95.workers.dev') +
-    `/invoice?item=${encodeURIComponent(item)}&uid=${encodeURIComponent(uid)}&type=stars&lang=en`;
+    `/invoice?item=${encodeURIComponent(item)}&uid=${encodeURIComponent(uid)}&type=stars&lang=${encodeURIComponent(currentLang)}` +
+    (signed ? `&initData=${encodeURIComponent(signed)}` : '');
   fetch(url).then(r=>r.json()).then(d=>{
-    if(d && d.link){ tg.openInvoice(d.link, (st)=>{ if(st==='paid'){addKarma(25); showToast('✧ Premium cosmetic unlocked — MY story featured.');} else showToast('Stars:'+st); }); }
-    else showToast('Stars link: set P2_PAY_BACKEND + worker createInvoiceLink(XTR)');
-  }).catch(()=> showToast('Demo Stars (cosmetic). Core free.'));
+    if (d && d.link) {
+      tg.openInvoice(d.link, (st) => {
+        if (st === 'paid') { addKarma(25); haptic('success'); showToast('✧ Premium cosmetic unlocked — MY story featured.'); }
+        else if (st === 'cancelled') { showToast('Purchase cancelled — core features stay free ✧'); }
+        else { showToast('Payment status: ' + st); }   // rank25: user-facing phrasing, not raw 'Stars:'
+      });
+    } else {
+      console.warn('[p2] Stars backend not configured: set P2_PAY_BACKEND + worker createInvoiceLink(XTR)'); // rank25: dev hint → console
+      showToast('Payments are being set up — please try again shortly ✧');
+    }
+  }).catch(() => {
+    console.warn('[p2] invoice fetch failed');
+    showToast('Payments are being set up — please try again shortly ✧');
+  });
 }
 
 let p2uid = '';
@@ -882,6 +1059,9 @@ function hashId(s) { let h = 0; for (let i=0;i<s.length;i++){ h=(h*31 + s.charCo
 
 function initIdentity() {
   let realId = '';
+  // rank3 TRUST BOUNDARY: initDataUnsafe is UNVERIFIED (client-forgeable). Use it only for local
+  // display/prefill (uid seed below). Any future server backend MUST verify tg.initData (signed) and
+  // must NOT promote this value to an authoritative identity for payments/credit.
   try { realId = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) ? String(tg.initDataUnsafe.user.id) : ''; } catch(e){}
   p2uid = localStorage.getItem('p2_uid') || realId || ('g' + hashId(navigator.userAgent + ':' + (Date.now())));
   localStorage.setItem('p2_uid', p2uid);
@@ -944,6 +1124,7 @@ function claimDaily() {
   let ms = '';
   if (streak.count === 7 || streak.count === 30 || streak.count === 100) { reward += streak.count; ms = ' · ' + streak.count + '-day milestone!'; }
   addKarma(reward); saveStreak();
+  haptic(jackpot ? 'success' : 'light');   // rank20
   showToast((jackpot?'🎉 JACKPOT ':'') + 'Day ' + streak.count + ' devotion · +' + reward + ' Karma' + ms + ' ✧', jackpot?3400:2600);
   renderReferralStreak();
 }
@@ -954,7 +1135,21 @@ function renderReferralStreak() {
   const sc = document.getElementById('streak-count'); if (sc) sc.textContent = streak.count;
   const sb = document.getElementById('streak-best'); if (sb) sb.textContent = streak.best;
   const btn = document.getElementById('streak-btn');
-  if (btn) { const done = streak.last === todayStr(); btn.disabled = done; btn.textContent = done ? 'Devoted ✓ — return tomorrow' : '☀ Claim Daily Karma'; btn.style.opacity = done ? '0.55' : '1'; }
+  if (btn) {
+    const done = streak.last === todayStr();
+    btn.disabled = done;
+    btn.style.opacity = done ? '0.55' : '1';
+    if (done) {
+      btn.textContent = 'Devoted ✓ — return tomorrow';
+    } else {
+      // honest urgency: real local-midnight reset countdown
+      const now = new Date(), mid = new Date(now); mid.setHours(24, 0, 0, 0);
+      const ms = mid - now, left = Math.floor(ms / 3600000) + 'h ' + Math.floor((ms % 3600000) / 60000) + 'm';
+      btn.textContent = streak.count > 0
+        ? '🔥 Keep your ' + streak.count + '-day streak — ' + left + ' left'
+        : '☀ Claim Daily Karma · ' + left + ' left';
+    }
+  }
   const rc = document.getElementById('ref-count'); if (rc) rc.textContent = refCount;
   const rl = document.getElementById('ref-ladder');
   if (rl) {
@@ -1011,6 +1206,16 @@ if (form) {
       switchTab('my');
       addKarma(5);
       updateMainButton();
+      // rank22: if the user saved a spark from Explore before having a pantheon, inject it now.
+      try {
+        const pend = localStorage.getItem('p2_pending_story');
+        if (pend) {
+          const ta = document.getElementById('story-text');
+          if (ta) ta.value = pend + ' — (refined into my own version, fictional)';
+          localStorage.removeItem('p2_pending_story');
+          showToast('Your saved inspiration is ready — make it yours ✧', 2600);
+        }
+      } catch (e) {}
     }, 1600);
   });
 }
@@ -1023,8 +1228,8 @@ function showCreationRitual(echoes, clanName) {
     <div class="ritual-content">
       <div class="ritual-glow"></div>
       <h3>✧ Awakening the Pantheon ✧</h3>
-      <p class="clan-name">${clanName}</p>
-      <div class="ritual-echoes">${echoes.map(e => `<span class="ritual-echo">${e}</span>`).join('')}</div>
+      <p class="clan-name">${escapeHtml(clanName)}</p>
+      <div class="ritual-echoes">${echoes.map(e => `<span class="ritual-echo">${escapeHtml(e)}</span>`).join('')}</div>
       <p class="ritual-text">The echoes awaken... your story begins.</p>
     </div>
   `;
@@ -1063,12 +1268,12 @@ function renderMyPantheon() {
   const echoIconsHTML = currentPantheon.echoes.map(echo => {
     const val = Object.keys(echoMap).find(k => echoMap[k] === echo) || '';
     const iconSVG = getEchoIcon(val, 22);
-    return `<div class="my-echo-visual">${iconSVG}<span>${echo}</span></div>`;
+    return `<div class="my-echo-visual">${iconSVG}<span>${escapeHtml(echo)}</span></div>`;
   }).join('');
 
   container.innerHTML = `
-    <h3>${currentPantheon.name}</h3>
-    <p>${currentPantheon.desc || ''}</p>
+    <h3>${escapeHtml(currentPantheon.name)}</h3>
+    <p>${escapeHtml(currentPantheon.desc || '')}</p>
     <div style="font-size:10px;color:#c9a227;opacity:.75;margin:2px 0 6px;">MY Pantheon — the power you author carries forever</div>
     <div class="my-echoes aura-mini">${echoIconsHTML}</div>
   `;
@@ -1109,9 +1314,10 @@ function renderMyPantheon() {
   if (currentPantheon.stories.length === 0) {
     storiesEl.innerHTML += '<p class="hint">No stories yet. Add one below to start your legend.</p>';
   } else {
-    currentPantheon.stories.forEach((s) => {
-      storiesEl.innerHTML += `<div class="story"><p>${s}</p><div style="text-align:right; font-size:9px; color:#c9a227; margin-top:4px; opacity:.7;">fictional • epics inspired • your legacy</div></div>`;
-    });
+    // rank1: escape user story text (stored-XSS). rank14: single map+join, not innerHTML+= per item (O(n²)).
+    storiesEl.innerHTML += currentPantheon.stories.map(s =>
+      `<div class="story"><p>${escapeHtml(s)}</p><div style="text-align:right; font-size:9px; color:#c9a227; margin-top:4px; opacity:.7;">fictional • epics inspired • your legacy</div></div>`
+    ).join('');
   }
   renderReferralStreak();  // 🪖 Founding 뱃지 + 스트릭 + 초대 래더
   updateMainButton();
@@ -1204,6 +1410,7 @@ function shareToTG() {
   const reach = Math.floor(Math.random() * 180) + 70;
   addKarma(2);
   showToast(`Shared! Reached ${reach} friends • +2 Karma ✧`, 2600);
+  haptic('medium');   // rank20
   celebrateShare();
   
   // Live feedback: update status immediately with reach
@@ -1234,6 +1441,7 @@ function inviteFriends() {
   sharesCount++;
   addKarma(3);  // 발송 보상(소액). 실제 가입 = 래더 마일스톤(백엔드 연결 시 정산).
   showToast('Invite shared! Friends who join via your link light your path ✧', 2800);
+  haptic('medium');   // rank20
   celebrateShare();
   if (document.getElementById('tab-my').classList.contains('active')) renderMyPantheon();
 }
@@ -1296,11 +1504,8 @@ function showLegal(type) {
 }
 
 // Explore (dummy data - Raji-style fictional stories)
-function renderExplore() {
-  const list = document.getElementById('explore-list');
-  if (!list) return;
-  
-  const SEED_PANTHEONS = [
+// rank15: hoisted to module scope (const) — no per-render reallocation of 20 objects.
+const P2_SEED_PANTHEONS = [
     { name: "Winds of Duty", echoes: "Echo of Rama, Echo of Hanuman", stories: 7, karma: 42, example: "A son set aside his city dreams to care for his ailing father through the monsoon. Years later the small tea-stall he kept alive became the heart of the village. — like the echoes of Rama and Hanuman." },
     { name: "Bloom of Small Kindness", echoes: "Echo of Krishna, Echo of Draupadi", stories: 12, karma: 89, example: "In poverty she still shared a child's lunch and an elder's medicine every day, trusting kindness returns. Fifteen years on, a grandchild she once fed came back with a chance that lifted her whole family. — like the echoes of Krishna and Draupadi." },
     { name: "Shield of Warmth", echoes: "Echo of Durga, Echo of Hanuman", stories: 5, karma: 31, example: "Widowed and struggling, she gave what little she had to her neighbours. A boy she once helped returned to build a school in her name. — like the echoes of Durga and Hanuman." },
@@ -1321,39 +1526,99 @@ function renderExplore() {
     { name: "Wings Over the Field", echoes: "Echo of Hanuman, Echo of Durga", stories: 8, karma: 52, example: "She carried medicine across a flooded river to a fevered child at midnight. The child grew to build the village's first clinic. — like the echoes of Hanuman and Durga." },
     { name: "The Shared Harvest", echoes: "Echo of Krishna, Echo of Rama", stories: 11, karma: 71, example: "Three farmers pooled their failing fields instead of fighting over water. Together they fed families that drought would have broken. — like the echoes of Krishna and Rama." },
     { name: "Embers of Welcome", echoes: "Echo of Draupadi, Echo of Hanuman", stories: 6, karma: 40, example: "Her door and pot were open to every traveller, however poor. When fire took her home, a hundred strangers rebuilt it in a week. — like the echoes of Draupadi and Hanuman." }
-  ];
-  // Show user's saved/explored + seeds (FTUE: never empty). 모두 허구 — 서사시에서 영감받은 가상 이야기.
-  const dummies = SEED_PANTHEONS;
-  
-  list.innerHTML = '';
-  dummies.forEach(d => {
-    // Mini icons for visual consistency
-    const echoVals = d.echoes.split(', ').map(e => {
-      if (e.includes('Krishna')) return 'Krishna-echo';
-      if (e.includes('Rama')) return 'Rama-echo';
-      if (e.includes('Draupadi')) return 'Draupadi-echo';
-      if (e.includes('Hanuman')) return 'Hanuman-echo';
-      if (e.includes('Durga')) return 'Durga-echo';
-      return '';
-    });
-    const miniIcons = echoVals.map(v => v ? getEchoIcon(v, 16) : '').join('');
-    
-    list.innerHTML += `
-      <div class="card">
-        <div style="display:flex; align-items:center; gap:6px;">
-          <div style="display:flex; gap:2px;">${miniIcons}</div>
-          <strong>${d.name}</strong>
-        </div>
-        <div class="meta">${d.echoes} • ${d.stories} stories • ${d.karma} karma</div>
-        <p class="example">"${d.example}"</p>
-        <button class="small" onclick="likePantheon('${d.name}')">Like & Share</button>
-        <button class="small" onclick="useAsInspiration('${d.example.replace(/'/g, "\\'")}')">Inspire My Story</button>
-      </div>
-    `;
+];
+
+function _exploreEchoVals(echoStr) {
+  return echoStr.split(', ').map(e => {
+    if (e.includes('Krishna')) return 'Krishna-echo';
+    if (e.includes('Rama')) return 'Rama-echo';
+    if (e.includes('Draupadi')) return 'Draupadi-echo';
+    if (e.includes('Hanuman')) return 'Hanuman-echo';
+    if (e.includes('Durga')) return 'Durga-echo';
+    return '';
   });
 }
 
+function renderExplore() {
+  const list = document.getElementById('explore-list');
+  if (!list) return;
+  // rank15: build the whole list as one string, then a single innerHTML assignment (1 reflow, O(n)).
+  list.innerHTML = P2_SEED_PANTHEONS.map((d, i) => {
+    const miniIcons = _exploreEchoVals(d.echoes).map(v => v ? getEchoIcon(v, 16) : '').join('');
+    const preview = d.example.length > 150 ? d.example.slice(0, 148).trim() + '…' : d.example;
+    return `
+      <div class="card" data-idx="${i}" role="button" tabindex="0" style="cursor:pointer;">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <div style="display:flex; gap:2px;">${miniIcons}</div>
+          <strong>${escapeHtml(d.name)}</strong>
+        </div>
+        <div class="meta">${escapeHtml(d.echoes)} • ${d.karma} karma • featured tale</div>
+        <p class="example">"${escapeHtml(preview)}"</p>
+        <div style="display:flex; gap:6px; margin-top:2px;">
+          <button class="small" data-act="view">View</button>
+          <button class="small" data-act="like">Like &amp; Share</button>
+          <button class="small" data-act="inspire">Inspire My Story</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  // rank1: wire via addEventListener (no inline onclick carrying story data → removes the
+  // stored-XSS / cross-user "worm" vector the moment real backend UGC feeds this list).
+  list.querySelectorAll('.card').forEach(card => {
+    const idx = parseInt(card.dataset.idx, 10);
+    const open = () => viewPantheon(idx);
+    card.addEventListener('click', e => {
+      const act = e.target.getAttribute && e.target.getAttribute('data-act');
+      if (act === 'like') { e.stopPropagation(); likePantheon(P2_SEED_PANTHEONS[idx].name); }
+      else if (act === 'inspire') { e.stopPropagation(); useAsInspiration(P2_SEED_PANTHEONS[idx].example); }
+      else open();
+    });
+    card.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+    });
+  });
+}
+
+// rank13: real read path — a detail view (echoes + full featured tale) instead of a dead-end card.
+function viewPantheon(idx) {
+  const d = P2_SEED_PANTHEONS[idx];
+  if (!d) return;
+  const echoVals = _exploreEchoVals(d.echoes);
+  const echoRows = d.echoes.split(', ').map((name, i) => {
+    const icon = echoVals[i] ? getEchoIcon(echoVals[i], 20) : '';
+    return `<div style="display:flex;align-items:center;gap:8px;margin:4px 0;">${icon}<span>${escapeHtml(name)}</span></div>`;
+  }).join('');
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px;';
+  modal.innerHTML = `
+    <div style="background:#25221d;border:1px solid #c9a227;border-radius:16px;padding:20px;max-width:340px;max-height:80vh;overflow-y:auto;color:#f5f1e6;">
+      <strong style="color:#c9a227;font-size:16px;">${escapeHtml(d.name)}</strong>
+      <div style="margin:8px 0 4px;font-size:11px;color:#c9a227;opacity:.8;">Echoes of this pantheon</div>
+      ${echoRows}
+      <div style="margin:10px 0 4px;font-size:11px;color:#c9a227;opacity:.8;">Featured tale</div>
+      <p style="font-size:13px;line-height:1.5;">"${escapeHtml(d.example)}"</p>
+      <div style="font-size:10px;opacity:.6;margin:8px 0;">Community pantheon • fictional, inspired by the epics • ${d.karma} karma</div>
+      <div style="display:flex;gap:8px;">
+        <button data-act="inspire" style="flex:1;padding:10px;background:#c9a227;color:#111;border:none;border-radius:8px;font-weight:600;">Inspire My Story</button>
+        <button data-act="close" style="flex:1;padding:10px;background:transparent;color:#c9a227;border:1px solid #c9a227;border-radius:8px;">Close</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.querySelector('[data-act="inspire"]').addEventListener('click', () => { modal.remove(); useAsInspiration(d.example); });
+  modal.querySelector('[data-act="close"]').addEventListener('click', () => modal.remove());
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  haptic('light');
+}
+
 function useAsInspiration(text) {
+  // rank22: no pantheon yet → the story box is hidden, so don't silently lose the spark.
+  // Save it, guide the user to Create, and auto-inject after the pantheon is born.
+  if (!currentPantheon) {
+    try { localStorage.setItem('p2_pending_story', text); } catch (e) {}
+    switchTab('create');
+    showToast('Create your pantheon first — your inspiration is saved ✧', 3000);
+    return;
+  }
   const ta = document.getElementById('story-text');
   if (ta) {
     ta.value = text + ' — (refined into my own version, fictional)';
@@ -1367,9 +1632,10 @@ function useAsInspiration(text) {
 
 function likePantheon(name) {
   const reach = Math.floor(Math.random() * 120) + 50;
-  showToast(`Shared "${name}"! Reached ${reach} • +2 Karma ✧`);
+  showToast(`Shared "${escapeHtml(name)}"! Reached ${reach} • +2 Karma ✧`);
   sharesCount++;
   addKarma(2);
+  haptic('medium');   // rank20
   celebrateShare();
   if (document.getElementById('tab-my').classList.contains('active')) {
     renderMyPantheon();
@@ -1391,7 +1657,8 @@ function joinEvent(ev) {
   let targetBtn = null;
   
   btns.forEach(b => {
-    if (b.textContent.includes('Join')) {
+    const oc = b.getAttribute('onclick') || '';
+    if (oc.includes("'" + ev + "'") || oc.includes('"' + ev + '"')) {  // QA P1 fix: 클릭된 축제 버튼만 (텍스트 'Join' 매칭 → 축제 3개 전부 삼켜 2/3 영구잠금하던 버그)
       targetBtn = b;
       b.style.transition = 'transform .35s cubic-bezier(.22,1,.32,1), background .2s';
       b.style.transform = 'scale(0.88)';
@@ -1412,6 +1679,7 @@ function joinEvent(ev) {
   
   const karmaGain = ev === 'diwali' ? 10 : (ev === 'navratri' ? 6 : 8);
   addKarma(karmaGain);
+  haptic('medium');   // rank20
   
   // Visual payoff: update status + temp festival boost indicator
   if (document.getElementById('tab-my').classList.contains('active')) {
@@ -1448,11 +1716,9 @@ function joinEvent(ev) {
 // Bottom nav listeners (high-quality TG app feel)
 document.querySelectorAll('.bottom-nav button').forEach(btn => {
   btn.addEventListener('click', () => {
-    const tab = btn.dataset.tab;
-    switchTab(tab);
-    document.querySelectorAll('.bottom-nav button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    if (tab === 'explore') renderExplore();
+    // switchTab already sets the active button and renders the tab synchronously (rank9/15) —
+    // no redundant second renderExplore()/class toggle here (was a double reflow).
+    switchTab(btn.dataset.tab);
   });
 });
 
@@ -1870,10 +2136,28 @@ function stopBGM() {
   }, 2100);
 }
 
-// Auto start clean luxurious BGM (subtle, always on for premium feel)
-setTimeout(() => {
-  startBGM();
-}, 1200);
+// rank21: BGM is OFF by default and never auto-starts.
+//  ① Mobile autoplay policy suspends a fresh AudioContext until a user gesture — a 1.2s auto-start
+//     was just 6 silent oscillators draining battery. ② Now opt-in via Settings, persisted.
+//  ③ First real user gesture resumes the context; ④ backgrounding suspends, page-hide stops.
+let bgmEnabled = localStorage.getItem('p2_bgm') === 'true';
+
+function ensureBgm() {
+  if (!bgmEnabled) return;
+  if (!bgmPlaying) startBGM();
+  try { if (bgmCtx && bgmCtx.state === 'suspended') bgmCtx.resume(); } catch (e) {}
+}
+function _firstGestureBgm() {
+  ensureBgm();
+  document.removeEventListener('pointerdown', _firstGestureBgm);
+}
+document.addEventListener('pointerdown', _firstGestureBgm);
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { try { if (bgmCtx) bgmCtx.suspend(); } catch (e) {} }
+  else if (bgmEnabled && bgmPlaying) { try { if (bgmCtx) bgmCtx.resume(); } catch (e) {} }
+});
+window.addEventListener('pagehide', () => { try { stopBGM(); } catch (e) {} });
 
 // (Ducking is handled inside startOm / stopOm for clean control)
 
@@ -1882,6 +2166,7 @@ document.querySelectorAll('.echo-card').forEach(card => {
   card.addEventListener('click', () => {
     const input = card.querySelector('input');
     if (!input) return;
+    haptic('light');   // rank20: echo tap
 
     // Ultra pop + glow on select
     card.style.transition = 'transform .3s cubic-bezier(.2,1,.2,1), box-shadow .35s';
@@ -1949,27 +2234,46 @@ const DIRECTOR_VAULT = [
   "On the eve of the Diwali festival, a village woman shaped lamps alone, held the aching hands of her neighbors, and shared sweets with poor children. 'Light is meant to be shared,' she whispered. Ten years later, the children she had helped returned in success and held a grand lamp festival that lit the whole village bright. 'The small light our mother gave us became a festival for us all.' Now, each year, the front of her house becomes the brightest star. — like the Echoes of Draupadi and Krishna."
 ];
 
+// rank24: replace native prompt() (premium-feel breaker, unresponsive in some TG clients) with an
+// in-app themed modal of curated theme chips.
 function askDirector() {
-  const theme = prompt('Pantheon Director (Kurosawa · Ray · Rajamouli · Tagore · epic fusion): tell me a theme (e.g. village well, festival help, lifting up a friend, a grandmother\'s good deed)');
+  const themes = [
+    { label: 'Family / Duty',      idx: 0 },
+    { label: 'Kindness / Poverty', idx: 1 },
+    { label: 'Lifting a Friend',   idx: 2 },
+    { label: 'Village / Well',     idx: 3 },
+    { label: 'Festival / Light',   idx: 4 },
+    { label: '✦ Surprise me',      idx: -1 }
+  ];
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px;';
+  modal.innerHTML = `
+    <div style="background:#25221d;border:1px solid #c9a227;border-radius:16px;padding:20px;max-width:320px;color:#f5f1e6;">
+      <strong style="color:#c9a227;">Pantheon Director</strong>
+      <div style="font-size:11px;opacity:.75;margin:6px 0 12px;">Kurosawa · Ray · Rajamouli · Tagore fusion — pick a theme for your tale.</div>
+      <div id="dir-themes" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+      <button id="dir-cancel" style="width:100%;margin-top:14px;padding:9px;background:transparent;color:#c9a227;border:1px solid #c9a227;border-radius:8px;">Cancel</button>
+    </div>`;
+  document.body.appendChild(modal);
+  const wrap = modal.querySelector('#dir-themes');
+  themes.forEach(th => {
+    const b = document.createElement('button');
+    b.textContent = th.label;
+    b.style.cssText = 'padding:8px 12px;background:rgba(201,162,39,.12);color:#f5f1e6;border:1px solid rgba(201,162,39,.4);border-radius:20px;font-size:12px;cursor:pointer;';
+    b.addEventListener('click', () => { modal.remove(); _directorPick(th.idx); });
+    wrap.appendChild(b);
+  });
+  modal.querySelector('#dir-cancel').addEventListener('click', () => modal.remove());
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  haptic('light');
+}
+
+function _directorPick(idx) {
   const ta = document.getElementById('story-text');
   if (!ta) return;
-
-  let chosen = DIRECTOR_VAULT[1]; // default core touching karma story
-  const t = (theme || '').toLowerCase();
-
-  if (t.includes('well') || t.includes('water') || t.includes('village')) chosen = DIRECTOR_VAULT[3];
-  else if (t.includes('festival') || t.includes('diwali') || t.includes('light') || t.includes('lamp')) chosen = DIRECTOR_VAULT[4];
-  else if (t.includes('father') || t.includes('family') || t.includes('duty')) chosen = DIRECTOR_VAULT[0];
-  else if (t.includes('friend') || t.includes('lift') || t.includes('raise')) chosen = DIRECTOR_VAULT[2];
-  else if (t.includes('grandmother') || t.includes('kind') || t.includes('poverty') || t.includes('poor')) chosen = DIRECTOR_VAULT[1];
-  else {
-    chosen = DIRECTOR_VAULT[Math.floor(Math.random() * DIRECTOR_VAULT.length)];
-  }
-
-  const prefix = 'A fictional story inspired by ancient epics. ';
-  ta.value = prefix + chosen;
+  const chosen = (idx < 0) ? DIRECTOR_VAULT[Math.floor(Math.random() * DIRECTOR_VAULT.length)] : DIRECTOR_VAULT[idx];
+  ta.value = 'A fictional story inspired by ancient epics. ' + chosen;
   ta.focus();
-
   setTimeout(() => {
     const hint = document.createElement('div');
     hint.style.cssText = 'font-size:11px;color:#c9a227;margin-top:4px;';
@@ -1977,7 +2281,6 @@ function askDirector() {
     if (ta.parentNode) ta.parentNode.appendChild(hint);
     setTimeout(() => hint && hint.remove(), 2400);
   }, 90);
-
   addKarma(1);
 }
 

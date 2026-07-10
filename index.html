@@ -3,46 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- CSP: block remote/injected script + exfiltration. script-src-attr 'unsafe-inline' keeps existing inline onclick handlers working (no runtime break) while disallowing injected <script>. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://telegram.org; script-src-attr 'unsafe-inline'; connect-src 'self' https://*.workers.dev; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'none'">
   <title>My Pantheon • p2</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
   <div class="app">
-    <!-- Top Meditation Bar - Om for high-vibe Indian meditation (not bottom nav) -->
-    <div class="meditation-top">
-      <div class="om-container">
-        <div class="om-symbol" id="om-symbol">ॐ</div>
-        <div class="om-info">
-          <strong>Meditate with Om</strong>
-          <span id="om-freq-info">ॐ Om • High vibration for inner peace &amp; dharma</span>
-        </div>
-      </div>
-      <button id="om-btn" class="om-btn">▶ Play Om</button>
-      <span id="om-timer" class="om-timer" style="display:none;">0:00</span>
-      <div class="breath-guide" id="breath-guide" style="display:none;">
-        <span id="breath-text">Breathe with the Om...</span>
-      </div>
-    </div>
-
-    <!-- Frequency List - Elegant, Soft Selector for Various High-Vibe Tones -->
-    <div class="freq-list" id="freq-list">
-      <div class="freq-item active" data-mode="om">ॐ Om<br><small>Mantra</small></div>
-      <div class="freq-item" data-mode="432">432 Hz<br><small>Nature</small></div>
-      <div class="freq-item" data-mode="528">528 Hz<br><small>Love</small></div>
-      <div class="freq-item" data-mode="963">963 Hz<br><small>Oneness</small></div>
-      <div class="freq-item" data-mode="417">417 Hz<br><small>Release</small></div>
-      <div class="freq-item" data-mode="639">639 Hz<br><small>Harmony</small></div>
-    </div>
-
-    <!-- Permanent Framing (Raji style) + p2 ALL AGENTS 2026-07-10 -->
-    <div class="framing" data-i18n="framing">
-      <strong>Fictional stories inspired by ancient epics of dharma and karma.</strong><br>
-      <span>Creative narrative for 20-30s Indians. 2026 Festivals: Ganesh Chaturthi (Sep 14) • Navratri (Oct 11-20) • Diwali (Nov 8) — Limited FOMO events live.</span>
-    </div>
-    <div class="legal-shield" style="font-size:10px;opacity:0.7;margin:4px 0;">Fictional • Positive dharma/karma only • Prominent disclosure • 18+ recommended (DPDP/IT compliance)</div>
-
-    <!-- Elegant Header - Premium Raji style with icon and decoration -->
+    <!-- Elegant Header - PRIMARY HERO: title leads the first screen (rank7 hierarchy fix 2026-07-10) -->
     <header>
       <div class="header-row">
         <div style="display:flex; align-items:center; gap:12px;">
@@ -63,6 +32,40 @@
         </div>
       </div>
     </header>
+
+    <!-- Framing + legal shield: compact line directly under the header (rank7) -->
+    <div class="framing" data-i18n="framing">
+      <strong>Fictional stories inspired by ancient epics of dharma and karma.</strong><br>
+      <span>Creative narrative for 20-30s Indians. 2026 Festivals: Ganesh Chaturthi (Sep 14) • Navratri (Oct 11-20) • Diwali (Nov 8) — Limited FOMO events live.</span>
+    </div>
+    <div class="legal-shield" style="font-size:10px;opacity:0.7;margin:4px 0;">Fictional • Positive dharma/karma only • Prominent disclosure • 18+ recommended (DPDP/IT compliance)</div>
+
+    <!-- Meditation + frequencies DEMOTED to a default-collapsed foldout (rank7): no longer eats the top of the first screen. All IDs kept so the Om/frequency player still works. -->
+    <details class="meditation-fold">
+      <summary style="cursor:pointer; padding:8px 4px; font-size:13px; color:var(--accent); list-style:none;">🧘 Meditation &amp; High-Vibe Frequencies</summary>
+      <div class="meditation-top" style="position:static; top:auto; z-index:auto;">
+        <div class="om-container">
+          <div class="om-symbol" id="om-symbol">ॐ</div>
+          <div class="om-info">
+            <strong>Meditate with Om</strong>
+            <span id="om-freq-info">ॐ Om • High vibration for inner peace &amp; dharma</span>
+          </div>
+        </div>
+        <button id="om-btn" class="om-btn">▶ Play Om</button>
+        <span id="om-timer" class="om-timer" style="display:none;">0:00</span>
+        <div class="breath-guide" id="breath-guide" style="display:none;">
+          <span id="breath-text">Breathe with the Om...</span>
+        </div>
+      </div>
+      <div class="freq-list" id="freq-list">
+        <div class="freq-item active" data-mode="om">ॐ Om<br><small>Mantra</small></div>
+        <div class="freq-item" data-mode="432">432 Hz<br><small>Nature</small></div>
+        <div class="freq-item" data-mode="528">528 Hz<br><small>Love</small></div>
+        <div class="freq-item" data-mode="963">963 Hz<br><small>Oneness</small></div>
+        <div class="freq-item" data-mode="417">417 Hz<br><small>Release</small></div>
+        <div class="freq-item" data-mode="639">639 Hz<br><small>Harmony</small></div>
+      </div>
+    </details>
 
     <!-- Premium Bottom Navigation -->
     <nav class="bottom-nav">
@@ -346,6 +349,48 @@
         <h2>Your Pantheon</h2>
         <div id="pantheon-display"></div>
 
+        <!-- CORE LOOP FIRST (rank8): write a story is the hero action. Wrapper keeps applyLanguage's
+             `#tab-my .section:nth-child(3)` a no-op (as today) so no mistranslation regression. -->
+        <div class="my-journey">
+          <div class="section">
+            <h3>Add Story / Retell</h3>
+            <p class="guide">Raji-style: write your own fictional story. The Pantheon Director (Kurosawa · Ray · Rajamouli · Tagore · epic fusion) guards the master craft.</p>
+            <p class="guide-small">Value = what you create yourself. We do not prefill.</p>
+            <p class="example">Example (Pantheon Director upgrade, dharma/karma accurate): "In poverty, I vowed each day to fulfill small duties (dharma) to family and neighbors, and with pure intent bought medicine for a grandmother and shared lunches with children. I believed karma is the virtuous cycle of good deeds. Fifteen years later, a grandson I had helped returned, saying 'Grandmother told your story every day...' and offered me a shop and a business chance. The kindness sown in hardship finally bloomed into vast abundance. — like the Echoes of Krishna and Draupadi."</p>
+
+            <!-- 선택적 의도 태그 (순수 UGC 유지, 가볍게 제안) -->
+            <div class="intention-hint">
+              <span class="hint-label">Optional: gently add your intention</span>
+              <div class="intention-chips">
+                <button type="button" class="intention-chip" data-phrase="for my family">Family</button>
+                <button type="button" class="intention-chip" data-phrase="with small kindness">Kindness</button>
+                <button type="button" class="intention-chip" data-phrase="fulfilling my duty">Duty</button>
+                <button type="button" class="intention-chip" data-phrase="believing in the virtuous cycle">Cycle</button>
+              </div>
+            </div>
+
+            <form id="story-form">
+              <textarea id="story-text" placeholder="120-160 chars · positive dharma story (daily kindness → legacy) · end — like the Echo of ... (fictional, India 20-30s empathy)" rows="5" required></textarea>
+              <div id="story-progress" class="story-progress">
+                <div class="story-progress-bar"><div id="story-progress-fill"></div></div>
+                <span id="story-progress-text">0 / 160</span>
+              </div>
+              <button type="submit" class="primary">Add to Pantheon</button>
+              <button type="button" onclick="askDirector()" class="secondary" style="margin-top:8px;">Get inspiration from the Pantheon Director (dharma/karma accurate, 5h upgrade)</button>
+            </form>
+          </div>
+
+          <div class="section">
+            <h3>Stories</h3>
+            <div id="stories-list"></div>
+          </div>
+
+          <!-- Single share primary (rank23): invite lives once, in the Invite Clan block below. -->
+          <div class="actions">
+            <button onclick="shareToTG()" class="primary">Share to Telegram</button>
+          </div>
+        </div>
+
         <!-- Soft premium Clan Status -->
         <div id="clan-status" class="clan-status">
           <div class="status-header">Clan Status</div>
@@ -375,15 +420,7 @@
           <div class="status-note">Every share spreads the light and grows your karma.</div>
         </div>
 
-        <!-- Premium (TG Stars — optional, fictional) -->
-        <div class="section" style="margin-top:12px">
-          <h3 style="font-size:13px">Premium (optional)</h3>
-          <p style="font-size:11px;opacity:0.8">Featured clan slot, extra story slots, custom frames. Purely cosmetic — core UGC + karma always free. <strong>Prominent disclosure: fictional stories only.</strong></p>
-          <button onclick="showPremiumModal()" class="secondary" style="font-size:12px">Unlock Premium (Stars)</button>
-          <div style="font-size:9px;opacity:0.6;margin-top:4px">Reversible. No dark patterns.</div>
-        </div>
-
-        <!-- 🪖 Founding Member + Daily Streak + Invite Ladder (MVP①②) -->
+        <!-- 🪖 Founding Member + Daily Streak + Invite Ladder (MVP①②) — single invite home -->
         <div class="section legion-block">
           <div id="founder-badge" class="founder-badge"></div>
 
@@ -405,42 +442,12 @@
           </div>
         </div>
 
-        <div class="section">
-          <h3>Add Story / Retell</h3>
-          <p class="guide">Raji-style: write your own fictional story. The Pantheon Director (Kurosawa · Ray · Rajamouli · Tagore · epic fusion) guards the master craft.</p>
-          <p class="guide-small">Value = what you create yourself. We do not prefill.</p>
-          <p class="example">Example (Pantheon Director upgrade, dharma/karma accurate): "In poverty, I vowed each day to fulfill small duties (dharma) to family and neighbors, and with pure intent bought medicine for a grandmother and shared lunches with children. I believed karma is the virtuous cycle of good deeds. Fifteen years later, a grandson I had helped returned, saying 'Grandmother told your story every day...' and offered me a shop and a business chance. The kindness sown in hardship finally bloomed into vast abundance. — like the Echoes of Krishna and Draupadi."</p>
-
-          <!-- 선택적 의도 태그 (순수 UGC 유지, 가볍게 제안) -->
-          <div class="intention-hint">
-            <span class="hint-label">Optional: gently add your intention</span>
-            <div class="intention-chips">
-              <button type="button" class="intention-chip" data-phrase="for my family">Family</button>
-              <button type="button" class="intention-chip" data-phrase="with small kindness">Kindness</button>
-              <button type="button" class="intention-chip" data-phrase="fulfilling my duty">Duty</button>
-              <button type="button" class="intention-chip" data-phrase="believing in the virtuous cycle">Cycle</button>
-            </div>
-          </div>
-
-          <form id="story-form">
-            <textarea id="story-text" placeholder="120-160 chars · positive dharma story (daily kindness → legacy) · end — like the Echo of ... (fictional, India 20-30s empathy)" rows="5" required></textarea>
-            <div id="story-progress" class="story-progress">
-              <div class="story-progress-bar"><div id="story-progress-fill"></div></div>
-              <span id="story-progress-text">0 / 160</span>
-            </div>
-            <button type="submit" class="primary">Add to Pantheon</button>
-            <button type="button" onclick="askDirector()" class="secondary" style="margin-top:8px;">Get inspiration from the Pantheon Director (dharma/karma accurate, 5h upgrade)</button>
-          </form>
-        </div>
-
-        <div class="section">
-          <h3>Stories</h3>
-          <div id="stories-list"></div>
-        </div>
-
-        <div class="actions">
-          <button onclick="shareToTG()" class="primary">Share to Telegram</button>
-          <button onclick="inviteFriends()" class="secondary">Invite Clan</button>
+        <!-- Premium (TG Stars — optional, fictional) — demoted to bottom (rank8) -->
+        <div class="section" style="margin-top:12px">
+          <h3 style="font-size:13px">Premium (optional)</h3>
+          <p style="font-size:11px;opacity:0.8">Featured clan slot, extra story slots, custom frames. Purely cosmetic — core UGC + karma always free. <strong>Prominent disclosure: fictional stories only.</strong></p>
+          <button onclick="showPremiumModal()" class="secondary" style="font-size:12px">Unlock Premium (Stars)</button>
+          <div style="font-size:9px;opacity:0.6;margin-top:4px">Reversible. No dark patterns.</div>
         </div>
 
 
@@ -514,16 +521,17 @@
             <div class="setting-desc">English + Indian languages (North &amp; South)</div>
           </div>
           <select id="lang-select" style="background: var(--card); color: var(--text); border:1px solid var(--border); border-radius:8px; padding:4px 8px;">
+            <!-- Only en/hi/ta/te are fully translated. Others disabled as "coming soon" so we never hand the user a dead option (rank4 i18n fix 2026-07-10). -->
             <option value="en">English</option>
             <option value="hi">हिन्दी (Hindi - North)</option>
-            <option value="bn">বাংলা (Bengali - East/North)</option>
-            <option value="mr">मराठी (Marathi)</option>
-            <option value="gu">ગુજરાતી (Gujarati)</option>
-            <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
             <option value="ta">தமிழ் (Tamil - South)</option>
             <option value="te">తెలుగు (Telugu - South)</option>
-            <option value="kn">ಕನ್ನಡ (Kannada - South)</option>
-            <option value="ml">മലയാളം (Malayalam - South)</option>
+            <option value="bn" disabled>বাংলা (Bengali) — coming soon</option>
+            <option value="mr" disabled>मराठी (Marathi) — coming soon</option>
+            <option value="gu" disabled>ગુજરાતી (Gujarati) — coming soon</option>
+            <option value="pa" disabled>ਪੰਜਾਬੀ (Punjabi) — coming soon</option>
+            <option value="kn" disabled>ಕನ್ನಡ (Kannada) — coming soon</option>
+            <option value="ml" disabled>മലയാളം (Malayalam) — coming soon</option>
           </select>
         </div>
       </div>
