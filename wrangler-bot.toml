@@ -1,0 +1,7 @@
+name = "mypantheon-bot"
+main = "bot-worker.js"
+compatibility_date = "2024-11-01"
+
+# Secrets (set via: wrangler secret put BOT_TOKEN -c wrangler-bot.toml):
+#   BOT_TOKEN      — from BotFather
+#   WEBHOOK_SECRET — optional; a random string to reject spoofed webhook calls
