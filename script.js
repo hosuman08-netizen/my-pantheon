@@ -1372,6 +1372,15 @@ if (storyForm) {
     }
     addKarma(baseKarma);
 
+    // Peak-share (do-now): creation pride is at its peak here → spread it. First Echo auto-opens the share sheet (one-time), later ones nudge.
+    var _storyN = currentPantheon.stories.length;
+    setTimeout(function(){
+      try {
+        if (_storyN === 1 && typeof shareToTG === 'function') { shareToTG(); }
+        else { showToast('\ud83d\udcdc Proud of that Echo? Share your legend \u2726', 3000); }
+      } catch(e){}
+    }, 1500);
+
     // ULTIMATE Story Bloom animation
     setTimeout(() => {
       const stories = document.querySelectorAll('#stories-list .story');
