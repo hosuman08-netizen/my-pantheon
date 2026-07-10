@@ -1124,6 +1124,20 @@ function checkStreakOnLoad() {
   }
   streak.count = 0; saveStreak();
 }
+// Daily dharma prompt (do-now): a rotating writing seed turns the streak from a button into a UGC habit. Date-hashed, no backend.
+const DHARMA_PROMPTS = [
+  "Write of a stranger who gave without being asked.",
+  "Tell of a small courage that no one saw.",
+  "An Echo who forgave what was hard to forgive.",
+  "A promise kept when it cost everything.",
+  "Someone who lifted another and asked for nothing back.",
+  "A quiet act that quietly changed a life.",
+  "The day an enemy became a friend."
+];
+function todaysDharmaPrompt(){
+  const d = parseInt(todayStr().split('-').join(''), 10) || 0;
+  return DHARMA_PROMPTS[d % DHARMA_PROMPTS.length];
+}
 function claimDaily() {
   const today = todayStr();
   if (streak.last === today) { showToast('Already devoted today — return tomorrow ✧'); return; }
@@ -1139,6 +1153,8 @@ function claimDaily() {
   haptic(jackpot ? 'success' : 'light');   // rank20
   showToast((jackpot?'🎉 JACKPOT ':'') + 'Day ' + streak.count + ' devotion · +' + reward + ' Karma' + ms + ' ✧', jackpot?3400:2600);
   renderReferralStreak();
+  // Nudge the UGC loop: surface today's dharma writing seed after the reward.
+  setTimeout(function(){ try { showToast("✍️ Today's dharma: " + todaysDharmaPrompt() + " — write it in Create.", 4200); } catch(e){} }, 2900);
 }
 
 function renderReferralStreak() {
