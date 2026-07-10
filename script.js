@@ -1107,10 +1107,22 @@ function syncRefCount() {
   }).catch(()=>renderReferralStreak());
 }
 
-// daily streak (resets if broken)
+// daily streak (resets if broken) + Dharma Shield: one auto-freeze per 7 days so a single missed day won't reset.
+function _dayBeforeYesterdayStr() { const d = new Date(); d.setDate(d.getDate()-2); return _dstr(d); }
 function checkStreakOnLoad() {
   const today = todayStr();
-  if (streak.last && streak.last !== today && streak.last !== yesterdayStr()) { streak.count = 0; saveStreak(); }
+  if (!streak.last || streak.last === today || streak.last === yesterdayStr()) return; // streak intact
+  // Missed exactly one day + a shield charge available (weekly) + a streak worth saving → freeze instead of reset.
+  const missedOne = (streak.last === _dayBeforeYesterdayStr());
+  const shieldReady = !streak.shieldLast || Math.round((new Date(today) - new Date(streak.shieldLast)) / 86400000) >= 7;
+  if (missedOne && shieldReady && (streak.count || 0) >= 3) {
+    streak.shieldLast = today;
+    streak.last = yesterdayStr(); // bridge the gap: today's check-in continues the streak
+    saveStreak();
+    setTimeout(() => { try { showToast('🛡️ Dharma Shield saved your ' + streak.count + '-day streak', 3200); } catch(e){} }, 900);
+    return;
+  }
+  streak.count = 0; saveStreak();
 }
 function claimDaily() {
   const today = todayStr();
