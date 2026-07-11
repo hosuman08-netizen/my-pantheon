@@ -1097,6 +1097,21 @@ button.secondary[onclick*="askDirector"]:hover {
   transform: translateY(-1px);
 }
 
+/* Quick-Start express button (JS-injected inline styles) — align to the .primary token
+   language for button consistency; slightly tighter than the main CTA so the express path
+   reads as secondary-to the full "Create Pantheon" hero, not a duplicate. !important beats inline. */
+#p2-qs-btn {
+  background: linear-gradient(145deg, var(--accent), #a17d1f) !important;
+  border-radius: 14px !important;
+  padding: 14px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  letter-spacing: -.3px;
+  box-shadow: 0 4px 16px rgba(201,162,39,.28) !important;
+  transition: all .3s cubic-bezier(.23,1,.32,1);
+}
+#p2-qs-btn:active { transform: scale(0.988); }
+
 /* Beautiful, decorative cards */
 /* Explore feed "living community" freshness ribbon — the feed re-orders daily. */
 .explore-fresh {
