@@ -1268,6 +1268,26 @@ h2::after {
   margin-bottom: 16px;
   box-shadow: 0 4px 14px rgba(0,0,0,.2);
 }
+/* Golden Frame — persistent premium cosmetic unlocked by a Stars purchase. Purely visual. */
+#pantheon-display.gold-frame {
+  border: 1.5px solid var(--accent);
+  background:
+    linear-gradient(145deg, #24201a, #1d1a14) padding-box,
+    linear-gradient(135deg, #e7c65a, #c9a227 45%, #8a6d18) border-box;
+  border-color: transparent;
+  box-shadow: 0 4px 18px rgba(201,162,39,0.28), inset 0 0 22px rgba(201,162,39,0.08);
+}
+.gold-frame-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .4px;
+  color: #111;
+  background: linear-gradient(90deg, #e7c65a, #c9a227);
+  padding: 2px 9px;
+  border-radius: 999px;
+  margin-bottom: 8px;
+}
 #pantheon-display h3 {
   font-size: 18px;
   margin: 0 0 4px;

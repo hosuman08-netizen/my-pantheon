@@ -1123,6 +1123,14 @@ function ageGate() {
   if (no)  no.addEventListener('click',  function(){ try { localStorage.setItem('p2_age_ok','0'); localStorage.setItem('p2_youth','1'); } catch(e){} try{ showToast('Youth mode: purchases off. Core features stay free ✧',3200);}catch(e){} enterYouthMode(); done(); });
 }
 
+// First-purchase 2× hook — the F2P→first-wallet breakthrough. Honest & cosmetic:
+//  • Every purchase unlocks the persistent Golden Frame cosmetic on MY Pantheon (what you buy).
+//  • Your FIRST purchase (one time only) additionally grants 2× the welcome-Karma bonus.
+// The offer text below states exactly this; no fake scarcity, no gambling. Reversible (localStorage).
+function firstPayUsed() { try { return localStorage.getItem('p2_first_pay') === '1'; } catch(e) { return false; } }
+function markFirstPay() { try { localStorage.setItem('p2_first_pay', '1'); } catch(e){} }
+function hasGoldFrame() { try { return localStorage.getItem('p2_gold_frame') === '1'; } catch(e) { return false; } }
+
 function purchaseP2WithStars(item = 'p2_featured') {
   if (isYouthMode()) { showToast('Purchases are disabled in youth mode — core features are free ✧'); return; }
   if (!tg || !tg.openInvoice) { showToast('TG WebApp only — Stars via Bot invoice'); return; }
@@ -1138,7 +1146,19 @@ function purchaseP2WithStars(item = 'p2_featured') {
   fetch(url).then(r=>r.json()).then(d=>{
     if (d && d.link) {
       tg.openInvoice(d.link, (st) => {
-        if (st === 'paid') { addKarma(25); haptic('success'); showToast('✧ Premium cosmetic unlocked — MY story featured.'); }
+        if (st === 'paid') {
+          const isFirst = !firstPayUsed();
+          const bonus = isFirst ? 50 : 25;   // first purchase = 2× welcome Karma (one time)
+          addKarma(bonus);
+          try { localStorage.setItem('p2_gold_frame', '1'); } catch(e){}   // persistent cosmetic
+          markFirstPay();
+          haptic('success');
+          showToast(isFirst
+            ? '✧ First unlock 2× — +50 welcome Karma & Golden Frame on MY Pantheon.'
+            : '✧ Premium cosmetic unlocked — Golden Frame + featured.');
+          try { renderMyPantheon(); } catch(e){}
+          try { emit('purchase', { item: item, first: isFirst }); } catch(e){}
+        }
         else if (st === 'cancelled') { showToast('Purchase cancelled — core features stay free ✧'); }
         else { showToast('Payment status: ' + st); }   // rank25: user-facing phrasing, not raw 'Stars:'
       });
@@ -1552,7 +1572,13 @@ function renderMyPantheon() {
     return `<div class="my-echo-visual">${iconSVG}<span>${escapeHtml(echo)}</span></div>`;
   }).join('');
 
+  const goldFrame = hasGoldFrame();
+  container.classList.toggle('gold-frame', goldFrame);
+  const frameBadge = goldFrame
+    ? '<div class="gold-frame-badge">✧ Golden Frame — premium cosmetic</div>'
+    : '';
   container.innerHTML = `
+    ${frameBadge}
     <h3>${escapeHtml(currentPantheon.name)}</h3>
     <p>${escapeHtml(currentPantheon.desc || '')}</p>
     <div style="font-size:10px;color:#c9a227;opacity:.75;margin:2px 0 6px;">MY Pantheon — the power you author carries forever</div>
@@ -1762,13 +1788,21 @@ function showPremiumModal() {
   if (isYouthMode()) { showToast('Purchases are disabled in youth mode — core features are free ✧'); return; }
   const modal = document.createElement('div');
   modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;';
+  const firstOffer = !firstPayUsed()
+    ? `<div style="background:linear-gradient(135deg,#3a2f12,#2a2413);border:1px solid #c9a227;border-radius:10px;padding:9px 10px;margin:0 0 12px;font-size:11.5px;line-height:1.45;color:#f5e9c0;">
+         <strong style="color:#c9a227;">✧ First unlock bonus — one time</strong><br>
+         2× welcome Karma (+50 instead of +25), Golden Frame included.
+       </div>`
+    : '';
+  const buyLabel = !firstPayUsed() ? 'Unlock 2× — Stars' : 'Purchase with Stars';
   modal.innerHTML = `
     <div style="background:#25221d;border:1px solid #c9a227;border-radius:16px;padding:20px;max-width:300px;text-align:center;">
       <strong>Premium (TG Stars)</strong><br><br>
-      <span style="font-size:12px;opacity:0.8">Featured slot, extra stories, custom frames — cosmetic only.<br>
+      ${firstOffer}
+      <span style="font-size:12px;opacity:0.8">Featured slot, extra stories, custom Golden Frame — cosmetic only.<br>
       Core (create, stories, karma, share, festivals) is always free.<br><br>
       <strong>Fictional stories inspired by epics. Optional purchase. XTR via Bot.</strong></span><br><br>
-      <button onclick="this.closest('div[style*=\'position:fixed\']').remove(); purchaseP2WithStars('p2_featured');" style="margin:4px;padding:8px 16px;background:#c9a227;color:#111;border:none;border-radius:8px;">Purchase with Stars</button>
+      <button onclick="this.closest('div[style*=\'position:fixed\']').remove(); purchaseP2WithStars('p2_featured');" style="margin:4px;padding:8px 16px;background:#c9a227;color:#111;border:none;border-radius:8px;">${buyLabel}</button>
       <button onclick="this.closest('div[style*=\"position:fixed\"]').remove()" style="margin:4px;padding:8px 16px;background:transparent;color:#c9a227;border:1px solid #c9a227;border-radius:8px;">Cancel</button>
     </div>`;
   document.body.appendChild(modal);
