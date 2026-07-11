@@ -761,6 +761,7 @@ let _karmaShown = 0;      // last rendered karma value (for count-up tween, rank
 let _lastProg = 0;        // last prestige-progress % (for level-up flourish, rank16)
 let _karmaRaf = null;
 let _karmaPopTimer = null;
+let _spendMode = false;   // Karma Atelier: suppress false level-up flourish when balance is spent (sink)
 
 function updateHeaderStats() {
   const k = document.getElementById('header-karma');
@@ -800,7 +801,7 @@ function updateHeaderStats() {
   const prog = karma % 10;
   if (fill) {
     const progress = (prog / 10) * 100;
-    if (progress < _lastProg - 0.01) {
+    if (progress < _lastProg - 0.01 && !_spendMode) {
       // rank16: level-up — fill to 100% + flash, then snap to 0 (no transition), then rise.
       // Prevents the bar visibly draining backwards (90%→20%) at the celebration moment.
       fill.style.transition = 'width .28s cubic-bezier(.23,1,.32,1)';
@@ -1405,6 +1406,108 @@ function renderCodex() {
     '<div class="codex-grid">' + cells + '</div>' + nudge;
 }
 
+// ===== Karma Atelier — free cosmetic shop (currency sink + premium value contrast) =====
+// Honest & reversible: Karma is genuinely deducted (a real sink), ownership persists in
+// localStorage, no randomness / no fake stock. Auras are FREE (earned Karma); the premium
+// Golden Frame stays Stars-only so free cosmetics feel generous and premium stays aspirational.
+const KARMA_COSMETICS = [
+  { id: 'aura_lotus',  name: 'Lotus Bloom',   cost: 20,  ring: '#e86aa0', glow: 'rgba(232,106,160,.45)', desc: 'Soft rose halo' },
+  { id: 'aura_flame',  name: 'Sacred Flame',  cost: 45,  ring: '#ff8c1a', glow: 'rgba(255,140,26,.45)',  desc: 'Warm ember glow' },
+  { id: 'aura_indigo', name: 'Cosmic Indigo', cost: 80,  ring: '#6a7dff', glow: 'rgba(106,125,255,.45)', desc: 'Deep night sky' },
+  { id: 'aura_dawn',   name: 'Dawn Saffron',  cost: 130, ring: '#ffd24a', glow: 'rgba(255,210,74,.5)',   desc: 'Golden sunrise' }
+];
+function cosmeticById(id) { return KARMA_COSMETICS.find(function(c){ return c.id === id; }) || null; }
+function cosOwned() {
+  try { const v = JSON.parse(localStorage.getItem('p2_cos_owned') || '[]'); return Array.isArray(v) ? v : []; }
+  catch(e) { return []; }
+}
+function cosEquipped() { try { return localStorage.getItem('p2_cos_equip') || ''; } catch(e) { return ''; } }
+function ownsCosmetic(id) { return cosOwned().indexOf(id) !== -1; }
+// Real Karma sink: deduct spendable balance (prestige rank is sticky, so it never drops).
+function spendKarma(cost) {
+  if (karma < cost) return false;
+  karma -= cost;
+  _spendMode = true;
+  updateHeaderStats();
+  _spendMode = false;
+  savePantheon();
+  const myTab = document.getElementById('tab-my');
+  if (myTab && myTab.classList.contains('active')) updateStatusCard();
+  return true;
+}
+function buyCosmetic(id) {
+  const c = cosmeticById(id);
+  if (!c || ownsCosmetic(id)) return;
+  if (karma < c.cost) { showToast('Need ' + (c.cost - karma) + ' more Karma for ' + c.name + ' — write a story to earn it ✧', 2600); haptic('warning'); return; }
+  if (!spendKarma(c.cost)) return;
+  const owned = cosOwned(); owned.push(id);
+  try { localStorage.setItem('p2_cos_owned', JSON.stringify(owned)); } catch(e){}
+  equipCosmetic(id, true);
+  showToast('✧ ' + c.name + ' unlocked & equipped — −' + c.cost + ' Karma', 2600);
+  haptic('success');
+}
+function equipCosmetic(id, silent) {
+  // '' = none; otherwise must be owned (auras) — codex-exclusive auras are granted, see Codex reward.
+  if (id && !ownsCosmetic(id)) return;
+  try { localStorage.setItem('p2_cos_equip', id || ''); } catch(e){}
+  applyCosmetic();
+  renderKarmaShop();
+  if (!silent && id) { const c = cosmeticById(id); if (c) showToast('Equipped ' + c.name + ' ✧', 1600); }
+}
+// Apply the equipped aura to MY Pantheon card (composes with the premium Golden Frame).
+function applyCosmetic() {
+  const container = document.getElementById('pantheon-display');
+  if (!container) return;
+  const c = cosmeticById(cosEquipped());
+  if (c) {
+    container.classList.add('cos-aura');
+    container.style.setProperty('--cos-ring', c.ring);
+    container.style.setProperty('--cos-glow', c.glow);
+  } else {
+    container.classList.remove('cos-aura');
+    container.style.removeProperty('--cos-ring');
+    container.style.removeProperty('--cos-glow');
+  }
+}
+function renderKarmaShop() {
+  ensureP2Styles();
+  const el = document.getElementById('karma-shop');
+  if (!el) return;
+  if (!currentPantheon) { el.innerHTML = ''; return; }
+  const equipped = cosEquipped();
+  const cards = KARMA_COSMETICS.map(function(c){
+    const owned = ownsCosmetic(c.id);
+    const isEq = equipped === c.id;
+    const swatch = '<span class="shop-swatch" style="--sw:' + c.ring + '"></span>';
+    let btn;
+    if (isEq) btn = '<button type="button" class="shop-btn equipped" disabled>✓ Equipped</button>';
+    else if (owned) btn = '<button type="button" class="shop-btn own" onclick="equipCosmetic(\'' + c.id + '\')">Equip</button>';
+    else {
+      const afford = karma >= c.cost;
+      btn = '<button type="button" class="shop-btn buy' + (afford ? '' : ' short') + '" onclick="buyCosmetic(\'' + c.id + '\')">✦ ' + c.cost + ' Karma</button>';
+    }
+    return '<div class="shop-card' + (isEq ? ' active' : '') + '">' + swatch +
+      '<span class="shop-name">' + escapeHtml(c.name) + '</span>' +
+      '<span class="shop-desc">' + escapeHtml(c.desc) + '</span>' + btn + '</div>';
+  }).join('');
+  const noneBtn = equipped
+    ? '<button type="button" class="shop-none" onclick="equipCosmetic(\'\')">Remove aura</button>'
+    : '';
+  // Premium value-contrast: the top tier stays Stars-only (aspirational anchor).
+  const gold = hasGoldFrame();
+  const premium = '<div class="shop-card premium' + (gold ? ' active' : '') + '">' +
+    '<span class="shop-swatch premium-sw"></span>' +
+    '<span class="shop-name">Golden Frame</span>' +
+    '<span class="shop-desc">Premium · top tier</span>' +
+    (gold
+      ? '<button type="button" class="shop-btn equipped" disabled>✓ Owned</button>'
+      : '<button type="button" class="shop-btn premium-btn" onclick="showPremiumModal()">★ Stars</button>') +
+    '</div>';
+  el.innerHTML = '<div class="shop-head"><span>✧ Karma Atelier</span><span class="shop-bal">✦ ' + karma + ' Karma</span></div>' +
+    '<div class="shop-sub">Spend earned Karma on free cosmetics for MY Pantheon. Core stays free.</div>' +
+    '<div class="shop-grid">' + cards + premium + '</div>' + noneBtn;
+}
+
 // ===== Mutual Blessing Loop — 2-way reciprocity (invitee is nudged to bless forward) =====
 function renderBlessingBack() {
   ensureP2Styles();
@@ -1574,6 +1677,7 @@ function renderMyPantheon() {
 
   const goldFrame = hasGoldFrame();
   container.classList.toggle('gold-frame', goldFrame);
+  applyCosmetic();   // Karma Atelier: equipped free aura (composes with premium Golden Frame)
   const frameBadge = goldFrame
     ? '<div class="gold-frame-badge">✧ Golden Frame — premium cosmetic</div>'
     : '';
@@ -1628,6 +1732,7 @@ function renderMyPantheon() {
   }
   renderReferralStreak();  // 🪖 Founding 뱃지 + 스트릭 + 초대 래더
   renderCodex();           // 📜 수집 그리드 + 'One more Echo' 근접 넛지
+  renderKarmaShop();       // ✧ Karma Atelier — 카르마 화폐싱크 + 프리미엄 가치대비
   renderBlessingBack();    // 🙏 상호 축복 루프 (invitedBy 상호성)
   updateMainButton();
 }
