@@ -726,6 +726,10 @@ h2 {
   transition: color .2s ease;
 }
 
+input, textarea, select {
+  /* Form controls default to Arial/monospace — force the premium body font (fluency + 2-font consistency). */
+  font-family: inherit;
+}
 input, textarea {
   width: 100%;
   padding: 14px 16px;
