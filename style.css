@@ -1605,6 +1605,13 @@ input:checked + .slider:before {
   background: rgba(255,255,255,.05); border: 1px solid rgba(201,162,39,.3);
   color: #e8d9a0; font-size: 12.5px; font-family: inherit;
 }
+.echo-bond-status {
+  margin-top: 6px; font-size: 11px; color: #cfc8b0; opacity: .9;
+  letter-spacing: .2px;
+}
+.echo-bond-status b { color: #e8d9a0; font-weight: 700; }
+.echo-bond-status .bond-next { color: var(--accent); }
+.echo-bond-status .bond-max { color: #e7c65a; font-weight: 700; }
 .codex-cell.owned { position: relative; }
 .bond-badge {
   position: absolute; top: 3px; right: 3px;

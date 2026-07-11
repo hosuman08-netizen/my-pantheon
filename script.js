@@ -1664,8 +1664,28 @@ function renderEchoTag() {
     const sel = k === prev ? ' selected' : '';
     return '<option value="' + k + '"' + sel + '>' + escapeHtml(echoShortName(k)) + tag + '</option>';
   }).join('');
-  el.innerHTML = '<label class="echo-tag-label">Dedicate this story to an Echo (grows its Bond):</label>' +
-    '<select id="story-echo-tag" class="echo-tag-select">' + opts + '</select>';
+  const firstKey = owned.indexOf(prev) >= 0 ? prev : owned[0];
+  el.innerHTML = '<label class="echo-tag-label">Dedicate this story to an Echo — it evolves as its Bond grows:</label>' +
+    '<select id="story-echo-tag" class="echo-tag-select" onchange="updateBondStatus()">' + opts + '</select>' +
+    '<div id="echo-bond-status" class="echo-bond-status">' + bondStatusHTML(firstKey) + '</div>';
+}
+// Live payoff line for the selected Echo: current Bond level + how far to the next evolution.
+// Honest: derived purely from the real stored Bond count (no fake numbers, no randomness).
+function bondStatusHTML(key) {
+  if (!key) return '';
+  const c = bondCount(key), lv = bondLevel(c);
+  const cur = lv > 0 ? 'Lv' + lv + ' ' + bondLabel(lv) : 'Unbonded';
+  let nextIdx = -1;
+  for (let i = 0; i < BOND_THRESH.length; i++) { if (c < BOND_THRESH[i]) { nextIdx = i; break; } }
+  const name = '<b>' + escapeHtml(echoShortName(key)) + '</b> · ' + cur;
+  if (nextIdx === -1) return name + ' — <span class="bond-max">max Bond ✦</span>';
+  const need = BOND_THRESH[nextIdx] - c;
+  return name + ' — <span class="bond-next">' + need + ' more ' + (need === 1 ? 'story' : 'stories') +
+    ' → ' + BOND_NAMES[nextIdx] + '</span>';
+}
+function updateBondStatus() {
+  const s = document.getElementById('story-echo-tag'), el = document.getElementById('echo-bond-status');
+  if (s && el) el.innerHTML = bondStatusHTML(s.value);
 }
 
 // ===== Karma Atelier — free cosmetic shop (currency sink + premium value contrast) =====
