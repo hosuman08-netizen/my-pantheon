@@ -2984,6 +2984,14 @@ function updateEchoSummary() {
   const checked = document.querySelectorAll('#tab-create input[type="checkbox"]:checked');
   const count = checked.length;
 
+  // Primary CTA readiness: it needs 3+ Echoes, so reflect that instead of always looking active.
+  const submitBtn = document.getElementById('create-submit-btn');
+  if (submitBtn) {
+    const ready = count >= 3;
+    submitBtn.classList.toggle('not-ready', !ready);
+    submitBtn.textContent = ready ? 'Create Pantheon' : 'Choose ' + (3 - count) + ' more Echo' + (3 - count === 1 ? '' : 'es');
+  }
+
   if (count === 0) {
     summary.textContent = '0 echoes selected • Begin your clan';
     summary.style.opacity = '0.6';
