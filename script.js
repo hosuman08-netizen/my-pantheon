@@ -708,6 +708,33 @@ function switchTab(tab) {
 }
 
 // Load state
+// Quick-Start onboarding (do-now): English-typing is the #1 dropout for our audience. One tap → first Pantheon, no typing.
+const P2_QS_NAMES = ["Dawn of Dharma","Hearts of Ayodhya","The Kurukshetra Vow","Lamps of Diwali","Children of the Ganga","The Unbroken Promise","Light of the Epics"];
+function p2QuickStart(){
+  const cbs = Array.prototype.slice.call(document.querySelectorAll('#tab-create input[type="checkbox"]')).slice(0,3);
+  const echoes = cbs.map(function(c){return c.value;});
+  if (echoes.length < 3) { showToast('Loading echoes...'); return; }
+  const name = P2_QS_NAMES[Math.floor(Math.random()*P2_QS_NAMES.length)];
+  const displayEchoes = echoes.map(function(e){ return (typeof echoMap!=='undefined' && echoMap[e]) || e; });
+  currentPantheon = { name: name, desc: '', echoes: displayEchoes, stories: [], created: new Date().toISOString() };
+  sharesCount = 0; savePantheon();
+  try { showCreationRitual(displayEchoes, name); } catch(e){}
+  setTimeout(function(){ try { switchTab('my'); renderMyPantheon(); } catch(e){} }, 2000);
+  var qs = document.getElementById('p2-quickstart'); if (qs) qs.remove();
+}
+function p2InjectQuickStart(){
+  if (currentPantheon) return; // returning users skip
+  if (document.getElementById('p2-quickstart')) return;
+  const host = document.getElementById('tab-create'); if (!host) return;
+  const box = document.createElement('div');
+  box.id = 'p2-quickstart';
+  box.style.cssText = 'margin:10px 0;padding:14px;border-radius:14px;background:linear-gradient(135deg,#1a1206,#241a08);border:1px solid rgba(201,162,39,.35);';
+  box.innerHTML = '<div style="font-size:14px;font-weight:800;color:#e8cf8a;margin-bottom:4px;">\u26a1 Start in one tap</div>'
+    + '<div style="font-size:12px;color:#c9b98a;opacity:.85;margin-bottom:10px;line-height:1.5;">New here? Skip the setup \u2014 we\'ll open your first Pantheon with three Echoes. You can rename and add your own stories after.</div>'
+    + '<button id="p2-qs-btn" style="width:100%;padding:12px;border:none;border-radius:11px;background:linear-gradient(135deg,#c9a227,#a67c00);color:#1a1400;font-weight:800;font-size:15px;cursor:pointer;">\u2728 Open my Pantheon \u2192</button>';
+  host.insertBefore(box, host.firstChild ? host.firstChild.nextSibling : null);
+  const btn = document.getElementById('p2-qs-btn'); if (btn) btn.onclick = p2QuickStart;
+}
 function loadState() {
   const saved = localStorage.getItem('p2_pantheon');
   if (saved) {
@@ -2540,6 +2567,7 @@ function _directorPick(idx) {
 window.onload = () => {
   ageGate();             // 🔞 18+ 확인(미결정 시 오버레이) — 최초 1회
   loadState();
+  try { p2InjectQuickStart(); } catch(e){}
   if (isYouthMode()) setTimeout(enterYouthMode, 300);   // 🔞 재방문 유스모드: 유료 진입점 숨김
   resolveSource();       // 🎯 첫 터치 채널 출처 확정(captureRef보다 먼저)
   captureRef();          // 🪖 피초대자 환영 보너스 + invitedBy 기록(1회)
