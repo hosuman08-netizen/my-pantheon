@@ -1070,7 +1070,34 @@ function founderDay3Gate() {   // 설치 후 2일 경과 재방문 시에만 창
   } catch(e){}
 }
 function getP2Uid() { return p2uid || localStorage.getItem('p2_uid') || ('p2' + Date.now().toString(36)); }
+// ===== 18+ Age Gate (컴플라 실드 · 되돌림 · localStorage 전용) — p2엔 가챠/도박 없음(구매=결정적 코스메틱). 중립 18+ 확인 + under-18 유스모드(유료 OFF, 코어 무료) =====
+function isYouthMode() { try { return localStorage.getItem('p2_youth') === '1'; } catch(e) { return false; } }
+function enterYouthMode() { try { document.querySelectorAll('button').forEach(function(b){ var oc = b.getAttribute('onclick') || ''; if (/showPremiumModal|purchaseP2WithStars/.test(oc)) b.style.display = 'none'; }); } catch(e){} }
+function ageGate() {
+  var decided = '';
+  try { decided = localStorage.getItem('p2_age_ok') || ''; } catch(e){}
+  if (decided === '1' || decided === '0') return;
+  var ov = document.createElement('div');
+  ov.id = 'p2-age-gate';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(10,8,6,.96);z-index:100000;display:flex;align-items:center;justify-content:center;padding:24px;';
+  ov.innerHTML =
+    '<div style="max-width:320px;text-align:center;background:#1c1a15;border:1px solid #c9a227;border-radius:16px;padding:24px;color:#f5f1e6;">' +
+      '<div style="font-size:28px;margin-bottom:8px;">🪷</div>' +
+      '<strong style="color:#c9a227;font-size:15px;">Welcome to My Pantheon</strong>' +
+      '<p style="font-size:12.5px;line-height:1.5;opacity:.85;margin:12px 0 18px;">Fictional stories inspired by ancient epics. Please confirm your age. Optional cosmetic purchases are for adults; all core features are always free.</p>' +
+      '<button id="p2-age-yes" type="button" style="width:100%;padding:12px;margin-bottom:8px;background:#c9a227;color:#111;border:none;border-radius:10px;font-weight:700;">I am 18 or older</button>' +
+      '<button id="p2-age-no" type="button" style="width:100%;padding:11px;background:transparent;color:#c9a227;border:1px solid #c9a227;border-radius:10px;font-weight:600;">I am under 18</button>' +
+      '<div style="font-size:10px;opacity:.5;margin-top:12px;">Fictional • No real deities • DPDP/IT compliance</div>' +
+    '</div>';
+  document.body.appendChild(ov);
+  var done = function(){ try { ov.remove(); } catch(e){} };
+  var yes = ov.querySelector('#p2-age-yes'), no = ov.querySelector('#p2-age-no');
+  if (yes) yes.addEventListener('click', function(){ try { localStorage.setItem('p2_age_ok','1'); localStorage.removeItem('p2_youth'); } catch(e){} done(); });
+  if (no)  no.addEventListener('click',  function(){ try { localStorage.setItem('p2_age_ok','0'); localStorage.setItem('p2_youth','1'); } catch(e){} try{ showToast('Youth mode: purchases off. Core features stay free ✧',3200);}catch(e){} enterYouthMode(); done(); });
+}
+
 function purchaseP2WithStars(item = 'p2_featured') {
+  if (isYouthMode()) { showToast('Purchases are disabled in youth mode — core features are free ✧'); return; }
   if (!tg || !tg.openInvoice) { showToast('TG WebApp only — Stars via Bot invoice'); return; }
   const uid = getP2Uid();
   // rank3: send the SIGNED initData string. The worker must HMAC-verify it with the bot token and
@@ -1681,6 +1708,7 @@ function playClanAnthem() {
 }
 
 function showPremiumModal() {
+  if (isYouthMode()) { showToast('Purchases are disabled in youth mode — core features are free ✧'); return; }
   const modal = document.createElement('div');
   modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;';
   modal.innerHTML = `
@@ -2510,7 +2538,9 @@ function _directorPick(idx) {
 
 // Init
 window.onload = () => {
+  ageGate();             // 🔞 18+ 확인(미결정 시 오버레이) — 최초 1회
   loadState();
+  if (isYouthMode()) setTimeout(enterYouthMode, 300);   // 🔞 재방문 유스모드: 유료 진입점 숨김
   resolveSource();       // 🎯 첫 터치 채널 출처 확정(captureRef보다 먼저)
   captureRef();          // 🪖 피초대자 환영 보너스 + invitedBy 기록(1회)
   emitLaunch();          // 🎯 install(1회)+session_start 계측 emit(귀속 채널 실림)
