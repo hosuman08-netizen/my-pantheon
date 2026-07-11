@@ -829,6 +829,58 @@ function updateHeaderStats() {
   const titles = ['Ashborn', 'Flame Seeker', 'Echo Warden', 'Karma Weaver', 'Star Guardian', 'Dharma Sovereign'];
   const titleEl = document.getElementById('prestige-title');
   if (titleEl) titleEl.textContent = titles[Math.min(prestige-1, titles.length-1)] || 'Legend';
+
+  renderAscensionLadder();
+}
+
+// ===== Ascension Path — named status ladder derived from real (sticky) Prestige =====
+// Honest: every value is read from the live `prestige` variable; nothing is fabricated.
+// Prestige never drops (Karma Atelier sinks spendable Karma, not rank), so this ladder only climbs.
+const ASCENSION_RANKS = [
+  { p: 1,  name: 'Seeker',    icon: '·'  },
+  { p: 3,  name: 'Initiate',  icon: '✦'  },
+  { p: 6,  name: 'Adept',     icon: '✧'  },
+  { p: 10, name: 'Luminary',  icon: '☀'  },
+  { p: 16, name: 'Ascendant', icon: '🔱' },
+  { p: 25, name: 'Avatar',    icon: '👑' },
+];
+function ensureAscensionStyles() {
+  if (document.getElementById('p2-ascension-styles')) return;
+  const st = document.createElement('style');
+  st.id = 'p2-ascension-styles';
+  st.textContent = [
+    '.asc-block{margin-top:12px}',
+    '.asc-head{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;color:#e8d9a0;margin-bottom:9px}',
+    '.asc-head .asc-meta{font-size:10.5px;color:#c9a227;font-weight:600;opacity:.85}',
+    '.asc-ladder{display:flex;flex-direction:column;gap:5px}',
+    '.asc-tier{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(201,162,39,.14);opacity:.6}',
+    '.asc-tier.done{opacity:1;border-color:rgba(201,162,39,.4);background:rgba(201,162,39,.08)}',
+    '.asc-tier.next{opacity:1;border-color:rgba(201,162,39,.6);background:rgba(201,162,39,.13);box-shadow:0 0 12px rgba(201,162,39,.18)}',
+    '.asc-icon{font-size:15px;width:20px;text-align:center;flex:0 0 auto}',
+    '.asc-name{font-size:12.5px;font-weight:700;color:#e8d9a0;flex:1 1 auto}',
+    '.asc-tier:not(.done) .asc-name{color:#a9a48e}',
+    '.asc-req{font-size:10.5px;color:#c9a227;font-weight:600}',
+    '.asc-check{color:#c9a227;font-weight:700;font-size:12px}',
+    '.asc-need{font-size:10.5px;font-weight:700;color:#e8d9a0;background:rgba(201,162,39,.2);padding:1px 7px;border-radius:9px}',
+    '.asc-note{margin-top:8px;font-size:9.5px;color:#c9a227;text-align:center;opacity:.7}'
+  ].join('');
+  document.head.appendChild(st);
+}
+function renderAscensionLadder() {
+  const el = document.getElementById('ascension-ladder');
+  if (!el) return;
+  ensureAscensionStyles();
+  const nextP = (ASCENSION_RANKS.find(r => prestige < r.p) || {}).p;
+  el.innerHTML = ASCENSION_RANKS.map(r => {
+    const done = prestige >= r.p, next = r.p === nextP;
+    return '<div class="asc-tier' + (done ? ' done' : '') + (next ? ' next' : '') + '">' +
+      '<span class="asc-icon">' + r.icon + '</span>' +
+      '<span class="asc-name">' + r.name + '</span>' +
+      '<span class="asc-req">' + (done ? 'Attained' : 'Prestige ' + r.p) + '</span>' +
+      (done ? '<span class="asc-check">✓</span>'
+            : (next ? '<span class="asc-need">' + prestige + '/' + r.p + '</span>' : '')) +
+      '</div>';
+  }).join('');
 }
 
 // rank10: lightweight toast queue — each toast gets guaranteed screen time (min ~900ms) so the
