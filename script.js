@@ -998,7 +998,7 @@ function celebratePrestige() {
 // 인도 바이럴 3종 중 레퍼럴 + 스트릭. (리더보드 = v2)
 // 정직>연기: 서수("N번째 유저") 거짓 주장 안 함 — Founder Code는 식별자, Founding은 출시기 가입 사실.
 // ═══════════════════════════════════════════════════════════════════════
-const P2_BOT = '';        // p2 봇 핸들(예: 'my_pantheon_bot'). 있으면 startapp 딥링크, 없으면 web URL ?ref= 폴백.
+const P2_BOT = 'MyPantheonEchoBot/play';   // named mini-app 'play'(BotFather /newapp). startapp 딥링크 귀속.
 const P2_BASE = (typeof location !== 'undefined' ? location.origin + location.pathname : '');
 const P2_BACKEND = '';    // optional backend for invite credit; empty = ignored
 
@@ -1008,6 +1008,67 @@ const P2_BACKEND = '';    // optional backend for invite credit; empty = ignored
 // When P2_PAY_BACKEND set: fetch /invoice → tg.openInvoice. Fictional cosmetic only.
 // Prominent: "Core always free. Optional featured/frames. Pure fiction."
 const P2_PAY_BACKEND = ""; // Sovereign: point to p2-stars worker (copy p1 legion-pay pattern)
+
+// 🎯 귀속 계측 배선 (Launch Gate Zero — 채널 출처 첫터치 + install/session emit). Legion 딥닝 R2.
+const P2_ANALYTICS = 'https://legion-analytics.hoyashi95.workers.dev';
+const P2_SRC_ALLOW = ['reddit','x','wa','insta','discord','quora','yt','tg','fb','direct','other'];
+function parseStartParam() {
+  let raw = '';
+  try { raw = (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) || ''; } catch(e){}
+  if (!raw) { const m = (location.search||'').match(/[?&](?:startapp|tgWebAppStartParam)=([^&]+)/); if (m) raw = decodeURIComponent(m[1]); }
+  let channel = '', ref = '';
+  if (raw.indexOf('c-') === 0) { const rest = raw.slice(2), ri = rest.indexOf('-r-'); if (ri >= 0) { channel = rest.slice(0, ri); ref = rest.slice(ri + 3); } else channel = rest; }
+  else if (raw.indexOf('ref') === 0) { ref = raw.slice(3); }
+  if (!channel) { const m = (location.search||'').match(/[?&]src=([A-Za-z0-9_]{1,16})/); if (m) channel = m[1]; }
+  if (!ref) { const m = (location.search||'').match(/[?&]ref=([^&]+)/); if (m) ref = decodeURIComponent(m[1]); }
+  channel = String(channel||'').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,16);
+  if (channel && P2_SRC_ALLOW.indexOf(channel) < 0) channel = 'other';
+  return { channel: channel, ref: ref };
+}
+function resolveSource() {  // 첫 터치 고정 — 최초 1회만 기록, 덮어쓰지 않음(귀속 무결성)
+  let src = '';
+  try { src = localStorage.getItem('p2_src') || ''; } catch(e){}
+  if (!src) { src = parseStartParam().channel || 'direct'; try { localStorage.setItem('p2_src', src); } catch(e){} }
+  return src;
+}
+function emit(type, extra) {  // fire-and-forget, 절대 앱에 throw 금지
+  try {
+    const d = Object.assign({ channel: resolveSource() }, extra || {});
+    const body = JSON.stringify({ type: type, anonId: 'p2_' + hashId(p2uid || 'anon'), ts: Date.now(), d: d });
+    const url = P2_ANALYTICS + '/ev';
+    if (typeof navigator !== 'undefined' && navigator.sendBeacon) navigator.sendBeacon(url, new Blob([body], { type: 'text/plain;charset=UTF-8' }));
+    else fetch(url, { method:'POST', headers:{'content-type':'text/plain'}, body: body, keepalive:true, mode:'no-cors' });
+  } catch(e) {}
+}
+function emitLaunch() {  // install=기기당1회, session_start=매 로드
+  let first = false;
+  try { first = !localStorage.getItem('p2_installed'); if (first) localStorage.setItem('p2_installed', todayStr()); } catch(e){}
+  if (first) emit('install', { first_day: todayStr() });
+  emit('session_start', { first: first });
+}
+// 🏛️ 창립 판테온 100 — 설치 시 서버 슬롯 예약(진짜 하드캡), 보상은 day-3 재방문에만 지급(용병 차단)
+function reserveFounder() {
+  try {
+    if (localStorage.getItem('p2_fdr_slot')) return;   // 이미 예약됨
+    fetch(P2_ANALYTICS + '/founder?uid=' + encodeURIComponent(p2uid)).then(r=>r.json()).then(j=>{
+      if (j && j.ok && j.founder) localStorage.setItem('p2_fdr_slot', String(j.num));
+      else if (j && j.full) localStorage.setItem('p2_fdr_slot', 'full');
+    }).catch(function(){});
+  } catch(e){}
+}
+function founderDay3Gate() {   // 설치 후 2일 경과 재방문 시에만 창립 보상 1회 — "가입만으론 배지 없음"
+  try {
+    const slot = localStorage.getItem('p2_fdr_slot');
+    if (!slot || slot === 'full' || localStorage.getItem('p2_fdr_granted')) return;
+    const inst = localStorage.getItem('p2_installed'); if (!inst) return;
+    const days = Math.floor((Date.parse(todayStr()) - Date.parse(inst)) / 86400000);
+    if (days >= 2) {
+      localStorage.setItem('p2_fdr_granted', '1');
+      addKarma(50);
+      showToast('🏛️ 창립 판테온 #' + slot + '/100 확정! +50 Karma — 함께 신화를 씁니다 ✧', 3600);
+    }
+  } catch(e){}
+}
 function getP2Uid() { return p2uid || localStorage.getItem('p2_uid') || ('p2' + Date.now().toString(36)); }
 function purchaseP2WithStars(item = 'p2_featured') {
   if (!tg || !tg.openInvoice) { showToast('TG WebApp only — Stars via Bot invoice'); return; }
@@ -1075,14 +1136,14 @@ function initIdentity() {
 function saveStreak() { localStorage.setItem('p2_streak', JSON.stringify(streak)); }
 
 function getInviteLink() {
-  if (P2_BOT) return 'https://t.me/' + P2_BOT + '?startapp=ref' + p2uid;
+  if (P2_BOT) return 'https://t.me/' + P2_BOT + '?startapp=c-tg-r-' + p2uid;
   return P2_BASE + '?ref=' + encodeURIComponent(p2uid);
 }
 
 // 신규 유입(피초대자) 측 — 완전 클라 동작. 인바이터 크레딧은 백엔드 있을 때만 graceful 핑.
 function captureRef() {
   let ref = '';
-  try { const sp = (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) || ''; if (sp.indexOf('ref') === 0) ref = sp.slice(3); } catch(e){}
+  try { ref = parseStartParam().ref || ''; } catch(e){}
   if (!ref) { const m = (location.search||'').match(/[?&]ref=([^&]+)/); if (m) ref = decodeURIComponent(m[1]); }
   if (ref && ref !== p2uid && !invitedBy) {
     invitedBy = ref; localStorage.setItem('p2_invitedBy', ref);
@@ -2334,7 +2395,11 @@ function _directorPick(idx) {
 // Init
 window.onload = () => {
   loadState();
+  resolveSource();       // 🎯 첫 터치 채널 출처 확정(captureRef보다 먼저)
   captureRef();          // 🪖 피초대자 환영 보너스 + invitedBy 기록(1회)
+  emitLaunch();          // 🎯 install(1회)+session_start 계측 emit(귀속 채널 실림)
+  reserveFounder();      // 🏛️ 창립100 서버 슬롯 예약(설치 시 1회)
+  founderDay3Gate();     // 🏛️ day-3 재방문 시 창립 보상 지급
   checkStreakOnLoad();   // streak check on load
   syncRefCount();        // 🪖 백엔드 있으면 초대 카운트 동기화 + 래더 렌더
 
