@@ -1477,29 +1477,53 @@ if (form) {
   });
 }
 
-// Epic Creation Ritual - the "엄청난 변화" moment
+// Epic Creation Ritual - the "엄청난 변화" moment.
+// Reveal is STAGED (not all-at-once): each echo lights up in sequence over ~1.2s, then a climax
+// burst — anticipation → payoff = the peak-dopamine "creation" beat. Reversible, client-only.
 function showCreationRitual(echoes, clanName) {
   const ritual = document.createElement('div');
   ritual.className = 'ritual-overlay';
   ritual.innerHTML = `
     <div class="ritual-content">
       <div class="ritual-glow"></div>
+      <div class="ritual-burst" aria-hidden="true"></div>
       <h3>✧ Awakening the Pantheon ✧</h3>
       <p class="clan-name">${escapeHtml(clanName)}</p>
-      <div class="ritual-echoes">${echoes.map(e => `<span class="ritual-echo">${escapeHtml(e)}</span>`).join('')}</div>
+      <div class="ritual-echoes">${echoes.map(e => `<span class="ritual-echo pending">${escapeHtml(e)}</span>`).join('')}</div>
       <p class="ritual-text">The echoes awaken... your story begins.</p>
     </div>
   `;
   document.body.appendChild(ritual);
 
-  // Animate
+  // Fade the overlay in.
   setTimeout(() => ritual.classList.add('active'), 10);
 
-  // Remove after
+  // Sequenced echo reveal — spread the chips across ~1.2s so each one "arrives" with its own beat.
+  const chips = ritual.querySelectorAll('.ritual-echo');
+  const startAt = 320;                     // let the title/clan-name settle first
+  const span = 1200;                       // total reveal window (the "1.2s reveal")
+  const stepEach = chips.length > 1 ? Math.round(span / chips.length) : 0;
+  chips.forEach((chip, i) => {
+    setTimeout(() => {
+      chip.classList.remove('pending');
+      chip.classList.add('shown');
+      try { haptic('light'); } catch(e){}
+    }, startAt + i * stepEach);
+  });
+
+  // Climax burst once the last echo has landed.
+  const climaxAt = startAt + Math.max(0, (chips.length - 1)) * stepEach + 180;
+  setTimeout(() => {
+    ritual.classList.add('climax');
+    try { haptic('success'); } catch(e){}
+  }, climaxAt);
+
+  // Hold on the full reveal, then fade out.
+  const holdUntil = Math.max(1900, climaxAt + 750);
   setTimeout(() => {
     ritual.classList.remove('active');
     setTimeout(() => ritual.remove(), 400);
-  }, 1400);
+  }, holdUntil);
 }
 
 // Render My Pantheon (more elegant story view)

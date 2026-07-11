@@ -485,14 +485,46 @@ h1 {
   padding: 4px 12px;
   border-radius: 999px;
   font-size: 12px;
-  animation: echoRise .6s ease both;
 }
-.ritual-echo:nth-child(2) { animation-delay: .1s; }
-.ritual-echo:nth-child(3) { animation-delay: .2s; }
-.ritual-echo:nth-child(4) { animation-delay: .3s; }
-@keyframes echoRise {
-  from { transform: translateY(20px) scale(0.6); opacity: 0; }
-  to { transform: translateY(0) scale(1); opacity: 1; }
+/* Staged reveal: chips start hidden, then pop in one-by-one as JS flips .pending → .shown. */
+.ritual-echo.pending {
+  opacity: 0;
+  transform: translateY(20px) scale(0.6);
+}
+.ritual-echo.shown {
+  animation: echoPop .55s cubic-bezier(.18,1.3,.4,1) both;
+  box-shadow: 0 0 12px rgba(201,162,39,0.55);
+}
+@keyframes echoPop {
+  0%   { transform: translateY(20px) scale(0.55); opacity: 0; }
+  60%  { transform: translateY(-3px) scale(1.14); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+/* Climax burst — a single gold flash the instant the last echo lands (the payoff). */
+.ritual-burst {
+  position: absolute;
+  inset: -30px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(201,162,39,0.55) 0%, rgba(201,162,39,0.12) 45%, transparent 72%);
+  opacity: 0;
+  transform: scale(0.4);
+  pointer-events: none;
+  z-index: -1;
+}
+.ritual-overlay.climax .ritual-burst {
+  animation: ritualBurst .85s cubic-bezier(.16,1,.3,1) forwards;
+}
+.ritual-overlay.climax .clan-name {
+  animation: clanFlash .85s ease;
+}
+@keyframes ritualBurst {
+  0%   { opacity: 0;   transform: scale(0.4); }
+  35%  { opacity: 0.9; transform: scale(1.05); }
+  100% { opacity: 0;   transform: scale(1.5); }
+}
+@keyframes clanFlash {
+  0%, 100% { filter: none; }
+  40% { filter: drop-shadow(0 0 10px rgba(201,162,39,0.8)) brightness(1.25); }
 }
 .ritual-text {
   font-size: 14px;
