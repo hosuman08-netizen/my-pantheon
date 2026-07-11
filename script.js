@@ -2017,7 +2017,7 @@ function renderMyPantheon() {
     statusNote.textContent = note;
   }
   
-  storiesEl.innerHTML = '<h4 style="margin:18px 0 8px; font-size:15px; position:relative;">Stories <span style="position:absolute; right:0; font-size:12px; color:var(--accent); opacity:.5;">✦ your legacy</span></h4>';
+  storiesEl.innerHTML = '<h3 style="margin:4px 0 8px; font-size:18px; color:#f5f1e6; position:relative;">Stories <span style="position:absolute; right:0; bottom:2px; font-size:12px; color:var(--accent); opacity:.55; font-weight:400;">✦ your legacy</span></h3>';
   if (currentPantheon.stories.length === 0) {
     storiesEl.innerHTML += '<p class="hint">No stories yet. Add one below to start your legend.</p>';
   } else {
