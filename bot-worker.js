@@ -20,7 +20,25 @@ const WELCOME_CAPTION =
   '✨ <b>Tap below to begin your Pantheon.</b>\n\n' +
   '<i>Fictional stories inspired by myth — no real deities. 100% free to start.</i>';
 
-const OPEN_BUTTON = { text: '✨ Open My Pantheon', web_app: { url: WEBAPP_URL } };
+// 채널 귀속 허용목록 — script.js P2_SRC_ALLOW 와 동일 유지.
+const P2_SRC_ALLOW = ['reddit','x','wa','insta','discord','quora','yt','tg','fb','direct','other'];
+// /start 딥링크 payload("c-reddit" / "c-reddit-r-<uid>")를 안전한 startapp 태그로 재구성(백업 귀속).
+function buildStartTag(payload) {
+  const raw = String(payload || '').trim();
+  if (raw.indexOf('c-') !== 0) return '';
+  const rest = raw.slice(2), ri = rest.indexOf('-r-');
+  let channel = ri >= 0 ? rest.slice(0, ri) : rest;
+  let ref = ri >= 0 ? rest.slice(ri + 3) : '';
+  channel = channel.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 16);
+  if (!channel || P2_SRC_ALLOW.indexOf(channel) < 0) channel = 'other';
+  ref = ref.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 24);
+  return 'c-' + channel + (ref ? '-r-' + ref : '');
+}
+function openButton(startTag) {
+  const url = startTag ? WEBAPP_URL + '?startapp=' + encodeURIComponent(startTag) : WEBAPP_URL;
+  return { text: '✨ Open My Pantheon', web_app: { url } };
+}
+const OPEN_BUTTON = openButton('');
 
 const CMD_REPLIES = {
   '/create': '⚒️ <b>Build your clan</b> — open the app and forge your first Echo hero. Every hero carries a virtue.',
@@ -36,9 +54,9 @@ async function tg(token, method, payload) {
   });
 }
 
-async function sendWelcome(token, chatId) {
+async function sendWelcome(token, chatId, startTag) {
   // Try a rich photo welcome; fall back to text if the image can't be fetched.
-  const kb = { inline_keyboard: [[OPEN_BUTTON]] };
+  const kb = { inline_keyboard: [[openButton(startTag)]] };
   const photoRes = await tg(token, 'sendPhoto', {
     chat_id: chatId, photo: HERO_IMAGE, caption: WELCOME_CAPTION,
     parse_mode: 'HTML', reply_markup: kb,
@@ -71,7 +89,8 @@ export default {
       const text = msg.text.trim();
       const cmd = text.split(/\s+/)[0].toLowerCase().replace(/@.*$/, '');
       if (cmd === '/start') {
-        await sendWelcome(token, chatId);
+        const startTag = buildStartTag(text.split(/\s+/)[1] || '');  // "/start c-reddit" → 백업귀속
+        await sendWelcome(token, chatId, startTag);
       } else if (CMD_REPLIES[cmd]) {
         await tg(token, 'sendMessage', {
           chat_id: chatId, text: CMD_REPLIES[cmd], parse_mode: 'HTML',
