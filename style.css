@@ -1123,6 +1123,22 @@ button.secondary[onclick*="askDirector"]:hover {
   margin: 2px 0 12px;
   letter-spacing: .3px;
 }
+/* Honest hierarchy: only the single top pick of today's feed is highlighted. */
+.explore-pick {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .3px;
+  color: #1a1400;
+  background: linear-gradient(135deg, #c9a227, #d4b37f);
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.card.featured {
+  border-color: rgba(201,162,39,.5);
+  box-shadow: 0 0 0 1px rgba(201,162,39,.18), 0 6px 22px rgba(201,162,39,.10);
+}
 .card, .event-card {
   background: var(--card);
   border: 1px solid var(--border);

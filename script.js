@@ -2304,20 +2304,22 @@ function renderExplore() {
   if (!list) return;
   const fresh = '<div class="explore-fresh">✧ Fresh picks today — the Pantheon feed refreshes daily</div>';
   // rank15: build the whole list as one string, then a single innerHTML assignment (1 reflow, O(n)).
-  list.innerHTML = fresh + _exploreOrder().map((i) => {
+  list.innerHTML = fresh + _exploreOrder().map((i, pos) => {
     const d = P2_SEED_PANTHEONS[i];
     const miniIcons = _exploreEchoVals(d.echoes).map(v => v ? getEchoIcon(v, 16) : '').join('');
     const preview = d.example.length > 150 ? d.example.slice(0, 148).trim() + '…' : d.example;
+    // Honest hierarchy: only the top of today's order is the pick, not every card.
+    const pick = pos === 0 ? '<span class="explore-pick">✧ Top pick today</span>' : '';
     return `
-      <div class="card" data-idx="${i}" role="button" tabindex="0" style="cursor:pointer;">
+      <div class="card${pos === 0 ? ' featured' : ''}" data-idx="${i}" role="button" tabindex="0" style="cursor:pointer;">
         <div style="display:flex; align-items:center; gap:6px;">
           <div style="display:flex; gap:2px;">${miniIcons}</div>
           <strong>${escapeHtml(d.name)}</strong>
+          ${pick}
         </div>
-        <div class="meta">${escapeHtml(d.echoes)} • ${d.karma} karma • featured tale</div>
+        <div class="meta">${escapeHtml(d.echoes)} • ${d.karma} karma</div>
         <p class="example">"${escapeHtml(preview)}"</p>
         <div style="display:flex; gap:6px; margin-top:2px;">
-          <button class="small" data-act="view">View</button>
           <button class="small" data-act="like">Like &amp; Share</button>
           <button class="small" data-act="inspire">Inspire My Story</button>
         </div>
