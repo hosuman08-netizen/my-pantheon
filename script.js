@@ -1392,7 +1392,11 @@ function renderCodex() {
   const cells = ALL_ECHO_KEYS.map(function(k){
     const nm = escapeHtml(echoShortName(k));
     if (owned.indexOf(k) !== -1) {
-      return '<div class="codex-cell owned">' + getEchoIcon(k, 30) + '<span>' + nm + '</span></div>';
+      const lv = bondLevel(bondCount(k));
+      const badge = lv > 0
+        ? '<span class="bond-badge bond-l' + lv + '" title="' + bondLabel(lv) + '">Lv' + lv + '</span>'
+        : '';
+      return '<div class="codex-cell owned' + (lv > 0 ? ' bonded' : '') + '">' + getEchoIcon(k, 30) + '<span>' + nm + '</span>' + badge + '</div>';
     }
     return '<button type="button" class="codex-cell locked" onclick="addEchoToPantheon(\'' + k + '\')" aria-label="Discover ' + nm + '">' +
       '<div class="codex-silhouette">' + getEchoIcon(k, 30) + '</div><span>?</span></button>';
@@ -1404,6 +1408,54 @@ function renderCodex() {
   else if (away === 2) nudge = '<div class="codex-nudge">✨ Just 2 Echoes from a complete Codex (' + n + '/' + total + '). So close — tap a silhouette.</div>';
   el.innerHTML = '<div class="codex-head"><span>📜 Pantheon Codex</span><span class="codex-count">' + n + '/' + total + ' discovered</span></div>' +
     '<div class="codex-grid">' + cells + '</div>' + nudge;
+}
+
+// ===== Echo Bond — story tagging → Echo evolution (endowment / collection depth) =====
+// Honest & reversible: dedicating a story to an Echo grows its Bond (a real count stored on the
+// pantheon). Bond level is derived purely from that count — no randomness, no fake numbers. The
+// endowment loop: the Echoes YOU nurture with your stories visibly evolve and stay yours.
+const BOND_THRESH = [1, 3, 6, 10, 15];   // count needed for Lv1..Lv5
+const BOND_NAMES  = ['Kindled', 'Awakened', 'Radiant', 'Ascendant', 'Eternal'];
+function getBonds() {
+  if (!currentPantheon) return {};
+  if (!currentPantheon.bonds || typeof currentPantheon.bonds !== 'object') currentPantheon.bonds = {};
+  return currentPantheon.bonds;
+}
+function bondCount(key) { const b = getBonds(); return b[key] || 0; }
+function bondLevel(count) { let lv = 0; for (let i = 0; i < BOND_THRESH.length; i++) { if (count >= BOND_THRESH[i]) lv = i + 1; } return lv; }
+function bondLabel(lv) { return BOND_NAMES[lv - 1] || ''; }
+// Dedicate a story to an Echo → +1 Bond. Level-up = evolution moment (toast + haptic).
+function grantBond(key) {
+  if (!key || !currentPantheon) return;
+  if (ownedEchoKeys().indexOf(key) === -1) return;   // only owned Echoes evolve
+  const b = getBonds();
+  const before = bondLevel(b[key] || 0);
+  b[key] = (b[key] || 0) + 1;
+  const after = bondLevel(b[key]);
+  savePantheon();
+  if (after > before) {
+    showToast('🔱 ' + echoShortName(key) + ' evolved — Bond Lv' + after + ' (' + bondLabel(after) + ') ✧', 3000);
+    haptic('success');
+  }
+  renderCodex();
+  renderEchoTag();
+}
+// Populate the story-form Echo tag selector from the Echoes you own (shows each Echo's Bond).
+function renderEchoTag() {
+  const el = document.getElementById('echo-tag-row');
+  if (!el) return;
+  const owned = currentPantheon ? ownedEchoKeys() : [];
+  if (!owned.length) { el.style.display = 'none'; el.innerHTML = ''; return; }
+  el.style.display = 'block';
+  const prev = (function(){ const s = document.getElementById('story-echo-tag'); return s ? s.value : ''; })();
+  const opts = owned.map(function(k){
+    const lv = bondLevel(bondCount(k));
+    const tag = lv > 0 ? ' · Bond Lv' + lv : '';
+    const sel = k === prev ? ' selected' : '';
+    return '<option value="' + k + '"' + sel + '>' + escapeHtml(echoShortName(k)) + tag + '</option>';
+  }).join('');
+  el.innerHTML = '<label class="echo-tag-label">Dedicate this story to an Echo (grows its Bond):</label>' +
+    '<select id="story-echo-tag" class="echo-tag-select">' + opts + '</select>';
 }
 
 // ===== Karma Atelier — free cosmetic shop (currency sink + premium value contrast) =====
@@ -1732,6 +1784,7 @@ function renderMyPantheon() {
   }
   renderReferralStreak();  // 🪖 Founding 뱃지 + 스트릭 + 초대 래더
   renderCodex();           // 📜 수집 그리드 + 'One more Echo' 근접 넛지
+  renderEchoTag();         // 🔱 Echo Bond — 스토리 태깅 셀렉터(소유 Echo 진화)
   renderKarmaShop();       // ✧ Karma Atelier — 카르마 화폐싱크 + 프리미엄 가치대비
   renderBlessingBack();    // 🙏 상호 축복 루프 (invitedBy 상호성)
   updateMainButton();
@@ -1746,10 +1799,15 @@ if (storyForm) {
     
     const text = document.getElementById('story-text').value.trim();
     if (!text) return;
-    
+
+    // Echo Bond: read the dedicated Echo BEFORE re-render repopulates the selector.
+    const _tagEl = document.getElementById('story-echo-tag');
+    const _bondKey = _tagEl ? _tagEl.value : '';
+
     currentPantheon.stories.push(text);
     savePantheon();
     renderMyPantheon();
+    if (_bondKey) grantBond(_bondKey);   // 🔱 dedicate → grow that Echo's Bond (evolution)
     document.getElementById('story-text').value = '';
     let baseKarma = 3;
     if (currentPantheon.festivalBoost) {

@@ -1578,3 +1578,26 @@ input:checked + .slider:before {
   background: transparent; border: 1px solid rgba(201,162,39,.25);
   color: #a9a58f; font-size: 10.5px; font-weight: 600; cursor: pointer; font-family: inherit;
 }
+
+/* ===== Echo Bond — story tagging → Echo evolution (endowment) ===== */
+.echo-tag-row { margin: 6px 0 10px; }
+.echo-tag-label { display: block; font-size: 10.5px; color: #cfc8b0; opacity: .82; margin-bottom: 4px; }
+.echo-tag-select {
+  width: 100%; padding: 8px 10px; border-radius: 8px;
+  background: rgba(255,255,255,.05); border: 1px solid rgba(201,162,39,.3);
+  color: #e8d9a0; font-size: 12.5px; font-family: inherit;
+}
+.codex-cell.owned { position: relative; }
+.bond-badge {
+  position: absolute; top: 3px; right: 3px;
+  font-size: 8px; font-weight: 800; line-height: 1;
+  padding: 2px 4px; border-radius: 6px;
+  color: #111; background: linear-gradient(90deg, #e7c65a, #c9a227);
+}
+.bond-badge.bond-l3 { background: linear-gradient(90deg, #ffd24a, #ff8c1a); }
+.bond-badge.bond-l4 { background: linear-gradient(90deg, #ffe08a, #e86aa0); }
+.bond-badge.bond-l5 {
+  background: linear-gradient(90deg, #fff6c0, #ffd24a, #6a7dff);
+  box-shadow: 0 0 8px 1px rgba(255,210,74,.6);
+}
+.codex-cell.owned.bonded { border-color: rgba(201,162,39,.55); }
