@@ -98,6 +98,85 @@ function renderFestivals() {
     cd.textContent = label;
     cd.style.cssText = 'margin-left:auto;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;letter-spacing:.3px;background:' + bg + ';color:' + fg + ';';
   });
+  renderFestivalBundle();
+}
+
+// ===== Festival Blessing Bundle — free, real-date-gated seasonal FOMO =====
+// Honest: claimable ONLY inside the real festival window (open..close). Karma shown == Karma granted.
+// No purchase, no probability, no fake numbers. Reversible (single localStorage flag per festival).
+const FEST_BUNDLES = [
+  { ev: 'ganesh',   icon: '🪷', name: 'Ganesh Blessing Bundle',   open: '2026-09-14', close: '2026-09-17', karma: 50,  seal: 'Modaka Seal',       reward: '+50 Karma · 🪷 Modaka Seal' },
+  { ev: 'navratri', icon: '⚔️', name: 'Navratri Blessing Bundle',  open: '2026-10-11', close: '2026-10-20', karma: 90,  seal: 'Nine-Night Seal',   reward: '+90 Karma · ⚔️ Nine-Night Seal' },
+  { ev: 'diwali',   icon: '🪔', name: 'Diwali Blessing Bundle',    open: '2026-11-08', close: '2026-11-11', karma: 120, seal: 'Festival of Lights Seal', reward: '+120 Karma · 🪔 Festival of Lights Seal' },
+];
+function ensureFestBundleStyles() {
+  if (document.getElementById('p2-festbundle-styles')) return;
+  const st = document.createElement('style');
+  st.id = 'p2-festbundle-styles';
+  st.textContent = [
+    '.fest-bundle{margin-top:14px}',
+    '.fb-card{padding:14px;border-radius:14px;background:linear-gradient(135deg,rgba(201,162,39,.16),rgba(232,69,46,.06));border:1px solid rgba(201,162,39,.45)}',
+    '.fb-card.locked{opacity:.82;background:linear-gradient(135deg,rgba(201,162,39,.08),rgba(255,255,255,.02));border-color:rgba(201,162,39,.22)}',
+    '.fb-top{display:flex;align-items:center;gap:9px;margin-bottom:7px}',
+    '.fb-icon{font-size:22px;flex:0 0 auto}',
+    '.fb-title{font-size:14px;font-weight:800;color:#e8d9a0;flex:1 1 auto;line-height:1.15}',
+    '.fb-cd{font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:11px;letter-spacing:.3px;white-space:nowrap}',
+    '.fb-cd.live{background:#e8452e;color:#fff}',
+    '.fb-cd.soon{background:rgba(201,162,39,.18);color:#c9a227}',
+    '.fb-reward{font-size:12px;color:#e8d9a0;font-weight:600;margin-bottom:10px;opacity:.92}',
+    '.fb-btn{width:100%}',
+    '.fb-done{text-align:center;font-size:12px;font-weight:700;color:#c9a227;padding:2px 0}',
+    '.fb-hint{font-size:9.5px;color:#c9a227;text-align:center;opacity:.7;margin-top:7px}'
+  ].join('');
+  document.head.appendChild(st);
+}
+function fbClaimed(ev) { return localStorage.getItem('p2_festbundle_' + ev) === '1'; }
+function renderFestivalBundle() {
+  const el = document.getElementById('fest-bundle');
+  if (!el) return;
+  ensureFestBundleStyles();
+  const now = new Date();
+  let active = null, upcoming = null;
+  for (const b of FEST_BUNDLES) {
+    const o = new Date(b.open + 'T00:00:00'), c = new Date(b.close + 'T23:59:59');
+    if (now >= o && now <= c) { active = b; break; }
+    if (now < o && (!upcoming || o < new Date(upcoming.open + 'T00:00:00'))) upcoming = b;
+  }
+  const b = active || upcoming;
+  if (!b) { el.innerHTML = ''; return; }  // all festival windows have passed
+  const claimed = fbClaimed(b.ev);
+  let cd, foot;
+  if (active) {
+    const c = new Date(b.close + 'T23:59:59');
+    const days = Math.ceil((c - now) / 86400000);
+    cd = '<span class="fb-cd live">⚡ ' + (days <= 1 ? 'ends today' : days + 'd left') + '</span>';
+    foot = claimed
+      ? '<div class="fb-done">✓ Claimed — blessing received</div>'
+      : '<button class="primary fb-btn" onclick="claimFestBundle(\'' + b.ev + '\')">Claim Blessing · ' + b.reward + '</button>';
+  } else {
+    const o = new Date(b.open + 'T00:00:00');
+    const days = Math.ceil((o - now) / 86400000);
+    cd = '<span class="fb-cd soon">opens in ' + days + 'd</span>';
+    foot = '<div class="fb-hint">Unlocks on ' + b.open + ' — free during the festival only.</div>';
+  }
+  el.innerHTML =
+    '<div class="fb-card' + (active && !claimed ? '' : ' locked') + '">' +
+      '<div class="fb-top"><span class="fb-icon">' + b.icon + '</span>' +
+      '<span class="fb-title">' + b.name + '</span>' + cd + '</div>' +
+      '<div class="fb-reward">' + b.reward + '</div>' + foot +
+    '</div>';
+}
+function claimFestBundle(ev) {
+  const b = FEST_BUNDLES.find(x => x.ev === ev);
+  if (!b) return;
+  const now = new Date(), o = new Date(b.open + 'T00:00:00'), c = new Date(b.close + 'T23:59:59');
+  if (now < o || now > c) { showToast('This bundle is not open right now.', 2200); renderFestivalBundle(); return; }
+  if (fbClaimed(ev)) return;
+  localStorage.setItem('p2_festbundle_' + ev, '1');
+  localStorage.setItem('p2_seal_' + ev, b.seal);
+  addKarma(b.karma);
+  showToast(b.icon + ' ' + b.name + ' claimed · +' + b.karma + ' Karma ✧', 3000);
+  renderFestivalBundle();
 }
 
 // Reusable Echo icon SVGs (detailed Raji miniature style, for full & mini)
