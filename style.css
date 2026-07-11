@@ -69,7 +69,7 @@ body {
   box-shadow: var(--shadow);
 }
 .framing::before {
-  content: '𑁍  •  𑁍';
+  content: '✦  ·  ✦';
   position: absolute;
   top: -8px;
   left: 50%;
@@ -293,7 +293,7 @@ header {
   position: relative;
 }
 header::after {
-  content: '𑁍';
+  content: '✦';
   position: absolute;
   bottom: -1px;
   left: 50%;
