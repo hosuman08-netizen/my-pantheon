@@ -1094,6 +1094,16 @@ button.secondary[onclick*="askDirector"]:hover {
 }
 
 /* Beautiful, decorative cards */
+/* Explore feed "living community" freshness ribbon — the feed re-orders daily. */
+.explore-fresh {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  opacity: .85;
+  margin: 2px 0 12px;
+  letter-spacing: .3px;
+}
 .card, .event-card {
   background: var(--card);
   border: 1px solid var(--border);

@@ -1876,11 +1876,28 @@ function _exploreEchoVals(echoStr) {
   });
 }
 
+// Daily seed rotation — the fictional feed re-orders every day (date-hashed, deterministic, no
+// backend, no fabricated activity counts) so the Explore tab feels like a living, refreshing
+// community instead of a frozen list. data-idx keeps the TRUE index so view/like/inspire stay correct.
+function _exploreOrder() {
+  const n = P2_SEED_PANTHEONS.length;
+  const order = Array.from({ length: n }, (_, i) => i);
+  let s = (hashId(todayStr() + ':explore') >>> 0) || 1;
+  const rnd = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+  for (let i = n - 1; i > 0; i--) {   // Fisher–Yates with a seeded LCG
+    const j = Math.floor(rnd() * (i + 1));
+    const tmp = order[i]; order[i] = order[j]; order[j] = tmp;
+  }
+  return order;
+}
+
 function renderExplore() {
   const list = document.getElementById('explore-list');
   if (!list) return;
+  const fresh = '<div class="explore-fresh">✧ Fresh picks today — the Pantheon feed refreshes daily</div>';
   // rank15: build the whole list as one string, then a single innerHTML assignment (1 reflow, O(n)).
-  list.innerHTML = P2_SEED_PANTHEONS.map((d, i) => {
+  list.innerHTML = fresh + _exploreOrder().map((i) => {
+    const d = P2_SEED_PANTHEONS[i];
     const miniIcons = _exploreEchoVals(d.echoes).map(v => v ? getEchoIcon(v, 16) : '').join('');
     const preview = d.example.length > 150 ? d.example.slice(0, 148).trim() + '…' : d.example;
     return `
