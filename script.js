@@ -1255,6 +1255,120 @@ function renderReferralStreak() {
   }
 }
 
+// ===== One-time style injection for Codex + Blessing (client-only, reversible) =====
+function ensureP2Styles() {
+  if (document.getElementById('p2-codex-bless-styles')) return;
+  const st = document.createElement('style');
+  st.id = 'p2-codex-bless-styles';
+  st.textContent = [
+    '.codex-box{margin:10px 0 4px}',
+    '.codex-head{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;color:#e8d9a0;margin-bottom:8px}',
+    '.codex-count{font-size:11px;color:#c9a227;font-weight:600}',
+    '.codex-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}',
+    '.codex-cell{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(201,162,39,.18);font-size:9.5px;color:#cfc8b0;text-align:center;line-height:1.1}',
+    '.codex-cell.owned{border-color:rgba(201,162,39,.55);background:rgba(201,162,39,.10)}',
+    '.codex-cell.owned span{color:#e8d9a0}',
+    '.codex-cell.locked{cursor:pointer;opacity:.9;font-family:inherit}',
+    '.codex-cell.locked .codex-silhouette{filter:brightness(0) saturate(0) opacity(.32);transition:filter .2s}',
+    '.codex-cell.locked:hover .codex-silhouette,.codex-cell.locked:active .codex-silhouette{filter:brightness(0) saturate(0) opacity(.5)}',
+    '.codex-cell.locked span{color:#8a8676;font-weight:700}',
+    '.codex-nudge{margin-top:9px;padding:8px 10px;border-radius:9px;font-size:11.5px;text-align:center;background:rgba(201,162,39,.10);border:1px solid rgba(201,162,39,.3);color:#e8d9a0}',
+    '.codex-nudge.hot{background:rgba(201,162,39,.18);border-color:rgba(201,162,39,.6);animation:codexPulse 1.6s ease-in-out infinite}',
+    '@keyframes codexPulse{0%,100%{box-shadow:0 0 0 0 rgba(201,162,39,0)}50%{box-shadow:0 0 14px 2px rgba(201,162,39,.35)}}',
+    '.bless-card{margin:8px 0 0;padding:12px;border-radius:12px;background:linear-gradient(135deg,rgba(201,162,39,.14),rgba(201,162,39,.05));border:1px solid rgba(201,162,39,.4)}',
+    '.bless-card.done{text-align:center;font-size:11.5px;color:#c9a227}',
+    '.bless-title{font-size:13px;font-weight:700;color:#e8d9a0;margin-bottom:3px}',
+    '.bless-sub{font-size:11px;color:#cfc8b0;opacity:.85;margin-bottom:9px;line-height:1.35}',
+    '.bless-btn{width:100%}'
+  ].join('');
+  document.head.appendChild(st);
+}
+
+// ===== Pantheon Codex — collection grid (Zeigarnik open-loop) + honest 'One more Echo' near-miss =====
+const ALL_ECHO_KEYS = ['Krishna-echo','Rama-echo','Draupadi-echo','Hanuman-echo','Durga-echo','Arjuna-echo','Sita-echo'];
+function echoShortName(k) { return (echoMap[k] || k).replace('Echo of ', '').replace(/ \(.*\)$/, ''); }
+function ownedEchoKeys() {
+  if (!currentPantheon || !Array.isArray(currentPantheon.echoes)) return [];
+  return ALL_ECHO_KEYS.filter(k => currentPantheon.echoes.indexOf(echoMap[k]) !== -1);
+}
+// Collect a missing Echo into the pantheon — honest client-only progression (dopamine + endowment).
+function addEchoToPantheon(key) {
+  if (!currentPantheon || !Array.isArray(currentPantheon.echoes)) return;
+  const disp = echoMap[key];
+  if (!disp || currentPantheon.echoes.indexOf(disp) !== -1) return;
+  currentPantheon.echoes.push(disp);
+  savePantheon();
+  addKarma(4);
+  haptic('success');
+  const n = ownedEchoKeys().length, total = ALL_ECHO_KEYS.length;
+  showToast('✨ ' + echoShortName(key) + ' joined your Pantheon — Codex ' + n + '/' + total + ' · +4 Karma', 2800);
+  if (n === total) {
+    setTimeout(function(){ try { showToast('🔱 Codex complete! All ' + total + ' Echoes discovered ✦', 3400); celebrateShare(); } catch(e){} }, 950);
+  }
+  renderMyPantheon();
+}
+function renderCodex() {
+  ensureP2Styles();
+  const el = document.getElementById('pantheon-codex');
+  if (!el) return;
+  if (!currentPantheon) { el.innerHTML = ''; return; }
+  const owned = ownedEchoKeys();
+  const total = ALL_ECHO_KEYS.length, n = owned.length;
+  const cells = ALL_ECHO_KEYS.map(function(k){
+    const nm = escapeHtml(echoShortName(k));
+    if (owned.indexOf(k) !== -1) {
+      return '<div class="codex-cell owned">' + getEchoIcon(k, 30) + '<span>' + nm + '</span></div>';
+    }
+    return '<button type="button" class="codex-cell locked" onclick="addEchoToPantheon(\'' + k + '\')" aria-label="Discover ' + nm + '">' +
+      '<div class="codex-silhouette">' + getEchoIcon(k, 30) + '</div><span>?</span></button>';
+  }).join('');
+  // Honest near-miss: threshold = a complete Codex; only real values shown.
+  const away = total - n;
+  let nudge = '';
+  if (away === 1) nudge = '<div class="codex-nudge hot">🔥 One more Echo completes your Pantheon Codex — ' + n + '/' + total + '. Tap a silhouette to discover it.</div>';
+  else if (away === 2) nudge = '<div class="codex-nudge">✨ Just 2 Echoes from a complete Codex (' + n + '/' + total + '). So close — tap a silhouette.</div>';
+  el.innerHTML = '<div class="codex-head"><span>📜 Pantheon Codex</span><span class="codex-count">' + n + '/' + total + ' discovered</span></div>' +
+    '<div class="codex-grid">' + cells + '</div>' + nudge;
+}
+
+// ===== Mutual Blessing Loop — 2-way reciprocity (invitee is nudged to bless forward) =====
+function renderBlessingBack() {
+  ensureP2Styles();
+  const el = document.getElementById('blessing-back');
+  if (!el) return;
+  if (!invitedBy) { el.style.display = 'none'; el.innerHTML = ''; return; }
+  el.style.display = 'block';
+  if (localStorage.getItem('p2_blessed_back') === '1') {
+    el.innerHTML = '<div class="bless-card done">🙏 Blessing returned — the circle is complete. Your light carries forward ✦</div>';
+    return;
+  }
+  el.innerHTML = '<div class="bless-card">' +
+    '<div class="bless-title">🙏 A clan blessed you here</div>' +
+    '<div class="bless-sub">You were invited into the Pantheon. Complete the circle — carry the blessing to a new clan.</div>' +
+    '<button type="button" class="primary bless-btn" onclick="blessBack()">🔱 Bless it forward</button>' +
+    '</div>';
+}
+function blessBack() {
+  const link = getInviteLink();
+  const text = '🙏 A clan blessed me into the Pantheon — now I pass the light to you. Build your dharma legacy.\n' + link;
+  if (tg && tg.openTelegramLink) {
+    tg.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent(text));
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(link).then(function(){ showToast('Blessing link copied — pass it to your clan ✦', 2800); });
+  }
+  if (localStorage.getItem('p2_blessed_back') !== '1') {
+    localStorage.setItem('p2_blessed_back', '1');
+    addKarma(8);
+    sharesCount++;
+    // Reciprocity credit to the inviter — backend-only graceful ping, no-op if unset.
+    if (P2_BACKEND && invitedBy) { try { fetch(P2_BACKEND + '/p2bless?inviter=' + encodeURIComponent(invitedBy) + '&uid=' + encodeURIComponent(p2uid), {mode:'no-cors'}); } catch(e){} }
+    showToast('🙏 Blessing passed forward · +8 Karma — the circle continues ✦', 3000);
+    haptic('success');
+    celebrateShare();
+  }
+  renderBlessingBack();
+}
+
 // Create Pantheon
 const form = document.getElementById('pantheon-form');
 if (form) {
@@ -1409,6 +1523,8 @@ function renderMyPantheon() {
     ).join('');
   }
   renderReferralStreak();  // 🪖 Founding 뱃지 + 스트릭 + 초대 래더
+  renderCodex();           // 📜 수집 그리드 + 'One more Echo' 근접 넛지
+  renderBlessingBack();    // 🙏 상호 축복 루프 (invitedBy 상호성)
   updateMainButton();
 }
 
