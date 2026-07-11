@@ -1461,6 +1461,69 @@ function renderReferralStreak() {
   }
 }
 
+// ===== Daily Dharma Draw — free once-a-day variable reveal + collectible deck (habit anchor) =====
+// Honest & client-only: each day you reveal ONE of a fixed set of dharma wisdom cards. Which card is
+// the variable reward (equal chance, no fake odds shown, no purchase). New cards fill a Dharma Deck
+// (Zeigarnik open loop); every draw grants a small variable Karma. Reversible localStorage only.
+const DHARMA_CARDS = [
+  { id: 'gift',    icon: '🕊️', title: 'The Unasked Gift',   line: 'Kindness given freely returns as light.' },
+  { id: 'courage', icon: '🔥', title: 'Quiet Courage',       line: 'The bravest deeds are seen by no one.' },
+  { id: 'tide',    icon: '🌊', title: 'The Forgiving Tide',  line: 'To forgive is to unchain your own heart.' },
+  { id: 'seed',    icon: '🌱', title: 'Seed of Karma',       line: 'Every small act plants a forest you may never see.' },
+  { id: 'scale',   icon: '⚖️', title: 'The Even Scale',      line: 'Justice weighs the unseen as much as the seen.' },
+  { id: 'lotus',   icon: '🪷', title: 'Lotus in the Mud',    line: 'From hardship, the purest bloom rises.' },
+  { id: 'vow',     icon: '🌟', title: 'The Kept Promise',    line: 'A vow honored outlives the one who made it.' },
+  { id: 'hand',    icon: '🤝', title: 'The Lifted Hand',     line: 'Raise another and you rise unbroken.' },
+  { id: 'moon',    icon: '🌘', title: 'The Patient Moon',    line: 'What is dark now will be full in time.' },
+  { id: 'blade',   icon: '🗡️', title: 'The Sheathed Blade',  line: 'True strength knows when not to strike.' },
+  { id: 'echo',    icon: '🔔', title: 'Echo of Deeds',       line: 'Your actions ring long after your voice is gone.' },
+  { id: 'flame',   icon: '🕯️', title: 'The Shared Flame',    line: 'A lamp lit for another loses none of its light.' }
+];
+let dharmaDeck = (function(){
+  try { const v = JSON.parse(localStorage.getItem('p2_dharmadeck') || 'null'); if (v && Array.isArray(v.owned)) return v; } catch(e){}
+  return { last: '', owned: [], today: null };
+})();
+function saveDharmaDeck(){ try { localStorage.setItem('p2_dharmadeck', JSON.stringify(dharmaDeck)); } catch(e){} }
+function drawDharma(){
+  const today = todayStr();
+  if (dharmaDeck.last === today) { showToast("Today's Dharma already revealed — return at midnight ✧"); return; }
+  const card = DHARMA_CARDS[Math.floor(Math.random() * DHARMA_CARDS.length)];
+  const isNew = dharmaDeck.owned.indexOf(card.id) === -1;
+  if (isNew) dharmaDeck.owned.push(card.id);
+  dharmaDeck.last = today;
+  dharmaDeck.today = card.id;
+  saveDharmaDeck();
+  const reward = 3 + Math.floor(Math.random() * 6);   // 3~8 variable
+  addKarma(reward);
+  haptic(isNew ? 'success' : 'light');
+  const n = dharmaDeck.owned.length, total = DHARMA_CARDS.length;
+  if (isNew) showToast('📜 New Dharma — ' + card.icon + ' ' + card.title + ' · Deck ' + n + '/' + total + ' · +' + reward + ' Karma', 3600);
+  else showToast('📜 ' + card.icon + ' ' + card.title + ' — wisdom revisited · +' + reward + ' Karma', 3000);
+  renderDharmaDraw();
+}
+function renderDharmaDraw(){
+  ensureP2Styles();
+  const el = document.getElementById('dharma-draw');
+  if (!el) return;
+  const n = dharmaDeck.owned.length, total = DHARMA_CARDS.length;
+  const drawnToday = dharmaDeck.last === todayStr();
+  let body;
+  if (drawnToday) {
+    const card = DHARMA_CARDS.find(c => c.id === dharmaDeck.today) || DHARMA_CARDS[0];
+    const now = new Date(), mid = new Date(now); mid.setHours(24, 0, 0, 0);
+    const ms = mid - now, left = Math.floor(ms / 3600000) + 'h ' + Math.floor((ms % 3600000) / 60000) + 'm';
+    body = '<div class="dharma-card revealed">' +
+        '<div class="dharma-icon">' + card.icon + '</div>' +
+        '<div class="dharma-title">' + escapeHtml(card.title) + '</div>' +
+        '<div class="dharma-line">“' + escapeHtml(card.line) + '”</div></div>' +
+      '<div class="dharma-next">Next Dharma in ' + left + '</div>';
+  } else {
+    body = '<button class="primary dharma-btn" onclick="drawDharma()">🃏 Draw Today’s Dharma</button>' +
+      '<div class="dharma-hint">A new wisdom each day — gather all ' + total + '.</div>';
+  }
+  el.innerHTML = '<div class="dharma-head"><span>📜 Daily Dharma</span><span class="dharma-count">' + n + '/' + total + ' gathered</span></div>' + body;
+}
+
 // ===== One-time style injection for Codex + Blessing (client-only, reversible) =====
 function ensureP2Styles() {
   if (document.getElementById('p2-codex-bless-styles')) return;
@@ -1485,7 +1548,19 @@ function ensureP2Styles() {
     '.bless-card.done{text-align:center;font-size:11.5px;color:#c9a227}',
     '.bless-title{font-size:13px;font-weight:700;color:#e8d9a0;margin-bottom:3px}',
     '.bless-sub{font-size:11px;color:#cfc8b0;opacity:.85;margin-bottom:9px;line-height:1.35}',
-    '.bless-btn{width:100%}'
+    '.bless-btn{width:100%}',
+    '.dharma-box{margin:12px 0 0}',
+    '.dharma-head{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;color:#e8d9a0;margin-bottom:8px}',
+    '.dharma-count{font-size:11px;color:#c9a227;font-weight:600}',
+    '.dharma-btn{width:100%}',
+    '.dharma-hint{margin-top:6px;font-size:11px;color:#cfc8b0;opacity:.8;text-align:center}',
+    '.dharma-card{padding:14px 12px;border-radius:12px;text-align:center;background:linear-gradient(135deg,rgba(201,162,39,.16),rgba(201,162,39,.05));border:1px solid rgba(201,162,39,.42)}',
+    '.dharma-card.revealed{animation:dharmaReveal .5s ease-out}',
+    '@keyframes dharmaReveal{0%{opacity:0;transform:scale(.9)}100%{opacity:1;transform:scale(1)}}',
+    '.dharma-icon{font-size:30px;line-height:1;margin-bottom:6px}',
+    '.dharma-title{font-size:14px;font-weight:700;color:#e8d9a0;margin-bottom:4px}',
+    '.dharma-line{font-size:12px;color:#cfc8b0;font-style:italic;line-height:1.4}',
+    '.dharma-next{margin-top:8px;font-size:11px;color:#c9a227;text-align:center;opacity:.85}'
   ].join('');
   document.head.appendChild(st);
 }
@@ -1948,6 +2023,7 @@ function renderMyPantheon() {
     ).join('');
   }
   renderReferralStreak();  // 🪖 Founding 뱃지 + 스트릭 + 초대 래더
+  renderDharmaDraw();      // 📜 Daily Dharma Draw — 일일 무료 variable 리빌 + 수집덱(습관앵커)
   renderCodex();           // 📜 수집 그리드 + 'One more Echo' 근접 넛지
   renderEchoTag();         // 🔱 Echo Bond — 스토리 태깅 셀렉터(소유 Echo 진화)
   renderKarmaShop();       // ✧ Karma Atelier — 카르마 화폐싱크 + 프리미엄 가치대비
