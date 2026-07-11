@@ -1601,3 +1601,12 @@ input:checked + .slider:before {
   box-shadow: 0 0 8px 1px rgba(255,210,74,.6);
 }
 .codex-cell.owned.bonded { border-color: rgba(201,162,39,.55); }
+
+/* ===== Pantheon Codex completion reward — exclusive Codex Halo card ===== */
+.shop-card.exclusive { border-color: rgba(155,231,255,.45); }
+.shop-card.exclusive.active { border-color: rgba(155,231,255,.75); background: rgba(155,231,255,.10); }
+.shop-card.exclusive.dim { opacity: .82; border-style: dashed; }
+.shop-btn.locked-reward {
+  background: rgba(155,231,255,.10); color: #9be7ff;
+  border: 1px solid rgba(155,231,255,.4); cursor: default;
+}

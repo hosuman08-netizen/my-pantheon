@@ -1377,9 +1377,7 @@ function addEchoToPantheon(key) {
   haptic('success');
   const n = ownedEchoKeys().length, total = ALL_ECHO_KEYS.length;
   showToast('✨ ' + echoShortName(key) + ' joined your Pantheon — Codex ' + n + '/' + total + ' · +4 Karma', 2800);
-  if (n === total) {
-    setTimeout(function(){ try { showToast('🔱 Codex complete! All ' + total + ' Echoes discovered ✦', 3400); celebrateShare(); } catch(e){} }, 950);
-  }
+  if (n === total) { grantCodexReward(); }   // 🔱 collection-completion payoff (guarded, once)
   renderMyPantheon();
 }
 function renderCodex() {
@@ -1408,6 +1406,8 @@ function renderCodex() {
   else if (away === 2) nudge = '<div class="codex-nudge">✨ Just 2 Echoes from a complete Codex (' + n + '/' + total + '). So close — tap a silhouette.</div>';
   el.innerHTML = '<div class="codex-head"><span>📜 Pantheon Codex</span><span class="codex-count">' + n + '/' + total + ' discovered</span></div>' +
     '<div class="codex-grid">' + cells + '</div>' + nudge;
+  // Retroactive: users already at full Codex (pre-reward) still receive the payoff once.
+  if (n === total && !codexRewarded()) grantCodexReward();
 }
 
 // ===== Echo Bond — story tagging → Echo evolution (endowment / collection depth) =====
@@ -1466,7 +1466,9 @@ const KARMA_COSMETICS = [
   { id: 'aura_lotus',  name: 'Lotus Bloom',   cost: 20,  ring: '#e86aa0', glow: 'rgba(232,106,160,.45)', desc: 'Soft rose halo' },
   { id: 'aura_flame',  name: 'Sacred Flame',  cost: 45,  ring: '#ff8c1a', glow: 'rgba(255,140,26,.45)',  desc: 'Warm ember glow' },
   { id: 'aura_indigo', name: 'Cosmic Indigo', cost: 80,  ring: '#6a7dff', glow: 'rgba(106,125,255,.45)', desc: 'Deep night sky' },
-  { id: 'aura_dawn',   name: 'Dawn Saffron',  cost: 130, ring: '#ffd24a', glow: 'rgba(255,210,74,.5)',   desc: 'Golden sunrise' }
+  { id: 'aura_dawn',   name: 'Dawn Saffron',  cost: 130, ring: '#ffd24a', glow: 'rgba(255,210,74,.5)',   desc: 'Golden sunrise' },
+  // Codex-exclusive — NOT buyable; granted only by completing the Pantheon Codex (see reward below).
+  { id: 'aura_codex',  name: 'Codex Halo',    exclusive: true, ring: '#9be7ff', glow: 'rgba(155,231,255,.5)', desc: 'Codex Master aura' }
 ];
 function cosmeticById(id) { return KARMA_COSMETICS.find(function(c){ return c.id === id; }) || null; }
 function cosOwned() {
@@ -1527,7 +1529,7 @@ function renderKarmaShop() {
   if (!el) return;
   if (!currentPantheon) { el.innerHTML = ''; return; }
   const equipped = cosEquipped();
-  const cards = KARMA_COSMETICS.map(function(c){
+  const cards = KARMA_COSMETICS.filter(function(c){ return !c.exclusive; }).map(function(c){
     const owned = ownsCosmetic(c.id);
     const isEq = equipped === c.id;
     const swatch = '<span class="shop-swatch" style="--sw:' + c.ring + '"></span>';
@@ -1555,9 +1557,41 @@ function renderKarmaShop() {
       ? '<button type="button" class="shop-btn equipped" disabled>✓ Owned</button>'
       : '<button type="button" class="shop-btn premium-btn" onclick="showPremiumModal()">★ Stars</button>') +
     '</div>';
+  // Codex-exclusive reward card — the collection-completion payoff (not buyable at any price).
+  const cx = cosmeticById('aura_codex');
+  const cxOwned = ownsCosmetic('aura_codex');
+  const cxEq = equipped === 'aura_codex';
+  const nOwned = currentPantheon ? ownedEchoKeys().length : 0;
+  const cxBtn = cxOwned
+    ? (cxEq ? '<button type="button" class="shop-btn equipped" disabled>✓ Equipped</button>'
+            : '<button type="button" class="shop-btn own" onclick="equipCosmetic(\'aura_codex\')">Equip</button>')
+    : '<button type="button" class="shop-btn locked-reward" disabled>🔒 Codex ' + nOwned + '/' + ALL_ECHO_KEYS.length + '</button>';
+  const exclusive = '<div class="shop-card exclusive' + (cxEq ? ' active' : '') + (cxOwned ? '' : ' dim') + '">' +
+    '<span class="shop-swatch" style="--sw:' + cx.ring + '"></span>' +
+    '<span class="shop-name">' + escapeHtml(cx.name) + '</span>' +
+    '<span class="shop-desc">' + (cxOwned ? 'Codex reward · earned' : 'Complete the Codex to unlock') + '</span>' + cxBtn + '</div>';
   el.innerHTML = '<div class="shop-head"><span>✧ Karma Atelier</span><span class="shop-bal">✦ ' + karma + ' Karma</span></div>' +
     '<div class="shop-sub">Spend earned Karma on free cosmetics for MY Pantheon. Core stays free.</div>' +
-    '<div class="shop-grid">' + cards + premium + '</div>' + noneBtn;
+    '<div class="shop-grid">' + cards + premium + exclusive + '</div>' + noneBtn;
+}
+
+// ===== Pantheon Codex completion reward — the collection payoff (honest, once, reversible) =====
+function codexComplete() { return !!currentPantheon && ownedEchoKeys().length === ALL_ECHO_KEYS.length; }
+function codexRewarded() { try { return localStorage.getItem('p2_codex_reward') === '1'; } catch(e) { return false; } }
+// Single guarded grant — safe to call any number of times / from any path; only the first fires.
+function grantCodexReward() {
+  if (!codexComplete() || codexRewarded()) return;
+  try { localStorage.setItem('p2_codex_reward', '1'); } catch(e){}
+  const owned = cosOwned();
+  if (owned.indexOf('aura_codex') === -1) { owned.push('aura_codex'); try { localStorage.setItem('p2_cos_owned', JSON.stringify(owned)); } catch(e){} }
+  // Respect the user's current aura: only auto-equip the Halo if nothing is equipped.
+  if (!cosEquipped()) equipCosmetic('aura_codex', true); else renderKarmaShop();
+  addKarma(30);   // one-time completion bonus (real Karma toward prestige)
+  setTimeout(function(){ try {
+    showToast('🔱 Codex complete! Codex Halo unlocked + 30 Karma ✦', 3600);
+    if (typeof celebrateShare === 'function') celebrateShare();
+    haptic('success');
+  } catch(e){} }, 300);
 }
 
 // ===== Mutual Blessing Loop — 2-way reciprocity (invitee is nudged to bless forward) =====
