@@ -68,19 +68,9 @@ body {
   position: relative;
   box-shadow: var(--shadow);
 }
-.framing::before {
-  content: '✦  ·  ✦';
-  position: absolute;
-  top: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 11px;
-  color: var(--accent);
-  opacity: .45;
-  letter-spacing: 4px;
-  background: var(--bg);
-  padding: 0 6px;
-}
+/* SENSE 절제: removed the second stacked ✦·✦ badge — it sat ~30px under the
+   header's ✦ divider, reading as an accidental double ornament / empty gap.
+   One centered signature star (header::after) is the elegant single accent. */
 
 /* p6 Lung + Sfumato DNA injected: soft smoky beauty, golden proportion, notebook, emergent smile */
 .dharma-entry {
