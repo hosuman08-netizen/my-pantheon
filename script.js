@@ -3155,7 +3155,7 @@ function importP6VoiceSeeds() {
       if (last) seeds = [last];
     } catch(e){}
   }
-  if (!seeds.length) { showToast('No p6 voice seeds yet. Record in Aether Canvas (p6) first.'); return []; }
+  if (!seeds.length) { showToast('No voice notes yet — record one to seed a story.'); return []; }
   return seeds;
 }
 
@@ -3213,15 +3213,15 @@ function renderDharmaNotebook() {
   const host = document.getElementById('dharma-notebook');
   if (!host) return;
   if (!dharmaNotebook.length) {
-    host.innerHTML = '<div class="hint" style="font-size:12px;opacity:.7">No voice seeds yet. Record in p6 Aether Canvas → plant here.</div>';
+    host.innerHTML = '<div class="hint" style="font-size:12px;opacity:.7">No voice notes yet — record a reflection to plant your first entry here.</div>';
     return;
   }
   host.innerHTML = dharmaNotebook.map((entry, i) => {
     const ache = entry.wound ? (entry.wound*100).toFixed(0) : '—';
     return `<div class="dharma-entry" data-idx="${i}" onclick="reObserveVoiceEntry(${i}, this)">
-      <div style="font-size:11px;opacity:.75">${new Date(entry.ts).toLocaleDateString()} · ache ${ache}% · +${entry.karma}k</div>
+      <div style="font-size:11px;opacity:.75">${new Date(entry.ts).toLocaleDateString()} · depth ${ache}% · +${entry.karma} karma</div>
       <div style="margin:4px 0;font-size:12.5px;line-height:1.35">${escapeHtml(entry.story)}</div>
-      <small style="color:#c5a46e">Re-observe (click) → Lung Surprise feeds dharma</small>
+      <small style="color:#c5a46e">Tap to revisit → a quiet reflection may add dharma</small>
     </div>`;
   }).join('');
 }
@@ -3299,7 +3299,7 @@ function joinVoiceEchoFestival() {
   try {
     localStorage.setItem('p2_voice_echo_seal', '1');
   } catch(e){}
-  showToast(`🎙️ Voice Echo Festival · +${surge} surprise karma (Lung Eye ${surprise.toFixed(2)})`);
+  showToast(`🎙️ Voice Echo Festival · +${surge} surprise karma ✧`);
   // birth visual echo in UI
   const ev = document.querySelector('#tab-events');
   if (ev) {
@@ -3320,7 +3320,7 @@ function enhanceFestivalsWithVoiceEcho() {
   card.id = 'voice-echo-fest';
   card.className = 'event-card';
   card.innerHTML = `<div class="event-header"><strong>🎙️ Voice Echo Festival</strong><span class="date">Surprise</span></div>
-    <p>p6 breath seeds UGC stories. Lung Surprise Eye feeds karma. Ache becomes dharma.</p>
+    <p>Turn a spoken reflection into a story your clan can echo. Every voice adds a little dharma.</p>
     <button onclick="joinVoiceEchoFestival()" class="primary small">Echo Voice · Claim Surprise</button>`;
   tab.appendChild(card);
 }
