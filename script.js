@@ -15,6 +15,20 @@ if (tg) {
 if (tg && tg.MainButton) {
   tg.MainButton.setParams({ text: 'Share Story', is_visible: false, color: '#c9a227' });
 }
+// Da Vinci + full-cheat + sense (Morpheus orchestrator): sfumato soft story cards, anatomy proportion, notebook UGC journal. Festival FOMO + MY Pantheon. Variable ratio + prominent disclosure.
+// p6 Lung Surprise Eye + Ache-Breath + 창발 pain CROSS DNA injected (Sovereign p1-p6 advance)
+(function injectP6LungCross() {
+  try {
+    const cross = JSON.parse(localStorage.getItem('p6_lungSurpriseCross') || '{}');
+    const dist = JSON.parse(localStorage.getItem('legion_distributed_notebook') || '{}');
+    const fomoV = JSON.parse(localStorage.getItem('p6_fomo_voice_all_p') || '{}');
+    if (cross.surprise || dist.surprise) {
+      // weaponize: voice ache/surprise seeds variable FOMO in festival stories + UGC
+      window.p6LungInPantheon = { surprise: cross.surprise || dist.surprise, ache: cross.ache || dist.ache || 0.3, fomo: fomoV.crossFOMO };
+      // example: higher surprise = stronger near-miss story reveal in next festival
+    }
+  } catch(e){}
+})();
 
 // MainButton onClick은 한 번만 등록(중복 누적 방지 — QA P2). 핸들러는 현재 상태를 클로저 밖에서 참조.
 let _mainBtnWired = false;
@@ -3126,3 +3140,195 @@ if (!currentPantheon) {
     }
   }, 200);
 }
+
+// ========== p6 Lung Surprise Eye + Ache-Breath + 창발 pain CROSS DNA (full p2 advance) ==========
+// p6 voice recordings → UGC story seeds. "Voice Echo" festivals with surprise karma.
+// Sfumato beauty + notebook from voice for dharma growth. Central zero. Legion one.
+
+function importP6VoiceSeeds() {
+  let seeds = [];
+  try { seeds = JSON.parse(localStorage.getItem('p6_voiceSeeds') || '[]'); } catch(e){}
+  if (!seeds.length) {
+    // fallback: try last
+    try {
+      const last = JSON.parse(localStorage.getItem('p6_lastVoiceSeed') || 'null');
+      if (last) seeds = [last];
+    } catch(e){}
+  }
+  if (!seeds.length) { showToast('No p6 voice seeds yet. Record in Aether Canvas (p6) first.'); return []; }
+  return seeds;
+}
+
+function plantVoiceAsStorySeed(seed, customName) {
+  if (!currentPantheon) { showToast('Create Pantheon first.'); switchTab('create'); return; }
+  const wound = seed.wound || 0.4;
+  const surprise = seed.surprise || 0.3;
+  // Ache-Breath: high wound = deeper dharma potential (full cheat weaponized positively)
+  const karmaBase = 8 + Math.floor(wound * 14) + Math.floor(surprise * 10);
+  const storyText = `Voice Echo from breath (p6): "${(seed.insights||'silent ache').slice(0,90)}..." — ${wound>0.6?'The wound sang dharma.':'The breath carried duty.'} (fictional, inspired by epics)`;
+  if (!currentPantheon.stories) currentPantheon.stories = [];
+  currentPantheon.stories.unshift({ text: storyText, ts: Date.now(), source: 'p6-voice', wound, surprise });
+  addKarma(karmaBase);
+  // Emergent 1 birth: Breath-Mycelium Karma — surprise spreads to other echoes
+  myceliumSpread(surprise, wound);
+  savePantheon();
+  showToast(`🌬️ Voice Seed planted · +${karmaBase} Karma (ache ${wound.toFixed(2)})`);
+  renderMyPantheon();
+  // notebook auto log
+  logToDharmaNotebook(seed, storyText, karmaBase);
+}
+
+function myceliumSpread(surprise, wound) {
+  // UNEXPECTED EMERGENT: Breath Mycelium — one voice pain threads silently feed the whole pantheon
+  if (!currentPantheon || !currentPantheon.echoes) return;
+  if (surprise < 0.15) return;
+  const bonus = Math.ceil(surprise * 4 + wound * 3);
+  // random other echo "receives" (no UI heavy, just meta growth)
+  if (currentPantheon.echoes.length > 1 && Math.random() < 0.7) {
+    const idx = Math.floor(Math.random() * currentPantheon.echoes.length);
+    // store mycelium thread
+    if (!currentPantheon.mycelium) currentPantheon.mycelium = {};
+    currentPantheon.mycelium[currentPantheon.echoes[idx]] = (currentPantheon.mycelium[currentPantheon.echoes[idx]] || 0) + bonus;
+    // surprise micro feed
+    setTimeout(() => {
+      addKarma(Math.max(1, Math.floor(bonus * 0.6)));
+      try { showToast('Mycelium thread: echo breathed extra karma'); } catch(e){}
+    }, 650);
+  }
+}
+
+let dharmaNotebook = [];
+function logToDharmaNotebook(seed, story, karmaGained) {
+  dharmaNotebook.unshift({ seedId: seed.id, story, karma: karmaGained, ts: Date.now(), wound: seed.wound, surprise: seed.surprise });
+  if (dharmaNotebook.length > 18) dharmaNotebook.length = 18;
+  try { localStorage.setItem('p2_dharmaNotebook', JSON.stringify(dharmaNotebook)); } catch(e){}
+}
+
+function loadDharmaNotebook() {
+  try { dharmaNotebook = JSON.parse(localStorage.getItem('p2_dharmaNotebook') || '[]'); } catch(e){ dharmaNotebook = []; }
+}
+
+function renderDharmaNotebook() {
+  loadDharmaNotebook();
+  const host = document.getElementById('dharma-notebook');
+  if (!host) return;
+  if (!dharmaNotebook.length) {
+    host.innerHTML = '<div class="hint" style="font-size:12px;opacity:.7">No voice seeds yet. Record in p6 Aether Canvas → plant here.</div>';
+    return;
+  }
+  host.innerHTML = dharmaNotebook.map((entry, i) => {
+    const ache = entry.wound ? (entry.wound*100).toFixed(0) : '—';
+    return `<div class="dharma-entry" data-idx="${i}" onclick="reObserveVoiceEntry(${i}, this)">
+      <div style="font-size:11px;opacity:.75">${new Date(entry.ts).toLocaleDateString()} · ache ${ache}% · +${entry.karma}k</div>
+      <div style="margin:4px 0;font-size:12.5px;line-height:1.35">${escapeHtml(entry.story)}</div>
+      <small style="color:#c5a46e">Re-observe (click) → Lung Surprise feeds dharma</small>
+    </div>`;
+  }).join('');
+}
+
+function reObserveVoiceEntry(idx, el) {
+  const entry = dharmaNotebook[idx];
+  if (!entry) return;
+  const surprise = entry.surprise || 0.25;
+  const wound = entry.wound || 0.4;
+  const boost = Math.floor(3 + surprise * 11 + wound * 7);
+  addKarma(boost);
+  // Emergent 2: Unpainted Dharma Smile — sfumato beauty appears from ache re-seeing (p6 DNA)
+  if (wound > 0.45 || surprise > 0.22) {
+    unpaintedDharmaSmile(el, surprise);
+  }
+  // mycelium again on re-observe
+  myceliumSpread(surprise, wound);
+  showToast(`👁 Re-observed · +${boost} dharma (surprise ${surprise.toFixed(2)})`);
+  // evolve the entry (notebook growth)
+  entry.karma = (entry.karma || 0) + boost;
+  localStorage.setItem('p2_dharmaNotebook', JSON.stringify(dharmaNotebook));
+  // refresh softly
+  setTimeout(renderDharmaNotebook, 420);
+}
+
+function unpaintedDharmaSmile(el, surprise) {
+  // UNEXPECTED EMERGENT birth: The Unpainted Smile (p6) grafted to p2 dharma notebook.
+  // Sfumato 10th glaze appears only on re-observation of pain. No command. Golden lift.
+  if (!el) return;
+  const smile = document.createElement('div');
+  smile.className = 'unpainted-smile';
+  smile.style.cssText = `position:absolute;right:8px;top:6px;font-size:13px;opacity:${0.25 + surprise*0.45};color:#f2e1bc;pointer-events:none;`;
+  smile.textContent = '∝';
+  el.style.position = 'relative';
+  el.appendChild(smile);
+  // extra prestige micro from the beauty itself
+  setTimeout(() => {
+    prestige = Math.max(prestige, prestige); // sticky
+    addKarma(1); // tiny beauty tax
+    smile.style.transition = 'opacity 1.6s ease';
+    smile.style.opacity = '0';
+    setTimeout(() => smile.remove(), 900);
+  }, 1350);
+}
+
+function initVoiceCrossDNA() {
+  loadDharmaNotebook();
+  // Auto wire Voice Seed button if exists (added in HTML)
+  const btn = document.getElementById('import-voice-seed-btn');
+  if (btn) btn.onclick = () => {
+    const seeds = importP6VoiceSeeds();
+    if (!seeds.length) return;
+    // pick freshest
+    const s = seeds[0];
+    plantVoiceAsStorySeed(s);
+  };
+  // Render notebook if host present
+  renderDharmaNotebook();
+}
+
+// Voice Echo Festival (p6 surprise + p2 FOMO)
+function joinVoiceEchoFestival() {
+  if (!currentPantheon) { showToast('Open Pantheon first.'); return; }
+  let surprise = 0.28;
+  try {
+    const lung = JSON.parse(localStorage.getItem('p6_lungFragment') || '{}');
+    surprise = lung.lastSurprise || 0.31;
+  } catch(e){}
+  const wound = 0.5 + Math.random()*0.3;
+  const base = 22;
+  const surge = Math.floor(base + surprise * 28 + wound * 14);
+  addKarma(surge);
+  myceliumSpread(surprise, wound);
+  // festival special: "Voice Echo" limited seal
+  try {
+    localStorage.setItem('p2_voice_echo_seal', '1');
+  } catch(e){}
+  showToast(`🎙️ Voice Echo Festival · +${surge} surprise karma (Lung Eye ${surprise.toFixed(2)})`);
+  // birth visual echo in UI
+  const ev = document.querySelector('#tab-events');
+  if (ev) {
+    const b = document.createElement('div');
+    b.style.cssText = 'margin-top:8px;font-size:11px;color:#c5a46e';
+    b.textContent = '∝ Voice mycelium active — echoes breathe together';
+    ev.appendChild(b);
+    setTimeout(() => b.remove(), 4200);
+  }
+}
+
+// Wire festivals to include voice one (called from existing renderFestivals / join)
+function enhanceFestivalsWithVoiceEcho() {
+  // non-destructive: existing joinEvent stays, we add extra card via render if host
+  const tab = document.getElementById('tab-events');
+  if (!tab || document.getElementById('voice-echo-fest')) return;
+  const card = document.createElement('div');
+  card.id = 'voice-echo-fest';
+  card.className = 'event-card';
+  card.innerHTML = `<div class="event-header"><strong>🎙️ Voice Echo Festival</strong><span class="date">Surprise</span></div>
+    <p>p6 breath seeds UGC stories. Lung Surprise Eye feeds karma. Ache becomes dharma.</p>
+    <button onclick="joinVoiceEchoFestival()" class="primary small">Echo Voice · Claim Surprise</button>`;
+  tab.appendChild(card);
+}
+
+// Init the full p6 cross on load (after DOM)
+setTimeout(() => {
+  try { initVoiceCrossDNA(); enhanceFestivalsWithVoiceEcho(); } catch(e){}
+}, 420);
+
+// ========== p2 p6 cross complete. p1-p6 advance via DNA. ==========
+

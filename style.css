@@ -82,6 +82,27 @@ body {
   padding: 0 6px;
 }
 
+/* p6 Lung + Sfumato DNA injected: soft smoky beauty, golden proportion, notebook, emergent smile */
+.dharma-entry {
+  position: relative;
+  padding: 8px 10px;
+  margin: 4px 0;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(37,34,29,.82), rgba(26,22,18,.6));
+  border: 1px solid rgba(201,162,39,.18);
+  cursor: pointer;
+}
+.dharma-entry:hover { border-color: rgba(201,162,39,.38); }
+.unpainted-smile {
+  /* 10th glaze — p6 Unpainted Smile grafted. Appears only on re-see of ache */
+  text-shadow: 0 0 6px rgba(242,225,188,.65);
+  transition: all .6s ease;
+}
+.event-card {
+  /* sfumato soft card */
+  box-shadow: 0 4px 14px rgba(0,0,0,.18), 0 0 0 1px rgba(201,162,39,.08) inset;
+}
+
 /* High-Quality Top Meditation Bar - Premium Raji style */
 .meditation-top {
   background: linear-gradient(145deg, var(--surface), #1a1814);

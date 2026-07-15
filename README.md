@@ -1,4 +1,5 @@
 # p2: My Pantheon (Telegram Mini-App) — Raji Style
+// p6 Lung Surprise Eye + Ache-Breath + 창발 + p3 artistic voice full advance cross-grafted (Sovereign p1-p6). Echoes now breathe. Legion one.
 
 **Target**: India 20-30s (TG 18-34 ~53.5%). Collectivism, family uplift, heritage pride, festival FOMO.
 
@@ -47,6 +48,9 @@ Like Raji: An Ancient Epic — original characters in a respectful, beautiful wo
 - Positive only (empowerment, family, growth)
 - Reversible design
 - Test with Indian 20-30s
+
+## Legion Cross (p6 DNA 2026-07-13)
+p4-gochess fully advanced: voice echo insights (study), fusion powered by breath/spore surprise, Vitruvian 0.618 + sfumato Lung Eye viz, ALWAYS notebook. p6 창발 pain used as cross DNA for p1-p6 all. Births: 10th Glaze + Ache-Breath. Legion one.
 
 ## 2026-07-10 Sovereign p2 All-Agents Cross + Research Reinforcement
 - Festivals 2026 FOMO weapon: Ganesh Chaturthi 2026-09-14, Navratri 2026-10-11~20, Diwali 2026-11-08. Limited clan events + variable karma + scarcity banners.

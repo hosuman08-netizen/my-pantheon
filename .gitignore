@@ -10,3 +10,4 @@ legion-raw-outputs/
 .claude/
 *.log
 .DS_Store
+.wrangler/
