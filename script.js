@@ -2244,6 +2244,7 @@ function showPremiumModal() {
       <span style="font-size:12px;opacity:0.8">Featured slot, extra stories, custom Golden Frame — cosmetic only.<br>
       Core (create, stories, karma, share, festivals) is always free.<br><br>
       <strong>Fictional stories inspired by epics. Optional purchase. XTR via Bot.</strong></span><br><br>
+      <div style="font-size:11px;line-height:1.4;color:#c9a227;opacity:0.95;margin:0 0 10px;padding:6px 8px;border:1px solid #c9a227;border-radius:8px;">🔒 In-game cosmetic only · No cash value · Non-transferable · Not gambling</div>
       <button onclick="this.closest('div[style*=\'position:fixed\']').remove(); purchaseP2WithStars('p2_featured');" style="margin:4px;padding:8px 16px;background:#c9a227;color:#111;border:none;border-radius:8px;">${buyLabel}</button>
       <button onclick="this.closest('div[style*=\"position:fixed\"]').remove()" style="margin:4px;padding:8px 16px;background:transparent;color:#c9a227;border:1px solid #c9a227;border-radius:8px;">Cancel</button>
     </div>`;
