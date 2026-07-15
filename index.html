@@ -5,7 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- CSP: block remote/injected script + exfiltration. script-src-attr 'unsafe-inline' keeps existing inline onclick handlers working (no runtime break) while disallowing injected <script>. -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://telegram.org; script-src-attr 'unsafe-inline'; connect-src 'self' https://*.workers.dev; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'none'">
-  <title>My Pantheon • p2</title>
+  <title>My Pantheon</title>
+  <meta name="description" content="Create your own fictional heroes inspired by epic virtues of dharma & karma. Collect, grow, and share your Pantheon.">
+  <meta name="theme-color" content="#c9a227">
+  <!-- 앱 아이콘 / 프로필 이미지 (탭·PWA·홈화면) -->
+  <link rel="icon" type="image/png" sizes="32x32" href="art/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="art/apple-touch-180.png">
+  <link rel="manifest" href="manifest.json">
+  <!-- 공유 미리보기 (텔레그램·SNS 링크 카드) -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="My Pantheon">
+  <meta property="og:description" content="Create your own fictional heroes inspired by epic virtues of dharma & karma. Collect, grow, and share your Pantheon.">
+  <meta property="og:image" content="art/icon-512-web.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="My Pantheon">
+  <meta name="twitter:image" content="art/icon-512-web.png">
   <link rel="stylesheet" href="style.css">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>

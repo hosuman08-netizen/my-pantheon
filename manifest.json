@@ -1,0 +1,14 @@
+{
+  "name": "My Pantheon",
+  "short_name": "My Pantheon",
+  "description": "Create your own fictional heroes inspired by epic virtues of dharma & karma. Collect, grow, and share your Pantheon.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f0d0a",
+  "theme_color": "#c9a227",
+  "icons": [
+    { "src": "art/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "art/icon-512-web.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
