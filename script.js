@@ -3390,3 +3390,21 @@ setTimeout(() => {
 
 // ========== p2 p6 cross complete. p1-p6 advance via DNA. ==========
 
+
+// 3H Notcoin: daily invite mult reminder (permanent K)
+(function(){
+  try {
+    var k = 'p2_mult_toast_' + new Date().toISOString().slice(0,10);
+    if (localStorage.getItem(k)) return;
+    localStorage.setItem(k,'1');
+    setTimeout(function(){
+      try {
+        if (typeof inviteKarmaMult === 'function' && typeof showToast === 'function') {
+          var m = inviteKarmaMult();
+          var pct = Math.round((m-1)*100);
+          showToast(pct > 0 ? ('🚀 Karma +' + pct + '% forever from invites') : 'Invite clan → +2% Karma forever each', 2800);
+        }
+      } catch(e){}
+    }, 1400);
+  } catch(e){}
+})();
