@@ -36,7 +36,7 @@ function _mainBtnShare() {
   if (!currentPantheon) return;
   const shareText = `🔱 ${currentPantheon.name} — ${currentPantheon.desc || ''} (fictional, epics inspired)`;
   if (tg && tg.openTelegramLink) {
-    tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(shareText)}`);
+    tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(getInviteLink())}&text=${encodeURIComponent(shareText)}`);   // 귀속 딥링크(K엔진 연료)
   }
   addKarma(2);
 }
@@ -2208,10 +2208,12 @@ function shareToTG() {
   const framing = "\n\nA fictional story inspired by ancient epics. A creative narrative themed on dharma (duty and virtue within context) and karma (the virtuous cycle of positive action) • a test for Indians in their 20s-30s";
   const text = `My Pantheon: ${currentPantheon.name}\n${currentPantheon.desc || ''}\n\n${currentPantheon.stories.slice(-1)[0] || ''}${framing}`;
   
+  // 🔗 귀속 누수 픽스(2026-07-20 Morpheus): 첫스토리 자동공유가 날 웹URL이라 귀속·K엔진 연료 0이었음 → 초대 딥링크로.
+  const _link = getInviteLink();
   if (tg && tg.openTelegramLink) {
-    tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(text)}`);
+    tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(_link)}&text=${encodeURIComponent(text)}`);
   } else {
-    navigator.clipboard?.writeText(text).then(() => showToast('Copied with framing! Share it to your TG group. (fictional narrative)'));
+    navigator.clipboard?.writeText(text + '\n' + _link).then(() => showToast('Copied with framing! Share it to your TG group. (fictional narrative)'));
   }
   sharesCount++;
   const reach = Math.floor(Math.random() * 180) + 70;
