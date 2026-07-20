@@ -2196,7 +2196,7 @@ document.querySelectorAll('.intention-chip').forEach(chip => {
 function shareToWhatsApp() {
   if (!currentPantheon) return;
   var framing = "\n\nA fictional story inspired by ancient epics (dharma & karma) - a creative test for Indians in their 20s-30s.";
-  var text = "My Pantheon: " + currentPantheon.name + "\n" + (currentPantheon.desc || "") + "\n\n" + (currentPantheon.stories.slice(-1)[0] || "") + framing + "\n" + window.location.href;
+  var text = "My Pantheon: " + currentPantheon.name + "\n" + (currentPantheon.desc || "") + "\n\n" + (currentPantheon.stories.slice(-1)[0] || "") + framing + "\n" + getInviteLink();  // K엔진: 귀속 딥링크 (location.href 누수 차단)
   var url = "https://wa.me/?text=" + encodeURIComponent(text);
   try { if (tg && tg.openLink) tg.openLink(url); else window.open(url, "_blank"); } catch(e){ window.open(url, "_blank"); }
   sharesCount++; addKarma(2);
