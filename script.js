@@ -1,3 +1,6 @@
+
+/* LEGION_WAVE_56_today_counter */
+try{var _dk=new Date().toDateString();var _o=JSON.parse(localStorage.getItem('lw_p2_my_panthe_today_counter')||'{}');if(_o.d!==_dk)_o={d:_dk,n:0};_o.n=(_o.n||0)+1;localStorage.setItem('lw_p2_my_panthe_today_counter',JSON.stringify(_o));}catch(e){}
 // p2 My Pantheon - TG WebApp (structured frame)
 // Fictional stories inspired by India’s ancient epics of dharma & karma.
 // Positive loops only. TG native. Reversible.
