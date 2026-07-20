@@ -3408,3 +3408,21 @@ setTimeout(() => {
     }, 1400);
   } catch(e){}
 })();
+
+// 3H empty pantheon CTA (coldstart founding-100)
+(function(){
+  try {
+    setTimeout(function(){
+      if (typeof currentPantheon !== 'undefined' && currentPantheon) return;
+      var el = document.getElementById('pantheon-display') || document.querySelector('main');
+      if (!el) return;
+      if (document.getElementById('3h-empty-cta')) return;
+      var d = document.createElement('div');
+      d.id = '3h-empty-cta';
+      d.style.cssText = 'margin:12px;padding:14px;border:1px solid #c9a227;border-radius:12px;background:rgba(201,162,39,.08);text-align:center';
+      d.innerHTML = '<b>Create your first Echo in 30s</b><p style="font-size:12px;opacity:.85;margin:6px 0">Name a virtue. Write one line. Share to clan.</p><button class="primary" onclick="try{document.getElementById('create-form')?.scrollIntoView({behavior:\'smooth\'})}catch(e){}">Start now</button>';
+      el.insertBefore(d, el.firstChild);
+      if (window.legionTrack) legionTrack('empty_cta_show',{});
+    }, 1100);
+  } catch(e){}
+})();
