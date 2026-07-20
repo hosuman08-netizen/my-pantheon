@@ -188,7 +188,7 @@ function claimFestBundle(ev) {
   if (fbClaimed(ev)) return;
   localStorage.setItem('p2_festbundle_' + ev, '1');
   localStorage.setItem('p2_seal_' + ev, b.seal);
-  addKarma(b.karma);
+  addKarma(b.karma, true);   // 축제 지급 = raw(K엔진 배율 이중적용 방지)
   showToast(b.icon + ' ' + b.name + ' claimed · +' + b.karma + ' Karma ✧', 3000);
   renderFestivalBundle();
 }
@@ -1119,7 +1119,11 @@ function initAuraPreview() {
   setTimeout(updateAuraPreview, 100);
 }
 
-function addKarma(points) {
+// 🚀 K엔진(2026-07-20 Morpheus, 서치 각인): 초대할수록 영구히 카르마 더 벌림(Notcoin식 지수적 초대동기).
+//   +2%/초대·상한 25(=+50%). 주는 보상(뺏는 다크패턴 아님)·정직 노출. 마일스톤/축제 지급은 raw로 이중적용 방지.
+function inviteKarmaMult() { return 1 + Math.min(refCount || 0, 25) * 0.02; }
+function addKarma(points, raw) {
+  points = raw ? points : Math.round(points * inviteKarmaMult());
   karma += points;
   const newPrest = Math.floor(karma / 10) + 1;
   if (newPrest > prestige) {
@@ -1381,7 +1385,7 @@ function syncRefCount() {
       // 새로 확정된 초대 → 마일스톤 카르마 정산(1회씩)
       const claimed = parseInt(localStorage.getItem('p2_ref_claimed') || '0', 10);
       refCount = j.count; localStorage.setItem('p2_refs', String(refCount));
-      REF_TIERS.forEach(t => { if (refCount >= t.n && claimed < t.n) { addKarma(t.karma); showToast(`🔥 ${t.title} unlocked · +${t.karma} Karma ✧`, 3000); } });
+      REF_TIERS.forEach(t => { if (refCount >= t.n && claimed < t.n) { addKarma(t.karma, true); showToast(`🔥 ${t.title} unlocked · +${t.karma} Karma ✧`, 3000); } });
       localStorage.setItem('p2_ref_claimed', String(refCount));
     }
     renderReferralStreak();
@@ -1460,6 +1464,9 @@ function renderReferralStreak() {
     }
   }
   const rc = document.getElementById('ref-count'); if (rc) rc.textContent = refCount;
+  // K엔진 배율 정직 노출 — "초대할수록 영구히 카르마 더 벌림"
+  { const km = document.getElementById('ref-karma-mult'); const pct = Math.round((inviteKarmaMult()-1)*100);
+    if (km) km.textContent = pct > 0 ? '🚀 +' + pct + '% Karma forever (from ' + refCount + ' invites)' : 'Invite friends → earn +2% Karma forever, each'; }
   const rl = document.getElementById('ref-ladder');
   if (rl) {
     const nextN = (REF_TIERS.find(t => refCount < t.n) || {}).n;
