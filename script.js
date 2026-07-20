@@ -191,6 +191,21 @@ function claimFestBundle(ev) {
   addKarma(b.karma, true);   // 축제 지급 = raw(K엔진 배율 이중적용 방지)
   showToast(b.icon + ' ' + b.name + ' claimed · +' + b.karma + ' Karma ✧', 3000);
   renderFestivalBundle();
+  // share-at-peak: festival claim = highest social currency moment (Contagious)
+  try {
+    if (window.legionTrack) legionTrack('festival_claim', { ev: b.ev, karma: b.karma });
+  } catch (e) {}
+  setTimeout(function () {
+    try {
+      showToast('📤 Share your blessing — invite clan, keep the fire ✧', 3200);
+      var inviteBtn = document.querySelector('.actions button.secondary, #invite-btn, [data-action="invite"]');
+      if (inviteBtn) {
+        inviteBtn.style.boxShadow = '0 0 0 2px #c9a227';
+        inviteBtn.style.outline = '2px solid #c9a227';
+      }
+      if (window.legionTrack) legionTrack('share_peak_shown', { where: 'festival', ev: b.ev });
+    } catch (e) {}
+  }, 900);
 }
 
 // Reusable Echo icon SVGs (detailed Raji miniature style, for full & mini)
