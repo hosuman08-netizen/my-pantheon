@@ -3462,6 +3462,15 @@ setTimeout(() => {
   } catch(e){}
 })();
 
+// 3H: live refresh streak midnight FOMO on button
+(function(){
+  try {
+    setInterval(function(){
+      try { if (typeof renderReferralStreak === 'function') renderReferralStreak(); } catch(e){}
+    }, 60000);
+  } catch(e){}
+})();
+
 // 3H festival FOMO toast (LiveOps copy — 1 hard window messaging only)
 (function(){
   try {
