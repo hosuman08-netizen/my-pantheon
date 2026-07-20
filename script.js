@@ -1455,6 +1455,20 @@ function claimDaily() {
   renderReferralStreak();
   // Nudge the UGC loop: surface today's dharma writing seed after the reward.
   setTimeout(function(){ try { showToast("✍️ Today's dharma: " + todaysDharmaPrompt() + " — write it in Create.", 4200); } catch(e){} }, 2900);
+  // share-at-peak after daily devotion (especially jackpot / milestone)
+  try {
+    if (window.legionTrack) legionTrack('daily_claim', { streak: streak.count, jackpot: !!jackpot, reward: reward });
+  } catch (e) {}
+  if (jackpot || streak.count === 7 || streak.count === 30 || streak.count % 5 === 0) {
+    setTimeout(function () {
+      try {
+        showToast('📤 Streak Day ' + streak.count + ' — invite clan to keep the fire ✧', 3200);
+        var inviteBtn = document.querySelector('.actions button.secondary, #invite-btn, [data-action="invite"]');
+        if (inviteBtn) inviteBtn.style.boxShadow = '0 0 0 2px #c9a227';
+        if (window.legionTrack) legionTrack('share_peak_shown', { where: 'daily_streak', n: streak.count });
+      } catch (e) {}
+    }, 3600);
+  }
 }
 
 function renderReferralStreak() {
