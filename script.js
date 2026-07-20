@@ -3426,3 +3426,17 @@ setTimeout(() => {
     }, 1100);
   } catch(e){}
 })();
+
+// 3H festival FOMO toast (LiveOps copy — 1 hard window messaging only)
+(function(){
+  try {
+    var k = 'p2_fest_'+new Date().toISOString().slice(0,10);
+    if (localStorage.getItem(k)) return;
+    localStorage.setItem(k,'1');
+    setTimeout(function(){
+      if (typeof showToast === 'function')
+        showToast('🪔 Today\'s dharma seed is live — write before midnight for festival karma', 3200);
+      if (window.legionTrack) legionTrack('festival_fomo_toast',{});
+    }, 2200);
+  } catch(e){}
+})();
