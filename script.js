@@ -2376,7 +2376,21 @@ function _exploreOrder() {
 function renderExplore() {
   const list = document.getElementById('explore-list');
   if (!list) return;
-  const fresh = '<div class="explore-fresh">✧ Fresh picks today — the Pantheon feed refreshes daily</div>';
+  // 🏆 리더보드 경쟁 훅(2026-07-20 Morpheus, 서치: 리더보드=+25% 리텐션). 내 카르마 순위 = 시드+나 중 위치.
+  //   백엔드 불필요(기존 시드데이터+내 karma). 오르고 싶게 만드는 정직한 경쟁 프레임.
+  let board = '';
+  try {
+    const total = P2_SEED_PANTHEONS.length + 1;
+    const above = P2_SEED_PANTHEONS.filter(p => (p.karma || 0) > (karma || 0)).length;
+    const myRank = above + 1;
+    const toNext = myRank > 1 ? Math.max(1, (P2_SEED_PANTHEONS.map(p=>p.karma||0).filter(k=>k>(karma||0)).sort((a,b)=>a-b)[0] || 0) - (karma||0)) : 0;
+    board = '<div class="explore-board" style="background:linear-gradient(135deg,#2a2413,#1a160c);border:1px solid var(--accent);border-radius:12px;padding:10px 12px;margin-bottom:10px;">' +
+      '<div style="font-weight:800;color:#e8d9a0;font-size:13px;">🏆 Pantheon Ranks — You\'re <span style="color:var(--accent)">#' + myRank + '</span> of ' + total + '</div>' +
+      (myRank > 1 ? '<div style="font-size:11.5px;color:#67e8f9;margin-top:3px;">✍️ +' + toNext + ' karma to climb past #' + (myRank-1) + ' — write a story or invite a friend.</div>'
+                  : '<div style="font-size:11.5px;color:#a3e635;margin-top:3px;">👑 You lead the Pantheon. Keep your throne — write & invite.</div>') +
+    '</div>';
+  } catch(e) {}
+  const fresh = board + '<div class="explore-fresh">✧ Fresh picks today — the Pantheon feed refreshes daily</div>';
   // rank15: build the whole list as one string, then a single innerHTML assignment (1 reflow, O(n)).
   list.innerHTML = fresh + _exploreOrder().map((i, pos) => {
     const d = P2_SEED_PANTHEONS[i];
