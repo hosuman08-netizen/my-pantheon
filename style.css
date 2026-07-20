@@ -426,6 +426,33 @@ h1 {
   height: 18px;
   filter: drop-shadow(0 1px 1px rgba(0,0,0,.25));
 }
+/* Bond payoff on the hero Echo chip: the Echo you nurture visibly ranks up.
+   Tier glow escalates L1→L5; honest — driven purely by the real Bond level. */
+.my-echo-visual.bonded { padding-right: 8px; }
+.my-echo-visual.bond-t1 { border-color: #d8b64a; box-shadow: 0 0 6px rgba(216,182,74,.35); }
+.my-echo-visual.bond-t2 { border-color: #ffce5a; box-shadow: 0 0 8px rgba(255,206,90,.45); }
+.my-echo-visual.bond-t3 { border-color: #ff8c1a; box-shadow: 0 0 10px rgba(255,140,26,.5); }
+.my-echo-visual.bond-t4 { border-color: #e86aa0; box-shadow: 0 0 12px rgba(232,106,160,.55); }
+.my-echo-visual.bond-t5 {
+  border-color: #ffd24a;
+  box-shadow: 0 0 14px 1px rgba(255,210,74,.65);
+  animation: myEchoEternal 2.8s ease-in-out infinite;
+}
+@keyframes myEchoEternal {
+  0%,100% { box-shadow: 0 0 12px rgba(255,210,74,.5); }
+  50%     { box-shadow: 0 0 18px 2px rgba(106,125,255,.55); }
+}
+.my-echo-lv {
+  font-size: 8px; font-weight: 800; line-height: 1;
+  padding: 2px 4px; border-radius: 6px; margin-left: 1px;
+  color: #111; background: linear-gradient(90deg, #e7c65a, #c9a227);
+}
+.my-echo-lv.bond-l3 { background: linear-gradient(90deg, #ffd24a, #ff8c1a); }
+.my-echo-lv.bond-l4 { background: linear-gradient(90deg, #ffe08a, #e86aa0); }
+.my-echo-lv.bond-l5 {
+  background: linear-gradient(90deg, #fff6c0, #ffd24a, #6a7dff);
+  box-shadow: 0 0 8px 1px rgba(255,210,74,.6);
+}
 .aura-mini {
   justify-content: center;
   padding: 4px;

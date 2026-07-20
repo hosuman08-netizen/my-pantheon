@@ -1660,6 +1660,9 @@ function grantBond(key) {
   if (after > before) {
     showToast('🔱 ' + echoShortName(key) + ' evolved — Bond Lv' + after + ' (' + bondLabel(after) + ') ✧', 3000);
     haptic('success');
+    // Refresh the hero Echo display so the newly-earned rank glow shows immediately
+    // (story-submit renders MY Pantheon before grantBond, so re-render on level-up).
+    try { renderMyEchoesOnly(); } catch (e) {}
   }
   renderCodex();
   renderEchoTag();
@@ -1998,12 +2001,10 @@ function renderMyPantheon() {
   if (statusEl) statusEl.style.display = 'block';
   if (noP) noP.style.display = 'none';
   
-  // Visual Echo icons + aura feel for consistency with Creation
-  const echoIconsHTML = currentPantheon.echoes.map(echo => {
-    const val = Object.keys(echoMap).find(k => echoMap[k] === echo) || '';
-    const iconSVG = getEchoIcon(val, 22);
-    return `<div class="my-echo-visual">${iconSVG}<span>${escapeHtml(echo)}</span></div>`;
-  }).join('');
+  // Visual Echo icons + aura feel for consistency with Creation.
+  // Bond payoff surfaces HERE (the hero display), not just the Codex footnote:
+  // an Echo you nurture with stories visibly ranks up — glow tier + Lv badge.
+  const echoIconsHTML = buildEchoChipsHTML();
 
   const goldFrame = hasGoldFrame();
   container.classList.toggle('gold-frame', goldFrame);
@@ -2067,6 +2068,28 @@ function renderMyPantheon() {
   renderKarmaShop();       // ✧ Karma Atelier — 카르마 화폐싱크 + 프리미엄 가치대비
   renderBlessingBack();    // 🙏 상호 축복 루프 (invitedBy 상호성)
   updateMainButton();
+}
+
+// Hero Echo chips with Bond-rank glow. Shared by renderMyPantheon + renderMyEchoesOnly
+// so the full render and the lightweight level-up refresh stay identical (no drift).
+function buildEchoChipsHTML() {
+  if (!currentPantheon || !Array.isArray(currentPantheon.echoes)) return '';
+  return currentPantheon.echoes.map(echo => {
+    const val = Object.keys(echoMap).find(k => echoMap[k] === echo) || '';
+    const iconSVG = getEchoIcon(val, 22);
+    const lv = val ? bondLevel(bondCount(val)) : 0;
+    const bondCls = lv > 0 ? ' bonded bond-t' + lv : '';
+    const badge = lv > 0
+      ? `<span class="my-echo-lv bond-l${lv}" title="${escapeHtml(bondLabel(lv))} — nurtured by your stories">Lv${lv}</span>`
+      : '';
+    return `<div class="my-echo-visual${bondCls}">${iconSVG}<span>${escapeHtml(echo)}</span>${badge}</div>`;
+  }).join('');
+}
+// Refresh only the hero Echo row (used on Bond level-up so the new rank glow
+// appears instantly without re-triggering the heavier full MY-Pantheon render).
+function renderMyEchoesOnly() {
+  const row = document.querySelector('#pantheon-display .my-echoes');
+  if (row) row.innerHTML = buildEchoChipsHTML();
 }
 
 // Add story with stronger micro (story view focus)
