@@ -1469,6 +1469,30 @@ function claimDaily() {
       } catch (e) {}
     }, 3600);
   }
+  // 3H CRO money-pipe (ent track · not finance)
+  setTimeout(function () { try { showPantheonMoneyPipe(streak.count, jackpot); } catch (e) {} }, 1200);
+}
+
+function showPantheonMoneyPipe(days, jackpot) {
+  var el = document.getElementById('moneyPipe');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'moneyPipe';
+    el.style.cssText = 'margin:14px auto;max-width:420px;padding:14px;border:1px solid rgba(201,162,39,.45);border-radius:14px;background:rgba(20,16,28,.92);text-align:center;font-size:13px;z-index:40';
+    var host = document.getElementById('streak-btn') && document.getElementById('streak-btn').parentNode;
+    host = host || document.querySelector('main') || document.body;
+    host.appendChild(el);
+  }
+  el.innerHTML =
+    '<div style="color:#c9a227;font-weight:700;margin-bottom:6px">' + (jackpot ? '🎉 Jackpot devotion' : '💎 Keep the fire') + '</div>' +
+    '<p style="opacity:.8;font-size:12px;margin:0 0 10px">Entertainment only · not financial advice · Day ' + (days || 0) + '</p>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">' +
+    '<a style="display:inline-block;padding:8px 12px;border-radius:10px;border:1px solid rgba(201,162,39,.4);text-decoration:none;color:inherit" href="mailto:hoyashi95@gmail.com?subject=%5BPantheon%5D%20support">☕ Support</a>' +
+    '<button type="button" class="secondary" onclick="try{celebrateShare&&celebrateShare()}catch(e){};if(window.legionTrack)try{legionTrack(\'share_peak\')}catch(e){}">📤 Invite clan</button>' +
+    '<a style="display:inline-block;padding:8px 12px;border-radius:10px;border:1px solid rgba(201,162,39,.4);text-decoration:none;color:#c9a227" href="https://hosuman08-netizen.github.io/daedalus-conquest/?utm_source=pantheon&utm_medium=cross&ref=p2_pipe">⚔️ Daedalus</a>' +
+    '<a style="display:inline-block;padding:8px 12px;border-radius:10px;border:1px solid rgba(201,162,39,.4);text-decoration:none;color:#c9a227" href="https://hosuman08-netizen.github.io/legion-hub/?utm_source=pantheon&utm_medium=cross&ref=p2_pipe">🎮 Arcade</a>' +
+    '</div>';
+  try { if (window.legionTrack) legionTrack('money_pipe_shown', { app: 'pantheon', days: days, jackpot: !!jackpot }); } catch (e) {}
 }
 
 function renderReferralStreak() {
