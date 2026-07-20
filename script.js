@@ -1944,6 +1944,7 @@ if (form) {
 // Reveal is STAGED (not all-at-once): each echo lights up in sequence over ~1.2s, then a climax
 // burst — anticipation → payoff = the peak-dopamine "creation" beat. Reversible, client-only.
 function showCreationRitual(echoes, clanName) {
+  if (window.legionTrack) window.legionTrack('activate');  // Legion 통합 측정: 판테온 생성 = 코어루프 완료
   const ritual = document.createElement('div');
   ritual.className = 'ritual-overlay';
   ritual.innerHTML = `
@@ -2199,6 +2200,7 @@ function shareToWhatsApp() {
   var url = "https://wa.me/?text=" + encodeURIComponent(text);
   try { if (tg && tg.openLink) tg.openLink(url); else window.open(url, "_blank"); } catch(e){ window.open(url, "_blank"); }
   sharesCount++; addKarma(2);
+  if (window.legionTrack) window.legionTrack('share');  // Legion \ud1b5\ud569 \uce21\uc815: \uacf5\uc720 \ud074\ub9ad
   try { renderReferralStreak(); } catch(e){}
   showToast("Opening WhatsApp to share your legend \u2726");
 }
@@ -2216,6 +2218,7 @@ function shareToTG() {
     navigator.clipboard?.writeText(text + '\n' + _link).then(() => showToast('Copied with framing! Share it to your TG group. (fictional narrative)'));
   }
   sharesCount++;
+  if (window.legionTrack) window.legionTrack('share');  // Legion 통합 측정: TG 공유 클릭
   const reach = Math.floor(Math.random() * 180) + 70;
   addKarma(2);
   showToast(`Shared! Reached ${reach} friends • +2 Karma ✧`, 2600);
@@ -2248,6 +2251,7 @@ function inviteFriends() {
     navigator.clipboard.writeText(link).then(() => showToast('Invite link copied! Share in your TG groups ✧', 2800));
   }
   sharesCount++;
+  if (window.legionTrack) window.legionTrack('share');  // Legion 통합 측정: 초대 공유 클릭
   addKarma(3);  // 발송 보상(소액). 실제 가입 = 래더 마일스톤(백엔드 연결 시 정산).
   showToast('Invite shared! Friends who join via your link light your path ✧', 2800);
   haptic('medium');   // rank20
