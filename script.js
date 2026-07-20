@@ -2054,7 +2054,14 @@ function renderMyPantheon() {
   
   storiesEl.innerHTML = '<h3 style="margin:4px 0 8px; font-size:18px; color:#f5f1e6; position:relative;">Stories <span style="position:absolute; right:0; bottom:2px; font-size:12px; color:var(--accent); opacity:.55; font-weight:400;">✦ your legacy</span></h3>';
   if (currentPantheon.stories.length === 0) {
-    storiesEl.innerHTML += '<p class="hint">No stories yet. Add one below to start your legend.</p>';
+    // First-story activation gate — the app's #1 conversion. Name the concrete payoff:
+    // dedicate a story and that Echo visibly evolves (Bond glow, now shown on your Echoes above).
+    storiesEl.innerHTML +=
+      '<div class="codex-nudge" style="text-align:left;line-height:1.5;">' +
+        '<div style="font-weight:800;color:#e8d9a0;margin-bottom:3px;">✍️ Write your first story — 30 seconds</div>' +
+        'Dedicate it to one of your Echoes below. That Echo <b>evolves</b> as its Bond grows — ' +
+        'you\'ll watch it light up right on your Pantheon. This is your legend\'s first line.' +
+      '</div>';
   } else {
     // rank1: escape user story text (stored-XSS). rank14: single map+join, not innerHTML+= per item (O(n²)).
     storiesEl.innerHTML += currentPantheon.stories.map(s =>
