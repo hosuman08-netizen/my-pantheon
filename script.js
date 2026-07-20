@@ -3507,4 +3507,7 @@ setTimeout(() => {
       if (window.legionTrack) legionTrack('festival_fomo_toast',{});
     }, 2200);
   } catch(e){}
+
+/* LEGION_WAVE_11_fomo_chip */
+setTimeout(function(){try{if(document.getElementById('lw_fomo_11'))return;var end=new Date(); end.setHours(24,0,0,0);var ms=Math.max(0,end-Date.now());var h=Math.floor(ms/3600000), m=Math.floor((ms%3600000)/60000);var d=document.createElement('div'); d.id='lw_fomo_11';d.style.cssText='font-size:11px;opacity:.75;margin:6px 0;color:#e0b552';d.textContent='window '+h+'h '+m+'m · W11';var app=document.getElementById('app')||document.body; app.insertBefore(d, app.firstChild);}catch(e){}},40);
 })();
