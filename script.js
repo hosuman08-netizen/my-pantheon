@@ -1229,7 +1229,7 @@ function resolveSource() {  // 첫 터치 고정 — 최초 1회만 기록, 덮�
 function emit(type, extra) {  // fire-and-forget, 절대 앱에 throw 금지
   try {
     const d = Object.assign({ channel: resolveSource() }, extra || {});
-    const body = JSON.stringify({ type: type, anonId: 'p2_' + hashId(p2uid || 'anon'), ts: Date.now(), d: d });
+    const body = JSON.stringify({ app: 'pantheon', type: type, anon: 'p2_' + hashId(p2uid || 'anon'), anonId: 'p2_' + hashId(p2uid || 'anon'), ts: Date.now(), d: d });
     const url = P2_ANALYTICS + '/ev';
     if (typeof navigator !== 'undefined' && navigator.sendBeacon) navigator.sendBeacon(url, new Blob([body], { type: 'text/plain;charset=UTF-8' }));
     else fetch(url, { method:'POST', headers:{'content-type':'text/plain'}, body: body, keepalive:true, mode:'no-cors' });
