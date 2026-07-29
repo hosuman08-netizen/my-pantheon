@@ -15,8 +15,16 @@ if (tg) {
 
 // TG native: MainButton for primary action (share / create)
 // ⚠️ null 가드 필수 — SDK 로드 실패(망 차단·CDN 다운) 시 여기서 throw하면 앱 전체 사망(폴백 무력화). QA P1.
+// setParams는 Bot API 6.1+ — 구버전/부분 폴리필엔 메서드 없음 → 존재 확인 후 fallback (QA 2026-07-29)
 if (tg && tg.MainButton) {
-  tg.MainButton.setParams({ text: 'Share Story', is_visible: false, color: '#c9a227' });
+  try {
+    if (typeof tg.MainButton.setParams === 'function') {
+      tg.MainButton.setParams({ text: 'Share Story', is_visible: false, color: '#c9a227' });
+    } else {
+      if (typeof tg.MainButton.setText === 'function') tg.MainButton.setText('Share Story');
+      if (typeof tg.MainButton.hide === 'function') tg.MainButton.hide();
+    }
+  } catch (e) { /* boot must not die */ }
 }
 // Da Vinci + full-cheat + sense (Morpheus orchestrator): sfumato soft story cards, anatomy proportion, notebook UGC journal. Festival FOMO + MY Pantheon. Variable ratio + prominent disclosure.
 // p6 Lung Surprise Eye + Ache-Breath + 창발 pain CROSS DNA injected (Sovereign p1-p6 advance)
@@ -781,8 +789,10 @@ function initLanguage() {
     select.value = currentLang;
     select.addEventListener('change', (e) => {
       applyLanguage(e.target.value);
-      if (document.getElementById('tab-my').classList.contains('active')) renderMyPantheon();
-      if (document.getElementById('tab-explore').classList.contains('active')) renderExplore();
+      const tabMy = document.getElementById('tab-my');
+      const tabExplore = document.getElementById('tab-explore');
+      if (tabMy && tabMy.classList.contains('active')) renderMyPantheon();
+      if (tabExplore && tabExplore.classList.contains('active')) renderExplore();
     });
   }
   applyLanguage(currentLang);
@@ -1229,7 +1239,9 @@ function resolveSource() {  // 첫 터치 고정 — 최초 1회만 기록, 덮�
 function emit(type, extra) {  // fire-and-forget, 절대 앱에 throw 금지
   try {
     const d = Object.assign({ channel: resolveSource() }, extra || {});
-    const body = JSON.stringify({ app: 'pantheon', type: type, anon: 'p2_' + hashId(p2uid || 'anon'), anonId: 'p2_' + hashId(p2uid || 'anon'), ts: Date.now(), d: d });
+    // AWAY: unify app id with beacon LEGION_APP (was hardcode "pantheon" → stats key split)
+    const appId = (typeof window !== 'undefined' && window.LEGION_APP) ? window.LEGION_APP : 'my-pantheon';
+    const body = JSON.stringify({ app: appId, type: type, anon: 'p2_' + hashId(p2uid || 'anon'), anonId: 'p2_' + hashId(p2uid || 'anon'), ts: Date.now(), d: d });
     const url = P2_ANALYTICS + '/ev';
     if (typeof navigator !== 'undefined' && navigator.sendBeacon) navigator.sendBeacon(url, new Blob([body], { type: 'text/plain;charset=UTF-8' }));
     else fetch(url, { method:'POST', headers:{'content-type':'text/plain'}, body: body, keepalive:true, mode:'no-cors' });
@@ -1495,7 +1507,7 @@ function showPantheonMoneyPipe(days, jackpot) {
     '<a style="display:inline-block;padding:8px 12px;border-radius:10px;border:1px solid rgba(201,162,39,.4);text-decoration:none;color:#c9a227" href="https://hosuman08-netizen.github.io/daedalus-conquest/?utm_source=pantheon&utm_medium=cross&ref=p2_pipe">⚔️ Daedalus</a>' +
     '<a style="display:inline-block;padding:8px 12px;border-radius:10px;border:1px solid rgba(201,162,39,.4);text-decoration:none;color:#c9a227" href="https://hosuman08-netizen.github.io/legion-hub/?utm_source=pantheon&utm_medium=cross&ref=p2_pipe">🎮 Arcade</a>' +
     '</div>';
-  try { if (window.legionTrack) legionTrack('money_pipe_shown', { app: 'pantheon', days: days, jackpot: !!jackpot }); } catch (e) {}
+  try { if (window.legionTrack) legionTrack('money_pipe_shown', { app: (window.LEGION_APP || 'my-pantheon'), days: days, jackpot: !!jackpot }); } catch (e) {}
 }
 
 function renderReferralStreak() {
@@ -2784,6 +2796,7 @@ function initOmMeditation() {
   const breath = document.getElementById('breath-guide');
   const breathText = document.getElementById('breath-text');
   const freqList = document.getElementById('freq-list');
+  const omTimer = document.getElementById('om-timer');
 
   if (!btn || !symbol) return;
 
@@ -2794,8 +2807,8 @@ function initOmMeditation() {
       btn.textContent = '⏸ Pause Om';
       btn.classList.add('playing');
       symbol.classList.add('playing');
-      breath.style.display = 'block';
-      document.getElementById('om-timer').style.display = 'inline';
+      if (breath) breath.style.display = 'block';
+      if (omTimer) omTimer.style.display = 'inline';
       startBreathingGuide(breathText);
 
       // Live timer
@@ -2827,13 +2840,13 @@ function initOmMeditation() {
         clearInterval(omTimerInterval);
         omTimerInterval = null;
       }
-      document.getElementById('om-timer').style.display = 'none';
+      if (omTimer) omTimer.style.display = 'none';
       omStartTime = null;
       stopOm();
       btn.textContent = '▶ Play Om';
       btn.classList.remove('playing');
       symbol.classList.remove('playing');
-      breath.style.display = 'none';
+      if (breath) breath.style.display = 'none';
       stopBreathingGuide();
     }
   });
@@ -3477,7 +3490,8 @@ setTimeout(() => {
       d.id = '3h-empty-cta';
       d.style.cssText = 'margin:12px;padding:14px;border:1px solid #c9a227;border-radius:12px;background:rgba(201,162,39,.08);text-align:center';
       d.innerHTML = '<b>Create your first Echo in 30s</b><p style="font-size:12px;opacity:.85;margin:6px 0">Name a virtue. Write one line. Share to clan.</p><button type="button" class="primary" id="3h-empty-start">Start now</button>';
-      d.querySelector('#3h-empty-start').onclick = function () {
+      // CSS.escape: id starting with digit is invalid in querySelector('#3h-...') — use getElementById
+      (document.getElementById('3h-empty-start') || d.querySelector('button.primary')).onclick = function () {
         try {
           var f = document.getElementById('create-form') || document.querySelector('[data-create], #create, .create-form');
           if (f && f.scrollIntoView) f.scrollIntoView({ behavior: 'smooth' });

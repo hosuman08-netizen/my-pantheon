@@ -71,31 +71,23 @@ async function sendWelcome(token, chatId, startTag) {
 
 export default {
   async fetch(request, env) {
-    // 🔧 임시 셋업 라우트(2026-07-16 Morpheus) — env.BOT_TOKEN으로 봇 메타 자동설정(토큰 미노출). 사용 후 제거.
+    // 🔒 2026-07-29 Cipher P0: /__setup?k=legion2026 REMOVED (public weak key was live).
+    // Setup only via wrangler/local with BOT_TOKEN secret — never HTTP open control plane.
     {
       const su = new URL(request.url);
-      if (request.method === 'GET' && su.pathname === '/__setup' && su.searchParams.get('k') === 'legion2026') {
-        const tok = env.BOT_TOKEN;
-        if (!tok) return new Response(JSON.stringify({ ok: false, reason: 'no-token' }), { status: 500 });
-        const j = async (r) => { try { return await (await r).json(); } catch (e) { return { ok: false }; } };
-        const out = {};
-        const me = await j(tg(tok, 'getMe', {}));
-        out.username = (me && me.result && me.result.username) || '?';
-        if (out.username !== 'MyPantheonEchoBot') return new Response(JSON.stringify({ ok: false, reason: 'wrong-bot', username: out.username }), { status: 200, headers: { 'content-type': 'application/json' } });
-        // 봇이 실제로 응답하도록 webhook을 이 워커로 지정(그동안 미설정이었음)
-        out.webhook = await j(tg(tok, 'setWebhook', { url: su.origin + '/' }));
-        out.short = await j(tg(tok, 'setMyShortDescription', { short_description: 'Craft your legend of dharma & karma. Collect fictional heroes, grow your Pantheon, share your story. ✧' }));
-        out.desc = await j(tg(tok, 'setMyDescription', { description: '✧ My Pantheon — your story of dharma & karma.\n\nCreate your OWN fictional heroes inspired by the virtues of ancient epics — duty, courage, kindness. Grow their echoes, collect a living Pantheon, and share your legend with friends.\n\n• Positive, empowering stories only\n• Fictional — not real gods or deities\n• Free to play · optional cosmetics\n\nTap below to begin your first hero. 🪔' }));
-        out.cmds = await j(tg(tok, 'setMyCommands', { commands: [{ command: 'start', description: 'Begin your Pantheon ✧' }] }));
-        out.menu = await j(tg(tok, 'setChatMenuButton', { menu_button: { type: 'web_app', text: '✨ Open', web_app: { url: WEBAPP_URL } } }));
-        return new Response(JSON.stringify({ ok: true, out }), { status: 200, headers: { 'content-type': 'application/json' } });
+      if (su.pathname === '/__setup') {
+        return new Response(JSON.stringify({ ok: false, reason: 'setup-disabled' }), {
+          status: 404, headers: { 'content-type': 'application/json' },
+        });
       }
     }
     if (request.method !== 'POST') return new Response('My Pantheon bot', { status: 200 });
-    // Optional spoof guard: Telegram sends this header if a secret_token was set on the webhook.
-    if (env.WEBHOOK_SECRET) {
+    // 🔒 Webhook auth: if WEBHOOK_SECRET set → fail-closed header match (Cipher P0-3).
+    // If unset: legacy accept (worker secret list empty 2026-07-29) — put secret + setWebhook secret_token ASAP.
+    const wsecret = env.WEBHOOK_SECRET;
+    if (wsecret) {
       const got = request.headers.get('x-telegram-bot-api-secret-token');
-      if (got !== env.WEBHOOK_SECRET) return new Response('forbidden', { status: 403 });
+      if (got !== wsecret) return new Response('forbidden', { status: 403 });
     }
     const token = env.BOT_TOKEN;
     if (!token) return new Response('no token', { status: 500 });
