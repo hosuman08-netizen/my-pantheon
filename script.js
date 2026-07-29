@@ -1391,7 +1391,8 @@ function saveStreak() { localStorage.setItem('p2_streak', JSON.stringify(streak)
 
 function getInviteLink() {
   if (P2_BOT) return 'https://t.me/' + P2_BOT + '?startapp=c-tg-r-' + p2uid;
-  return P2_BASE + '?ref=' + encodeURIComponent(p2uid);
+  // Wave21: public web share bare → utm for K/analytics (TG startapp path unchanged)
+  return P2_BASE + '?utm_source=share&utm_medium=app&ref=' + encodeURIComponent(p2uid);
 }
 
 // 신규 유입(피초대자) 측 — 완전 클라 동작. 인바이터 크레딧은 백엔드 있을 때만 graceful 핑.
