@@ -1885,6 +1885,18 @@ function echoDropCalLabel(off) {
   d.setDate(d.getDate() + (off || 0));
   return (d.getMonth() + 1) + '/' + d.getDate();
 }
+/* WAVE162: slot cell tap = highlight disclosure. No fake live drops. Youth-Stars 0. */
+var EDC_NOTE_HI_MS = 1600;
+function highlightEchoDropNote() {
+  const note = document.querySelector('#echo-drop-cal .edc-note');
+  if (!note) return;
+  note.classList.add('hi');
+  note.setAttribute('tabindex', '-1');
+  try { note.focus({ preventScroll: true }); } catch (e) { try { note.focus(); } catch (e2) {} }
+  try { note.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) {}
+  clearTimeout(highlightEchoDropNote._t);
+  highlightEchoDropNote._t = setTimeout(function () { note.classList.remove('hi'); }, EDC_NOTE_HI_MS);
+}
 function renderEchoDropCal() {
   const el = document.getElementById('echo-drop-cal');
   if (!el) return;
@@ -1896,11 +1908,11 @@ function renderEchoDropCal() {
     const key = ALL_ECHO_KEYS[echoDropDoy(off) % ALL_ECHO_KEYS.length];
     const inClan = owned.indexOf(key) !== -1;
     const mark = off === 0 ? ' today' : '';
-    return '<div class="edc-row' + mark + '">' +
+    return '<button type="button" class="edc-row' + mark + '" data-edc-off="' + off + '" onclick="highlightEchoDropNote()">' +
       '<span class="edc-day">' + (off === 0 ? '오늘' : echoDropCalLabel(off)) + '</span>' +
       '<span class="edc-name">Echo of ' + escapeHtml(echoShortName(key)) + '</span>' +
       '<span class="edc-st">' + (inClan ? 'in clan' : 'open slot') + '</span>' +
-    '</div>';
+    '</button>';
   }).join('');
   el.innerHTML =
     '<div class="edc-card">' +
@@ -1908,7 +1920,7 @@ function renderEchoDropCal() {
       '<p class="edc-line">오늘 로컬 슬롯 · Echo of ' + escapeHtml(echoShortName(todayKey)) +
         ' · 로스터 안 · <b>라이브 드롭 아님</b></p>' +
       '<div class="edc-rows">' + rows + '</div>' +
-      '<div class="edc-note">로컬 슬롯 고지 · 신규 신 도착 없음 · 페이크 라이브 드롭 0 · 18+ fictional</div>' +
+      '<div class="edc-note" id="edc-note">로컬 슬롯 고지 · 신규 신 도착 없음 · 페이크 라이브 드롭 0 · 18+ fictional</div>' +
     '</div>';
 }
 

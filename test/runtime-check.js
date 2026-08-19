@@ -45,6 +45,7 @@ const T = `(function(){
     tryFn(fn, function(){ if(typeof globalThis[fn]==='function') globalThis[fn](); });
   });
   tryFn('pickEchoTalk(no pantheon)', function(){ if(typeof globalThis.pickEchoTalk==='function') globalThis.pickEchoTalk('remember'); });
+  tryFn('highlightEchoDropNote', function(){ if(typeof globalThis.highlightEchoDropNote==='function') globalThis.highlightEchoDropNote(); });
   tryFn('emitLaunch', ()=>{ if(typeof emitLaunch==='function') emitLaunch(); });
   globalThis.__R = R;
 })();`;
