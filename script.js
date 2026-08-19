@@ -1279,7 +1279,7 @@ function founderDay3Gate() {   // 설치 후 2일 경과 재방문 시에만 창
 function getP2Uid() { return p2uid || localStorage.getItem('p2_uid') || ('p2' + Date.now().toString(36)); }
 // ===== 18+ Age Gate (컴플라 실드 · 되돌림 · localStorage 전용) — p2엔 가챠/도박 없음(구매=결정적 코스메틱). 중립 18+ 확인 + under-18 유스모드(유료 OFF, 코어 무료) =====
 function isYouthMode() { try { return localStorage.getItem('p2_youth') === '1'; } catch(e) { return false; } }
-function enterYouthMode() { try { document.querySelectorAll('button').forEach(function(b){ var oc = b.getAttribute('onclick') || ''; if (/showPremiumModal|purchaseP2WithStars/.test(oc)) b.style.display = 'none'; }); } catch(e){} }
+function enterYouthMode() { try { document.querySelectorAll('button').forEach(function(b){ var oc = b.getAttribute('onclick') || ''; if (/showPremiumModal|purchaseP2WithStars/.test(oc) || b.classList.contains('premium-btn')) b.style.display = 'none'; }); } catch(e){} }
 function ageGate() {
   var decided = '';
   try { decided = localStorage.getItem('p2_age_ok') || ''; } catch(e){}
@@ -1781,6 +1781,97 @@ function updateBondStatus() {
   if (s && el) el.innerHTML = bondStatusHTML(s.value);
 }
 
+// ===== Echo Bond Talk — local otome-lite beat (GOLD50 TOP1 LI · no LLM · no voice · no Stars) =====
+// One owned Echo speaks. Three canned branches. One honest Bond tick per local day.
+const ECHO_TALK_OPEN = {
+  'Krishna-echo':  'Strategy is a conversation. What weight do you carry today?',
+  'Rama-echo':     'Duty waits with me. Which path do you choose?',
+  'Draupadi-echo': 'I have not forgotten fire. Will you stand in it with me?',
+  'Hanuman-echo':  'Loyalty is a vow spoken twice. Speak yours.',
+  'Durga-echo':    'I guard the threshold. Who do you protect tonight?',
+  'Arjuna-echo':   'The bow is still. Where do you aim?',
+  'Sita-echo':     'Endurance is a quiet bond. What do you bring me?'
+};
+const ECHO_TALK_CHOICES = [
+  { id: 'remember', label: 'I remember you' },
+  { id: 'counsel',  label: 'I seek your counsel' },
+  { id: 'walk',     label: 'Walk with me' }
+];
+const ECHO_TALK_REPLY = {
+  remember: 'Then the fire stays. I am still here.',
+  counsel:  'Duty first, then the heart. I am listening.',
+  walk:     'Then we walk the same path. Your courage is mine.'
+};
+function loadEchoTalk() {
+  try {
+    const v = JSON.parse(localStorage.getItem('p2_echo_talk') || 'null');
+    return (v && typeof v === 'object') ? v : {};
+  } catch (e) { return {}; }
+}
+function saveEchoTalk(st) {
+  try { localStorage.setItem('p2_echo_talk', JSON.stringify(st)); } catch (e) {}
+}
+function closestTalkEcho() {
+  const owned = ownedEchoKeys();
+  if (!owned.length) return '';
+  return owned.slice().sort(function (a, b) {
+    const d = bondCount(b) - bondCount(a);
+    return d !== 0 ? d : owned.indexOf(a) - owned.indexOf(b);
+  })[0];
+}
+function renderEchoTalk() {
+  const el = document.getElementById('echo-talk');
+  if (!el) return;
+  if (!currentPantheon) { el.hidden = true; el.innerHTML = ''; return; }
+  const key = closestTalkEcho();
+  if (!key) { el.hidden = true; el.innerHTML = ''; return; }
+  el.hidden = false;
+  const name = escapeHtml(echoShortName(key));
+  const open = escapeHtml(ECHO_TALK_OPEN[key] || 'The bond we share is still being written.');
+  const st = loadEchoTalk();
+  const doneToday = st.day === todayStr() && st.key === key && st.choice;
+  let body;
+  if (doneToday) {
+    const reply = escapeHtml(ECHO_TALK_REPLY[st.choice] || st.reply || '');
+    const now = new Date(), mid = new Date(now); mid.setHours(24, 0, 0, 0);
+    const ms = mid - now, left = Math.floor(ms / 3600000) + 'h ' + Math.floor((ms % 3600000) / 60000) + 'm';
+    body =
+      '<p class="et-line">“' + reply + '”</p>' +
+      '<div class="et-next">Spoken today — return in ' + left + '</div>';
+  } else {
+    const chips = ECHO_TALK_CHOICES.map(function (c) {
+      return '<button type="button" class="et-chip" onclick="pickEchoTalk(\'' + c.id + '\')">' +
+        escapeHtml(c.label) + '</button>';
+    }).join('');
+    body =
+      '<p class="et-line">“' + open + '”</p>' +
+      '<div class="et-chips">' + chips + '</div>';
+  }
+  el.innerHTML =
+    '<div class="et-card">' +
+      '<div class="et-who">Echo of ' + name + ' speaks</div>' +
+      body +
+      '<div class="et-note">Fictional · 18+ recommended · one Bond tick per day · not a real deity</div>' +
+    '</div>';
+}
+function pickEchoTalk(choiceId) {
+  if (!currentPantheon) return;
+  if (!ECHO_TALK_REPLY[choiceId]) return;
+  const key = closestTalkEcho();
+  if (!key) return;
+  const st = loadEchoTalk();
+  if (st.day === todayStr() && st.key === key) {
+    showToast('Already spoken today — return after midnight ✧');
+    return;
+  }
+  const reply = ECHO_TALK_REPLY[choiceId];
+  saveEchoTalk({ day: todayStr(), key: key, choice: choiceId, reply: reply });
+  grantBond(key);
+  haptic('success');
+  showToast('🔱 ' + echoShortName(key) + ' heard you — Bond grows ✧', 2600);
+  renderEchoTalk();
+}
+
 // ===== Karma Atelier — free cosmetic shop (currency sink + premium value contrast) =====
 // Honest & reversible: Karma is genuinely deducted (a real sink), ownership persists in
 // localStorage, no randomness / no fake stock. Auras are FREE (earned Karma); the premium
@@ -1872,13 +1963,16 @@ function renderKarmaShop() {
     : '';
   // Premium value-contrast: the top tier stays Stars-only (aspirational anchor).
   const gold = hasGoldFrame();
+  const premiumBtn = gold
+    ? '<button type="button" class="shop-btn equipped" disabled>✓ Owned</button>'
+    : (isYouthMode()
+      ? '<button type="button" class="shop-btn premium-btn" disabled>18+ only</button>'
+      : '<button type="button" class="shop-btn premium-btn" onclick="showPremiumModal()">★ Stars</button>');
   const premium = '<div class="shop-card premium' + (gold ? ' active' : '') + '">' +
     '<span class="shop-swatch premium-sw"></span>' +
     '<span class="shop-name">Golden Frame</span>' +
     '<span class="shop-desc">Premium · top tier</span>' +
-    (gold
-      ? '<button type="button" class="shop-btn equipped" disabled>✓ Owned</button>'
-      : '<button type="button" class="shop-btn premium-btn" onclick="showPremiumModal()">★ Stars</button>') +
+    premiumBtn +
     '</div>';
   // Codex-exclusive reward card — the collection-completion payoff (not buyable at any price).
   const cx = cosmeticById('aura_codex');
@@ -1896,6 +1990,7 @@ function renderKarmaShop() {
   el.innerHTML = '<div class="shop-head"><span>✧ Karma Atelier</span><span class="shop-bal">✦ ' + karma + ' Karma</span></div>' +
     '<div class="shop-sub">Spend earned Karma on free cosmetics for MY Pantheon. Core stays free.</div>' +
     '<div class="shop-grid">' + cards + premium + exclusive + '</div>' + noneBtn;
+  if (isYouthMode()) enterYouthMode();
 }
 
 // ===== Pantheon Codex completion reward — the collection payoff (honest, once, reversible) =====
@@ -2071,6 +2166,7 @@ function renderMyPantheon() {
     if (myContent) myContent.style.display = 'none';
     if (statusEl) statusEl.style.display = 'none';
     if (noP) noP.style.display = 'block';
+    try { renderEchoTalk(); } catch (e) {}
     return;
   }
   
@@ -2149,6 +2245,7 @@ function renderMyPantheon() {
   renderDharmaDraw();      // 📜 Daily Dharma Draw — 일일 무료 variable 리빌 + 수집덱(습관앵커)
   renderCodex();           // 📜 수집 그리드 + 'One more Echo' 근접 넛지
   renderEchoTag();         // 🔱 Echo Bond — 스토리 태깅 셀렉터(소유 Echo 진화)
+  renderEchoTalk();        // 🔱 Echo Bond Talk — 로컬 분기 1치 (LLM/보이스/Stars 없음)
   renderKarmaShop();       // ✧ Karma Atelier — 카르마 화폐싱크 + 프리미엄 가치대비
   renderBlessingBack();    // 🙏 상호 축복 루프 (invitedBy 상호성)
   updateMainButton();

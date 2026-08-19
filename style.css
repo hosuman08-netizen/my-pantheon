@@ -1672,6 +1672,32 @@ input:checked + .slider:before {
 }
 .codex-cell.owned.bonded { border-color: rgba(201,162,39,.55); }
 
+/* Echo Bond Talk — local canned LI beat (one Echo, three branches) */
+.echo-talk { margin: 8px 0 10px; }
+.et-card {
+  padding: 14px 12px; border-radius: 12px;
+  background: linear-gradient(135deg, rgba(232,106,160,.10), rgba(201,162,39,.06));
+  border: 1px solid rgba(201,162,39,.40);
+}
+.et-who { font-size: 12px; font-weight: 700; color: #e8d9a0; letter-spacing: .2px; }
+.et-line {
+  font-size: 14px; font-style: italic; color: #f5f1e6;
+  margin: 8px 0 10px; line-height: 1.45;
+}
+.et-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.et-chip {
+  font-family: inherit; cursor: pointer;
+  padding: 8px 12px; border-radius: 20px;
+  background: rgba(201,162,39,.12); color: #f5f1e6;
+  border: 1px solid rgba(201,162,39,.40); font-size: 12px; font-weight: 600;
+}
+.et-chip:hover, .et-chip:active {
+  border-color: rgba(232,106,160,.55);
+  background: rgba(232,106,160,.14);
+}
+.et-next { font-size: 11px; color: #c9a227; text-align: center; opacity: .85; }
+.et-note { margin-top: 8px; font-size: 9.5px; opacity: .55; text-align: center; }
+
 /* ===== Pantheon Codex completion reward — exclusive Codex Halo card ===== */
 .shop-card.exclusive { border-color: rgba(155,231,255,.45); }
 .shop-card.exclusive.active { border-color: rgba(155,231,255,.75); background: rgba(155,231,255,.10); }
