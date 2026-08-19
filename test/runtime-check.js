@@ -41,7 +41,7 @@ const T = `(function(){
   var R=[];
   function tryFn(label, f){ try{ f(); R.push('✅ '+label); }catch(e){ R.push('❌ '+label+' — '+e.message); } }
   tryFn('window.onload(부팅)', ()=>{ if(typeof window.onload==='function') window.onload(); });
-  ['renderMyPantheon','renderExplore','renderKarmaShop','renderCodex','renderDharmaDraw','renderFestivals','renderAscensionLadder','renderReferralStreak','renderEchoTalk','initOmMeditation','reserveFounder','ageGate','initLanguage','initSettings'].forEach(function(fn){
+  ['renderMyPantheon','renderExplore','renderKarmaShop','renderCodex','renderDharmaDraw','renderFestivals','renderAscensionLadder','renderReferralStreak','renderEchoTalk','renderEchoDropCal','initOmMeditation','reserveFounder','ageGate','initLanguage','initSettings'].forEach(function(fn){
     tryFn(fn, function(){ if(typeof globalThis[fn]==='function') globalThis[fn](); });
   });
   tryFn('pickEchoTalk(no pantheon)', function(){ if(typeof globalThis.pickEchoTalk==='function') globalThis.pickEchoTalk('remember'); });

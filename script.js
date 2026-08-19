@@ -1872,6 +1872,46 @@ function pickEchoTalk(choiceId) {
   renderEchoTalk();
 }
 
+/* GOLD50 TOP2: SMITE god-drop cadence → local roster slot calendar only.
+   Existing 7 Echo slots. No fake live drops. No new gods arriving. Youth-Stars 아님. 18+ fictional. */
+function echoDropDoy(off) {
+  const d = new Date();
+  d.setDate(d.getDate() + (off || 0));
+  const start = new Date(d.getFullYear(), 0, 0);
+  return Math.floor((d.getTime() - start.getTime()) / 86400000);
+}
+function echoDropCalLabel(off) {
+  const d = new Date();
+  d.setDate(d.getDate() + (off || 0));
+  return (d.getMonth() + 1) + '/' + d.getDate();
+}
+function renderEchoDropCal() {
+  const el = document.getElementById('echo-drop-cal');
+  if (!el) return;
+  if (!currentPantheon) { el.hidden = true; el.innerHTML = ''; return; }
+  el.hidden = false;
+  const owned = ownedEchoKeys();
+  const todayKey = ALL_ECHO_KEYS[echoDropDoy(0) % ALL_ECHO_KEYS.length];
+  const rows = [0, 1, 2, 3, 4, 5, 6].map(function (off) {
+    const key = ALL_ECHO_KEYS[echoDropDoy(off) % ALL_ECHO_KEYS.length];
+    const inClan = owned.indexOf(key) !== -1;
+    const mark = off === 0 ? ' today' : '';
+    return '<div class="edc-row' + mark + '">' +
+      '<span class="edc-day">' + (off === 0 ? '오늘' : echoDropCalLabel(off)) + '</span>' +
+      '<span class="edc-name">Echo of ' + escapeHtml(echoShortName(key)) + '</span>' +
+      '<span class="edc-st">' + (inClan ? 'in clan' : 'open slot') + '</span>' +
+    '</div>';
+  }).join('');
+  el.innerHTML =
+    '<div class="edc-card">' +
+      '<div class="edc-who">Local slot calendar</div>' +
+      '<p class="edc-line">오늘 로컬 슬롯 · Echo of ' + escapeHtml(echoShortName(todayKey)) +
+        ' · 로스터 안 · <b>라이브 드롭 아님</b></p>' +
+      '<div class="edc-rows">' + rows + '</div>' +
+      '<div class="edc-note">로컬 슬롯 고지 · 신규 신 도착 없음 · 페이크 라이브 드롭 0 · 18+ fictional</div>' +
+    '</div>';
+}
+
 // ===== Karma Atelier — free cosmetic shop (currency sink + premium value contrast) =====
 // Honest & reversible: Karma is genuinely deducted (a real sink), ownership persists in
 // localStorage, no randomness / no fake stock. Auras are FREE (earned Karma); the premium
@@ -2246,6 +2286,7 @@ function renderMyPantheon() {
   renderCodex();           // 📜 수집 그리드 + 'One more Echo' 근접 넛지
   renderEchoTag();         // 🔱 Echo Bond — 스토리 태깅 셀렉터(소유 Echo 진화)
   renderEchoTalk();        // 🔱 Echo Bond Talk — 로컬 분기 1치 (LLM/보이스/Stars 없음)
+  renderEchoDropCal();     // 🔱 GOLD50 TOP2 신 드롭 캘린더 — 로컬 슬롯 고지 only (라이브 드롭 0)
   renderKarmaShop();       // ✧ Karma Atelier — 카르마 화폐싱크 + 프리미엄 가치대비
   renderBlessingBack();    // 🙏 상호 축복 루프 (invitedBy 상호성)
   updateMainButton();
