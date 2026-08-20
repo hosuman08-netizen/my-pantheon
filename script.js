@@ -3385,7 +3385,7 @@ function _directorPick(idx) {
 window.onload = () => {
   ageGate();             // 🔞 18+ 확인(미결정 시 오버레이) — 최초 1회
   loadState();
-  try { p2InjectQuickStart(); } catch(e){}
+  try { /* one hero: #quickBirth only — skip second CTA */ } catch(e){}
   if (isYouthMode()) setTimeout(enterYouthMode, 300);   // 🔞 재방문 유스모드: 유료 진입점 숨김
   resolveSource();       // 🎯 첫 터치 채널 출처 확정(captureRef보다 먼저)
   captureRef();          // 🪖 피초대자 환영 보너스 + invitedBy 기록(1회)
