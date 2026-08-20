@@ -2105,6 +2105,19 @@ function blessBack() {
 // Create Pantheon
 const form = document.getElementById('pantheon-form');
 if (form) {
+  var qb = document.getElementById('quickBirth');
+  if (qb) qb.addEventListener('click', function () {
+    var n = document.getElementById('clan-name');
+    if (n && !n.value.trim()) n.value = 'Kurukshetra Light';
+    var d = document.getElementById('clan-desc');
+    if (d && !d.value.trim()) d.value = 'Fictional echoes of dharma · not the gods themselves';
+    ['Krishna-echo', 'Rama-echo', 'Draupadi-echo'].forEach(function (v) {
+      var cb = document.querySelector('#tab-create input[value="' + v + '"]');
+      if (cb) cb.checked = true;
+    });
+    if (typeof form.requestSubmit === 'function') form.requestSubmit();
+    else form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+  });
   form.addEventListener('submit', e => {
     e.preventDefault();
     const name = document.getElementById('clan-name').value.trim();
