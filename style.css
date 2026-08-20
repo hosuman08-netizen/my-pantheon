@@ -743,6 +743,16 @@ h1 {
 body:has(.bottom-nav.first-visit) .app {
   padding-bottom: 28px;
 }
+/* First screen: one hero. Karma/prestige and the festival wall fight the CTA. */
+body:has(.bottom-nav.first-visit) .stats,
+body:has(.bottom-nav.first-visit) .framing {
+  display: none;
+}
+body:has(.bottom-nav.first-visit) h1 {
+  font-size: var(--fs-xl);
+  letter-spacing: -.4px;
+  line-height: 1.15;
+}
 
 /* Content */
 .tab-content {
