@@ -1506,7 +1506,7 @@ function showPantheonMoneyPipe(days, jackpot) {
     '<a style="display:inline-block;padding:8px 12px;border-radius:10px;border:1px solid rgba(201,162,39,.4);text-decoration:none;color:inherit" href="mailto:hoyashi95@gmail.com?subject=%5BPantheon%5D%20support">☕ Support</a>' +
     '<button type="button" class="secondary" onclick="try{celebrateShare&&celebrateShare()}catch(e){};if(window.legionTrack)try{legionTrack(\'share_peak\')}catch(e){}">📤 Invite clan</button>' +
     '<a style="display:inline-block;padding:8px 12px;border-radius:10px;border:1px solid rgba(201,162,39,.4);text-decoration:none;color:#c9a227" href="https://hosuman08-netizen.github.io/daedalus-conquest/?utm_source=pantheon&utm_medium=cross&ref=p2_pipe">⚔️ Daedalus</a>' +
-    '<a style="display:inline-block;padding:8px 12px;border-radius:10px;border:1px solid rgba(201,162,39,.4);text-decoration:none;color:#c9a227" href="https://hosuman08-netizen.github.io/legion-hub/?utm_source=pantheon&utm_medium=cross&ref=p2_pipe">🎮 Arcade</a>' +
+    '' +
     '</div>';
   try { if (window.legionTrack) legionTrack('money_pipe_shown', { app: (window.LEGION_APP || 'my-pantheon'), days: days, jackpot: !!jackpot }); } catch (e) {}
 }
