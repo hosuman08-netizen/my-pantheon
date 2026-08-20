@@ -81,25 +81,25 @@
       </div>
     </details>
 
-    <!-- Premium Bottom Navigation -->
-    <nav class="bottom-nav">
+    <!-- Premium Bottom Navigation — first visit: Create only -->
+    <nav class="bottom-nav first-visit">
       <button data-tab="create" class="active">
         <div class="icon">✧</div>
         <div>Create</div>
       </button>
-      <button data-tab="my">
+      <button data-tab="my" class="nav-unlock">
         <div class="icon">◈</div>
-        <div>My Pantheon</div>
+        <div>My</div>
       </button>
-      <button data-tab="explore">
+      <button data-tab="explore" class="nav-unlock">
         <div class="icon">◇</div>
         <div>Explore</div>
       </button>
-      <button data-tab="events">
+      <button data-tab="events" class="nav-unlock">
         <div class="icon">✦</div>
         <div>Festivals</div>
       </button>
-      <button data-tab="settings">
+      <button data-tab="settings" class="nav-unlock">
         <div class="icon">⚙</div>
         <div>Settings</div>
       </button>
@@ -110,10 +110,10 @@
       <div class="section-header">
         <h2>Open a New Pantheon</h2>
         <p class="section-sub">Inspired by the virtues of the epics, create your unique Echoes.</p>
-        <button type="button" id="quickBirth" class="primary" style="margin-top:10px">오늘 첫 에코 — 10초</button>
+        <button type="button" id="quickBirth" class="primary">오늘 첫 에코 — 10초</button>
       </div>
       <details class="more-nav" style="margin:8px 0 16px">
-        <summary style="cursor:pointer;color:var(--accent);font-size:13px">이름 직접 고르기</summary>
+        <summary style="cursor:pointer;color:var(--accent);font-size:13px">Pick a name yourself</summary>
       <form id="pantheon-form">
         <div class="form-group">
           <label>Pantheon Name</label>
@@ -627,7 +627,6 @@
   </div>
 
   <script src="script.js"></script>
-  <!-- Legion 통합 측정 beacon (self-hosted; config는 파일 상단에 CSP-safe로 baked) -->
   <script src="legion-beacon.js"></script>
 
 <script src="sw-register.js"></script>

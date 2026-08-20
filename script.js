@@ -348,7 +348,7 @@ const translations = {
     echoSelect: "Choose Echoes (3-5)",
     guide: "Fictional heroes inspired by epic virtues. Not the gods themselves.",
     navCreate: "Create",
-    navMy: "My Pantheon",
+    navMy: "My",
     navExplore: "Explore",
     navFestivals: "Festivals",
     navSettings: "Settings",
@@ -711,7 +711,7 @@ function applyLanguage(lang) {
     else if (val === 'Sita-echo') { name.textContent = t.echoSita; trait.textContent = t.traitSita; }
   });
 
-  const createBtn = document.querySelector('#tab-create button.primary');
+  const createBtn = document.getElementById('create-submit-btn');
   if (createBtn) createBtn.textContent = t.createBtn;
 
   // Preview
@@ -798,9 +798,16 @@ function initLanguage() {
   applyLanguage(currentLang);
 }
 
+function syncNavForPantheon() {
+  var nav = document.querySelector('.bottom-nav');
+  if (!nav) return;
+  if (currentPantheon) nav.classList.remove('first-visit');
+  else nav.classList.add('first-visit');
+}
+
 // Tab switching
 function switchTab(tab) {
-  // rank9: no 180ms blank-wait. Toggle classes synchronously; fade only the newly-active tab.
+  if (!currentPantheon && tab !== 'create') tab = 'create';
   document.querySelectorAll('.bottom-nav button').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(c => {
     c.classList.remove('active');
@@ -814,14 +821,12 @@ function switchTab(tab) {
   const activeContent = document.getElementById(`tab-${tab}`);
   if (activeContent) {
     activeContent.classList.add('active');
-    // render synchronously so the tab lands fully-formed (removes the double stall)
     if (tab === 'explore') renderExplore();
     if (tab === 'events') renderFestivals();
     if (tab === 'my') updateMainButton();
-    // gentle in-sync fade on the new tab only
     activeContent.style.opacity = '0';
     requestAnimationFrame(() => {
-      activeContent.style.transition = 'opacity .15s ease';
+      activeContent.style.transition = 'opacity 220ms ease-out';
       activeContent.style.opacity = '1';
     });
   }
@@ -839,22 +844,11 @@ function p2QuickStart(){
   const displayEchoes = echoes.map(function(e){ return (typeof echoMap!=='undefined' && echoMap[e]) || e; });
   currentPantheon = { name: name, desc: '', echoes: displayEchoes, stories: [], created: new Date().toISOString() };
   sharesCount = 0; savePantheon();
-  try { showCreationRitual(displayEchoes, name); } catch(e){}
-  setTimeout(function(){ try { switchTab('my'); renderMyPantheon(); } catch(e){} }, 2000);
-  var qs = document.getElementById('p2-quickstart'); if (qs) qs.remove();
+  syncNavForPantheon();
+  try { showCreationRitual(displayEchoes, name, function(){ switchTab('my'); renderMyPantheon(); }); } catch(e){}
 }
 function p2InjectQuickStart(){
-  if (currentPantheon) return; // returning users skip
-  if (document.getElementById('p2-quickstart')) return;
-  const host = document.getElementById('tab-create'); if (!host) return;
-  const box = document.createElement('div');
-  box.id = 'p2-quickstart';
-  box.style.cssText = 'margin:10px 0;padding:14px;border-radius:14px;background:linear-gradient(135deg,#1a1206,#241a08);border:1px solid rgba(201,162,39,.35);';
-  box.innerHTML = '<div style="font-size:14px;font-weight:800;color:#e8cf8a;margin-bottom:4px;">\u26a1 Start in one tap</div>'
-    + '<div style="font-size:12px;color:#c9b98a;opacity:.85;margin-bottom:10px;line-height:1.5;">New here? Skip the setup \u2014 we\'ll open your first Pantheon with three Echoes. You can rename and add your own stories after.</div>'
-    + '<button id="p2-qs-btn" style="width:100%;padding:12px;border:none;border-radius:11px;background:linear-gradient(135deg,#c9a227,#a67c00);color:#1a1400;font-weight:800;font-size:15px;cursor:pointer;">\u2728 Open my Pantheon \u2192</button>';
-  host.insertBefore(box, host.firstChild ? host.firstChild.nextSibling : null);
-  const btn = document.getElementById('p2-qs-btn'); if (btn) btn.onclick = p2QuickStart;
+  return;
 }
 function loadState() {
   const saved = localStorage.getItem('p2_pantheon');
@@ -867,6 +861,7 @@ function loadState() {
   notifEnabled = localStorage.getItem('p2_notif') !== 'false';
   initIdentity();        // 🪖 uid·Founder·streak·refs 로드
   updateHeaderStats();
+  syncNavForPantheon();
 }
 
 // Save
@@ -1503,10 +1498,7 @@ function showPantheonMoneyPipe(days, jackpot) {
     '<div style="color:#c9a227;font-weight:700;margin-bottom:6px">' + (jackpot ? '🎉 Jackpot devotion' : '💎 Keep the fire') + '</div>' +
     '<p style="opacity:.8;font-size:12px;margin:0 0 10px">Entertainment only · not financial advice · Day ' + (days || 0) + '</p>' +
     '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">' +
-    '' +
     '<button type="button" class="secondary" onclick="try{celebrateShare&&celebrateShare()}catch(e){};if(window.legionTrack)try{legionTrack(\'share_peak\')}catch(e){}">📤 Invite clan</button>' +
-    '<a style="display:inline-block;padding:8px 12px;border-radius:10px;border:1px solid rgba(201,162,39,.4);text-decoration:none;color:#c9a227" href="https://hosuman08-netizen.github.io/daedalus-conquest/?utm_source=pantheon&utm_medium=cross&ref=p2_pipe">⚔️ Daedalus</a>' +
-    '' +
     '</div>';
   try { if (window.legionTrack) legionTrack('money_pipe_shown', { app: (window.LEGION_APP || 'my-pantheon'), days: days, jackpot: !!jackpot }); } catch (e) {}
 }
@@ -2146,16 +2138,12 @@ if (form) {
     sharesCount = 0;
     savePantheon();
 
-    // ULTIMATE creation ritual animation - huge visual change
-    showCreationRitual(displayEchoes, name);
-    
-    // Then go to my
-    setTimeout(() => {
+    syncNavForPantheon();
+    showCreationRitual(displayEchoes, name, function () {
       renderMyPantheon();
       switchTab('my');
       addKarma(5);
       updateMainButton();
-      // rank22: if the user saved a spark from Explore before having a pantheon, inject it now.
       try {
         const pend = localStorage.getItem('p2_pending_story');
         if (pend) {
@@ -2165,14 +2153,14 @@ if (form) {
           showToast('Your saved inspiration is ready — make it yours ✧', 2600);
         }
       } catch (e) {}
-    }, 1600);
+    });
   });
 }
 
 // Epic Creation Ritual - the "엄청난 변화" moment.
 // Reveal is STAGED (not all-at-once): each echo lights up in sequence over ~1.2s, then a climax
 // burst — anticipation → payoff = the peak-dopamine "creation" beat. Reversible, client-only.
-function showCreationRitual(echoes, clanName) {
+function showCreationRitual(echoes, clanName, after) {
   if (window.legionTrack) window.legionTrack('activate');  // Legion 통합 측정: 판테온 생성 = 코어루프 완료
   const ritual = document.createElement('div');
   ritual.className = 'ritual-overlay';
@@ -2211,11 +2199,11 @@ function showCreationRitual(echoes, clanName) {
     try { haptic('success'); } catch(e){}
   }, climaxAt);
 
-  // Hold on the full reveal, then fade out.
-  const holdUntil = Math.max(1900, climaxAt + 750);
+  const holdUntil = Math.max(2000, climaxAt + 750);
   setTimeout(() => {
+    try { if (typeof after === 'function') after(); } catch (e) {}
     ritual.classList.remove('active');
-    setTimeout(() => ritual.remove(), 400);
+    setTimeout(() => ritual.remove(), 240);
   }, holdUntil);
 }
 
@@ -3456,7 +3444,7 @@ function plantVoiceAsStorySeed(seed, customName) {
   const surprise = seed.surprise || 0.3;
   // Ache-Breath: high wound = deeper dharma potential (full cheat weaponized positively)
   const karmaBase = 8 + Math.floor(wound * 14) + Math.floor(surprise * 10);
-  const storyText = `Voice Echo from breath (p6): "${(seed.insights||'silent ache').slice(0,90)}..." — ${wound>0.6?'The wound sang dharma.':'The breath carried duty.'} (fictional, inspired by epics)`;
+  const storyText = `Voice Echo from breath: "${(seed.insights||'silent ache').slice(0,90)}..." — ${wound>0.6?'The wound sang dharma.':'The breath carried duty.'} (fictional, inspired by epics)`;
   if (!currentPantheon.stories) currentPantheon.stories = [];
   currentPantheon.stories.unshift({ text: storyText, ts: Date.now(), source: 'p6-voice', wound, surprise });
   addKarma(karmaBase);
@@ -3632,6 +3620,7 @@ setTimeout(() => {
     localStorage.setItem(k,'1');
     setTimeout(function(){
       try {
+        if (typeof currentPantheon !== 'undefined' && !currentPantheon) return;
         if (typeof inviteKarmaMult === 'function' && typeof showToast === 'function') {
           var m = inviteKarmaMult();
           var pct = Math.round((m-1)*100);
@@ -3645,25 +3634,8 @@ setTimeout(() => {
 // 3H empty pantheon CTA (coldstart founding-100)
 (function(){
   try {
-    setTimeout(function(){
-      if (typeof currentPantheon !== 'undefined' && currentPantheon) return;
-      var el = document.getElementById('pantheon-display') || document.querySelector('main');
-      if (!el) return;
-      if (document.getElementById('3h-empty-cta')) return;
-      var d = document.createElement('div');
-      d.id = '3h-empty-cta';
-      d.style.cssText = 'margin:12px;padding:14px;border:1px solid #c9a227;border-radius:12px;background:rgba(201,162,39,.08);text-align:center';
-      d.innerHTML = '<b>Create your first Echo in 30s</b><p style="font-size:12px;opacity:.85;margin:6px 0">Name a virtue. Write one line. Share to clan.</p><button type="button" class="primary" id="3h-empty-start">Start now</button>';
-      // CSS.escape: id starting with digit is invalid in querySelector('#3h-...') — use getElementById
-      (document.getElementById('3h-empty-start') || d.querySelector('button.primary')).onclick = function () {
-        try {
-          var f = document.getElementById('create-form') || document.querySelector('[data-create], #create, .create-form');
-          if (f && f.scrollIntoView) f.scrollIntoView({ behavior: 'smooth' });
-        } catch (e) {}
-      };
-      el.insertBefore(d, el.firstChild);
-      if (window.legionTrack) legionTrack('empty_cta_show',{});
-    }, 1100);
+    var leftover = document.getElementById('3h-empty-cta');
+    if (leftover) leftover.remove();
   } catch(e){}
 })();
 
@@ -3683,12 +3655,10 @@ setTimeout(() => {
     if (localStorage.getItem(k)) return;
     localStorage.setItem(k,'1');
     setTimeout(function(){
+      if (typeof currentPantheon !== 'undefined' && !currentPantheon) return;
       if (typeof showToast === 'function')
         showToast('🪔 Today\'s dharma seed is live — write before midnight for festival karma', 3200);
       if (window.legionTrack) legionTrack('festival_fomo_toast',{});
     }, 2200);
   } catch(e){}
-
-/* LEGION_WAVE_11_fomo_chip */
-setTimeout(function(){try{if(document.getElementById('lw_fomo_11'))return;var end=new Date(); end.setHours(24,0,0,0);var ms=Math.max(0,end-Date.now());var h=Math.floor(ms/3600000), m=Math.floor((ms%3600000)/60000);var d=document.createElement('div'); d.id='lw_fomo_11';d.style.cssText='font-size:11px;opacity:.75;margin:6px 0;color:#e0b552';d.textContent='window '+h+'h '+m+'m · W11';var app=document.getElementById('app')||document.body; app.insertBefore(d, app.firstChild);}catch(e){}},40);
 })();

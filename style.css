@@ -470,7 +470,7 @@ h1 {
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity .4s ease;
+  transition: opacity 240ms ease-out;
   pointer-events: none;
 }
 .ritual-overlay.active {
@@ -686,9 +686,12 @@ h1 {
   border-top: 1px solid var(--border);
   display: flex;
   z-index: 100;
+  overflow: hidden;
+  transition: opacity 220ms ease-out, visibility 220ms ease-out;
 }
 .bottom-nav button {
   flex: 1;
+  min-width: 0;
   padding: 10px 2px 16px;
   background: none;
   border: none;
@@ -700,12 +703,18 @@ h1 {
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  transition: all .32s cubic-bezier(.23,1,.32,1);
+  transition: opacity 220ms ease-out, flex 220ms ease-out, max-width 220ms ease-out, color 200ms ease-out;
   min-height: 52px;
+}
+.bottom-nav button > div:last-child {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .bottom-nav .icon {
   font-size: 18px;
-  transition: transform .32s cubic-bezier(.23,1,.32,1);
+  transition: transform 200ms ease-out;
 }
 .bottom-nav button.active .icon {
   transform: scale(1.05);
@@ -716,20 +725,34 @@ h1 {
 .bottom-nav button.active .icon {
   transform: scale(1.15);
 }
-.bottom-nav .icon {
-  font-size: 18px;
-  transition: transform .2s;
+/* First visit: no pantheon yet — hide nav (Create is already the screen; extra tabs fight the hero). */
+.bottom-nav.first-visit {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.bottom-nav.first-visit .nav-unlock {
+  flex: 0 0 0;
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  padding-left: 0;
+  padding-right: 0;
+  pointer-events: none;
+}
+body:has(.bottom-nav.first-visit) .app {
+  padding-bottom: 28px;
 }
 
 /* Content */
 .tab-content {
   display: none;
   padding-top: 16px;
-  transition: opacity .25s ease;
+  transition: opacity 220ms ease-out;
 }
 .tab-content.active {
   display: block;
-  animation: fadeInSoft .35s cubic-bezier(.23,1,.32,1);
+  animation: fadeInSoft 220ms ease-out;
 }
 @keyframes fadeInSoft {
   from { opacity: 0; transform: translateY(4px); }
@@ -1142,20 +1165,21 @@ button.secondary[onclick*="askDirector"]:hover {
   transform: translateY(-1px);
 }
 
-/* Quick-Start express button (JS-injected inline styles) — align to the .primary token
-   language for button consistency; slightly tighter than the main CTA so the express path
-   reads as secondary-to the full "Create Pantheon" hero, not a duplicate. !important beats inline. */
-#p2-qs-btn {
-  background: linear-gradient(145deg, var(--accent), #a17d1f) !important;
-  border-radius: 14px !important;
-  padding: 14px !important;
-  font-size: 16px !important;
-  font-weight: 600 !important;
-  letter-spacing: -.3px;
-  box-shadow: 0 4px 16px rgba(201,162,39,.28) !important;
-  transition: all .3s cubic-bezier(.23,1,.32,1);
+/* One first-screen hero. Duplicate express box stays gone. */
+#p2-quickstart { display: none !important; }
+#quickBirth {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  padding: 18px 20px;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -.2px;
+  transition: transform 200ms ease-out, box-shadow 200ms ease-out;
 }
-#p2-qs-btn:active { transform: scale(0.988); }
+#quickBirth:active {
+  transform: scale(0.988);
+}
 
 /* Beautiful, decorative cards */
 /* Explore feed "living community" freshness ribbon — the feed re-orders daily. */
