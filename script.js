@@ -1503,7 +1503,7 @@ function showPantheonMoneyPipe(days, jackpot) {
     '<div style="color:#c9a227;font-weight:700;margin-bottom:6px">' + (jackpot ? '🎉 Jackpot devotion' : '💎 Keep the fire') + '</div>' +
     '<p style="opacity:.8;font-size:12px;margin:0 0 10px">Entertainment only · not financial advice · Day ' + (days || 0) + '</p>' +
     '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">' +
-    '<a style="display:inline-block;padding:8px 12px;border-radius:10px;border:1px solid rgba(201,162,39,.4);text-decoration:none;color:inherit" href="mailto:hoyashi95@gmail.com?subject=%5BPantheon%5D%20support">☕ Support</a>' +
+    '' +
     '<button type="button" class="secondary" onclick="try{celebrateShare&&celebrateShare()}catch(e){};if(window.legionTrack)try{legionTrack(\'share_peak\')}catch(e){}">📤 Invite clan</button>' +
     '<a style="display:inline-block;padding:8px 12px;border-radius:10px;border:1px solid rgba(201,162,39,.4);text-decoration:none;color:#c9a227" href="https://hosuman08-netizen.github.io/daedalus-conquest/?utm_source=pantheon&utm_medium=cross&ref=p2_pipe">⚔️ Daedalus</a>' +
     '' +
